@@ -113,8 +113,8 @@ body {
     border-color: rgba(0, 200, 255, 0.3);
 }
 
-/* Show touch controls on mobile */
-@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+/* Show touch controls ONLY on touch devices */
+@media (hover: none) and (pointer: coarse) {
     #touch-controls {
         display: block;
     }
@@ -122,6 +122,13 @@ body {
     #game-container {
         max-width: 100%;
         max-height: 100%;
+    }
+}
+
+/* Desktop with small screen - NO touch controls */
+@media (max-width: 820px) and (hover: hover) {
+    #touch-controls {
+        display: none !important;
     }
 }
 
