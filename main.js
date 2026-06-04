@@ -34,12 +34,17 @@ class Game {
         this.enemiesKilled = 0;
         this.totalEnemies = 0;
 
-        // Core systems
-        this.bulletPool = new BulletPool(500);
-        this.particlePool = new ParticlePool(1000);
+        // Core systems (optimized pool sizes)
+        this.bulletPool = new BulletPool(250);
+        this.particlePool = new ParticlePool(300);
         this.formationManager = new FormationManager(this.canvas.width, this.canvas.height);
         this.dropManager = new DropManager(this.canvas.width, this.canvas.height);
         this.ui = new UI(this.canvas.width, this.canvas.height);
+
+        // Frame rate control
+        this.targetFPS = 60;
+        this.frameInterval = 1000 / this.targetFPS;
+        this.lastFrameTime = 0;
 
         // Player
         this.player = new Player(this.canvas.width, this.canvas.height);
@@ -202,16 +207,23 @@ class Game {
     }
 
     addFloatingText(x, y, text, color = '#fff', size = 16) {
-        this.floatingTexts.push({ x, y, text, color, size, vy: -2, life: 60, maxLife: 60 });
+        // Limit floating texts to prevent lag
+        if (this.floatingTexts.length > 20) {
+            this.floatingTexts.shift();
+        }
+        this.floatingTexts.push({ x, y, text, color, size, vy: -2, life: 45, maxLife: 45 });
     }
 
-    // Main game loop
+    // Main game loop (with frame rate capping)
     _gameLoop() {
         const now = performance.now();
-        this.lastTime = now;
+        const elapsed = now - this.lastFrameTime;
 
-        this._update();
-        this._render();
+        if (elapsed >= this.frameInterval) {
+            this.lastFrameTime = now - (elapsed % this.frameInterval);
+            this._update();
+            this._render();
+        }
 
         requestAnimationFrame(() => this._gameLoop());
     }
@@ -638,9 +650,9 @@ class Background {
         this.height = height;
 
         this.starLayers = [
-            { stars: [], speed: 0.2, count: 80, size: 0.8 },
-            { stars: [], speed: 0.5, count: 60, size: 1.2 },
-            { stars: [], speed: 1.0, count: 40, size: 1.8 }
+            { stars: [], speed: 0.2, count: 40, size: 0.8 },
+            { stars: [], speed: 0.5, count: 30, size: 1.2 },
+            { stars: [], speed: 1.0, count: 20, size: 1.8 }
         ];
 
         this.starLayers.forEach(layer => {
@@ -654,14 +666,14 @@ class Background {
         });
 
         this.nebulae = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             this.nebulae.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                radius: 80 + Math.random() * 120,
+                radius: 80 + Math.random() * 100,
                 color: this._randomColor(),
-                speed: 0.1 + Math.random() * 0.2,
-                alpha: 0.05 + Math.random() * 0.08
+                speed: 0.1 + Math.random() * 0.15,
+                alpha: 0.04 + Math.random() * 0.06
             });
         }
 
@@ -700,14 +712,14 @@ class Background {
         });
 
         this.meteorTimer++;
-        if (this.meteorTimer > 120 && Math.random() < 0.02) {
+        if (this.meteorTimer > 180 && Math.random() < 0.015) {
             this.meteors.push({
                 x: Math.random() * this.width,
                 y: -20,
                 vx: (Math.random() - 0.5) * 2,
-                vy: 3 + Math.random() * 4,
-                size: 2 + Math.random() * 3,
-                life: 200
+                vy: 3 + Math.random() * 3,
+                size: 2 + Math.random() * 2,
+                life: 150
             });
             this.meteorTimer = 0;
         }

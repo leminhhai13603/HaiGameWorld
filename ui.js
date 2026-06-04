@@ -474,11 +474,11 @@ class UI {
         ctx.restore();
     }
 
-    // Draw scanlines
+    // Draw scanlines (optimized - every 4th line)
     drawScanlines(ctx) {
         ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
-        for (let y = 0; y < this.canvasHeight; y += 3) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.015)';
+        for (let y = 0; y < this.canvasHeight; y += 4) {
             ctx.fillRect(0, y, this.canvasWidth, 1);
         }
         ctx.restore();

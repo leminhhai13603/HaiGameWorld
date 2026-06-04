@@ -180,97 +180,78 @@ class Enemy {
         return false;
     }
 
-    // Draw enemy
+    // Draw enemy (optimized)
     draw(ctx) {
         if (!this.active) return;
 
         ctx.save();
         ctx.translate(this.x, this.y);
 
-        // Hit flash
         const baseColor = this.hitFlash > 0 ? '#ffffff' : this.color;
 
-        // Shadow under enemy
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.beginPath();
-        ctx.ellipse(2, this.height / 2 + 2, this.width / 2.5, 4, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Body
+        // Body (single path for efficiency)
         ctx.fillStyle = baseColor;
         ctx.beginPath();
         ctx.ellipse(0, 0, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
         ctx.fill();
 
         // Belly
-        ctx.fillStyle = this.hitFlash > 0 ? '#eeeeee' : this._lighten(this.color, 0.3);
+        ctx.fillStyle = this.hitFlash > 0 ? '#eee' : this._lighten(this.color, 0.25);
         ctx.beginPath();
-        ctx.ellipse(0, 3, this.width / 2.5, this.height / 3, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 2, this.width / 2.8, this.height / 3, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Wings
-        const wingY = this.wingAngle === 0 ? -5 : 5;
+        // Wings (simplified)
+        const wingY = this.wingAngle === 0 ? -4 : 4;
         ctx.fillStyle = baseColor;
-
-        // Left wing
         ctx.beginPath();
         ctx.moveTo(-this.width / 3, 0);
-        ctx.lineTo(-this.width / 2 - 8, wingY - 4);
-        ctx.lineTo(-this.width / 2 - 4, wingY + 3);
-        ctx.lineTo(-this.width / 3 + 4, 4);
+        ctx.lineTo(-this.width / 2 - 6, wingY - 3);
+        ctx.lineTo(-this.width / 3 + 3, 3);
         ctx.closePath();
         ctx.fill();
-
-        // Right wing
         ctx.beginPath();
         ctx.moveTo(this.width / 3, 0);
-        ctx.lineTo(this.width / 2 + 8, wingY - 4);
-        ctx.lineTo(this.width / 2 + 4, wingY + 3);
-        ctx.lineTo(this.width / 3 - 4, 4);
+        ctx.lineTo(this.width / 2 + 6, wingY - 3);
+        ctx.lineTo(this.width / 3 - 3, 3);
         ctx.closePath();
         ctx.fill();
 
-        // Eyes
+        // Eyes + pupils (single draw)
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(-5, -4, 5, 0, Math.PI * 2);
-        ctx.arc(5, -4, 5, 0, Math.PI * 2);
+        ctx.arc(-5, -4, 4, 0, Math.PI * 2);
+        ctx.arc(5, -4, 4, 0, Math.PI * 2);
         ctx.fill();
-
-        // Pupils
         ctx.fillStyle = '#222';
         ctx.beginPath();
-        ctx.arc(-4, -4, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(6, -4, 2.5, 0, Math.PI * 2);
+        ctx.arc(-4, -4, 2, 0, Math.PI * 2);
+        ctx.arc(6, -4, 2, 0, Math.PI * 2);
         ctx.fill();
 
         // Beak
-        ctx.fillStyle = this.hitFlash > 0 ? '#ddd' : '#ff8800';
+        ctx.fillStyle = '#ff8800';
         ctx.beginPath();
         ctx.moveTo(0, 1);
-        ctx.lineTo(-4, 8);
-        ctx.lineTo(4, 8);
+        ctx.lineTo(-3, 7);
+        ctx.lineTo(3, 7);
         ctx.closePath();
         ctx.fill();
 
-        // Type-specific details
-        this._drawTypeDetails(ctx, baseColor);
-
-        // Health bar for multi-health enemies
-        if (this.maxHealth > 1 && this.health < this.maxHealth) {
-            this._drawHealthBar(ctx);
+        // Type details (minimal)
+        if (this.type === 'rooster') {
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.moveTo(-2, -this.height / 2);
+            ctx.lineTo(0, -this.height / 2 - 6);
+            ctx.lineTo(2, -this.height / 2);
+            ctx.closePath();
+            ctx.fill();
         }
 
-        // Entering indicator
-        if (this.entering || this.enterDelay > 0) {
-            ctx.globalAlpha = 0.5 + Math.sin(this.animTimer * 0.2) * 0.3;
-            ctx.fillStyle = '#fff';
-            ctx.font = '8px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText('▼', 0, -this.height / 2 - 5);
-            ctx.globalAlpha = 1;
+        // Health bar
+        if (this.maxHealth > 1 && this.health < this.maxHealth) {
+            this._drawHealthBar(ctx);
         }
 
         ctx.restore();
@@ -384,9 +365,9 @@ class FormationManager {
             return this._generateBossMinions(waveNumber);
         }
 
-        // Calculate formation size based on wave
-        const cols = Math.min(8 + Math.floor(waveNumber / 2), 12);
-        const rows = Math.min(3 + Math.floor(waveNumber / 3), 6);
+        // Calculate formation size based on wave (optimized for performance)
+        const cols = Math.min(6 + Math.floor(waveNumber / 3), 10);
+        const rows = Math.min(2 + Math.floor(waveNumber / 4), 4);
         const types = this._getWaveTypes(waveNumber);
 
         // Spacing
