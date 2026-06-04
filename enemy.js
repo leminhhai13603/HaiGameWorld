@@ -180,81 +180,76 @@ class Enemy {
         return false;
     }
 
-    // Draw enemy (optimized)
+    // Draw enemy (ultra optimized)
     draw(ctx) {
         if (!this.active) return;
 
-        ctx.save();
-        ctx.translate(this.x, this.y);
+        const x = this.x;
+        const y = this.y;
+        const hw = this.width / 2;
+        const hh = this.height / 2;
 
-        const baseColor = this.hitFlash > 0 ? '#ffffff' : this.color;
-
-        // Body (single path for efficiency)
-        ctx.fillStyle = baseColor;
+        // Body
+        ctx.fillStyle = this.hitFlash > 0 ? '#fff' : this.color;
         ctx.beginPath();
-        ctx.ellipse(0, 0, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y, hw, hh, 0, 0, Math.PI * 2);
         ctx.fill();
 
         // Belly
-        ctx.fillStyle = this.hitFlash > 0 ? '#eee' : this._lighten(this.color, 0.25);
+        ctx.fillStyle = this.hitFlash > 0 ? '#eee' : this._lighten(this.color, 0.2);
         ctx.beginPath();
-        ctx.ellipse(0, 2, this.width / 2.8, this.height / 3, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y + 2, hw * 0.7, hh * 0.6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Wings (simplified)
-        const wingY = this.wingAngle === 0 ? -4 : 4;
-        ctx.fillStyle = baseColor;
+        // Wings
+        const wingY = this.wingAngle === 0 ? -3 : 3;
+        ctx.fillStyle = this.hitFlash > 0 ? '#fff' : this.color;
         ctx.beginPath();
-        ctx.moveTo(-this.width / 3, 0);
-        ctx.lineTo(-this.width / 2 - 6, wingY - 3);
-        ctx.lineTo(-this.width / 3 + 3, 3);
+        ctx.moveTo(x - hw * 0.6, y);
+        ctx.lineTo(x - hw - 5, y + wingY - 2);
+        ctx.lineTo(x - hw * 0.5, y + 3);
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(this.width / 3, 0);
-        ctx.lineTo(this.width / 2 + 6, wingY - 3);
-        ctx.lineTo(this.width / 3 - 3, 3);
+        ctx.moveTo(x + hw * 0.6, y);
+        ctx.lineTo(x + hw + 5, y + wingY - 2);
+        ctx.lineTo(x + hw * 0.5, y + 3);
         ctx.closePath();
         ctx.fill();
 
-        // Eyes + pupils (single draw)
+        // Eyes
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(-5, -4, 4, 0, Math.PI * 2);
-        ctx.arc(5, -4, 4, 0, Math.PI * 2);
+        ctx.arc(x - 5, y - 4, 4, 0, Math.PI * 2);
+        ctx.arc(x + 5, y - 4, 4, 0, Math.PI * 2);
         ctx.fill();
+
+        // Pupils
         ctx.fillStyle = '#222';
         ctx.beginPath();
-        ctx.arc(-4, -4, 2, 0, Math.PI * 2);
-        ctx.arc(6, -4, 2, 0, Math.PI * 2);
+        ctx.arc(x - 4, y - 4, 2, 0, Math.PI * 2);
+        ctx.arc(x + 6, y - 4, 2, 0, Math.PI * 2);
         ctx.fill();
 
         // Beak
         ctx.fillStyle = '#ff8800';
         ctx.beginPath();
-        ctx.moveTo(0, 1);
-        ctx.lineTo(-3, 7);
-        ctx.lineTo(3, 7);
+        ctx.moveTo(x, y + 1);
+        ctx.lineTo(x - 3, y + 7);
+        ctx.lineTo(x + 3, y + 7);
         ctx.closePath();
         ctx.fill();
 
-        // Type details (minimal)
-        if (this.type === 'rooster') {
-            ctx.fillStyle = '#ff0000';
-            ctx.beginPath();
-            ctx.moveTo(-2, -this.height / 2);
-            ctx.lineTo(0, -this.height / 2 - 6);
-            ctx.lineTo(2, -this.height / 2);
-            ctx.closePath();
-            ctx.fill();
-        }
-
         // Health bar
         if (this.maxHealth > 1 && this.health < this.maxHealth) {
-            this._drawHealthBar(ctx);
+            const barW = this.width + 4;
+            const barH = 3;
+            const barY = y - hh - 6;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - barW / 2, barY, barW, barH);
+            ctx.fillStyle = this.health > this.maxHealth * 0.5 ? '#0f0' : this.health > this.maxHealth * 0.25 ? '#fa0' : '#f00';
+            ctx.fillRect(x - barW / 2, barY, barW * (this.health / this.maxHealth), barH);
         }
-
-        ctx.restore();
     }
 
     // Draw type-specific details
@@ -366,8 +361,8 @@ class FormationManager {
         }
 
         // Calculate formation size based on wave (optimized for performance)
-        const cols = Math.min(6 + Math.floor(waveNumber / 3), 10);
-        const rows = Math.min(2 + Math.floor(waveNumber / 4), 4);
+        const cols = Math.min(5 + Math.floor(waveNumber / 4), 8);
+        const rows = Math.min(2 + Math.floor(waveNumber / 5), 3);
         const types = this._getWaveTypes(waveNumber);
 
         // Spacing
