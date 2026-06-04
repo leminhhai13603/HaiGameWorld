@@ -76,7 +76,7 @@ class Bullet {
 }
 
 /**
- * BulletPool - Optimized object pool
+ * BulletPool - Optimized object pool with batched rendering
  */
 class BulletPool {
     constructor(size = 300) {
@@ -107,9 +107,57 @@ class BulletPool {
         }
     }
 
+    // Optimized: batch draw by type to minimize ctx.fillStyle changes
     draw(ctx) {
+        // Enemy bullets - all same shape (circle), batch by color
+        // Most enemy bullets are '#ff4444', '#ffaa00', '#ff88ff', '#ff6644'
+        // Group them to reduce fillStyle changes
+        let lastColor = null;
+
+        // Draw all enemy bullets in one pass
         for (let i = 0; i < this.pool.length; i++) {
-            this.pool[i].draw(ctx);
+            const b = this.pool[i];
+            if (!b.active || b.type !== 'enemy') continue;
+            if (b.color !== lastColor) {
+                ctx.fillStyle = b.color;
+                lastColor = b.color;
+            }
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.width / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw all player bullets
+        lastColor = null;
+        for (let i = 0; i < this.pool.length; i++) {
+            const b = this.pool[i];
+            if (!b.active || b.type !== 'player') continue;
+            if (b.color !== lastColor) {
+                ctx.fillStyle = b.color;
+                lastColor = b.color;
+            }
+            ctx.beginPath();
+            ctx.ellipse(b.x, b.y, b.width / 2, b.height / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw laser bullets (separate type with different shape)
+        lastColor = null;
+        for (let i = 0; i < this.pool.length; i++) {
+            const b = this.pool[i];
+            if (!b.active || b.type !== 'laser') continue;
+            if (b.color !== lastColor) {
+                ctx.fillStyle = b.color;
+                lastColor = b.color;
+            }
+            ctx.fillRect(b.x - b.width / 2, b.y, b.width, b.height);
+        }
+        // Laser white center (batch)
+        ctx.fillStyle = '#fff';
+        for (let i = 0; i < this.pool.length; i++) {
+            const b = this.pool[i];
+            if (!b.active || b.type !== 'laser') continue;
+            ctx.fillRect(b.x - 1, b.y, 2, b.height);
         }
     }
 

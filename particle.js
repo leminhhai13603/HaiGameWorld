@@ -183,9 +183,73 @@ class ParticlePool {
     }
 
     draw(ctx) {
+        // Batch circle particles by color to minimize fillStyle changes
+        let lastColor = null;
         for (let i = 0; i < this.pool.length; i++) {
-            this.pool[i].draw(ctx);
+            const p = this.pool[i];
+            if (!p.active || p.type !== 'circle') continue;
+
+            const progress = 1 - (p.life / p.maxLife);
+            const alpha = p.fadeOut ? (1 - progress) : 1;
+            const currentSize = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
+
+            if (alpha < 0.01) continue;
+
+            ctx.globalAlpha = alpha;
+            if (p.color !== lastColor) {
+                ctx.fillStyle = p.color;
+                lastColor = p.color;
+            }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
+            ctx.fill();
         }
+
+        // Draw spark particles (need save/restore for rotation)
+        for (let i = 0; i < this.pool.length; i++) {
+            const p = this.pool[i];
+            if (!p.active || p.type !== 'spark') continue;
+
+            const progress = 1 - (p.life / p.maxLife);
+            const alpha = p.fadeOut ? (1 - progress) : 1;
+            const currentSize = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
+
+            if (alpha < 0.01) continue;
+
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            const angle = Math.atan2(p.vy, p.vx);
+            const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(angle);
+            ctx.fillRect(-speed * 2, -currentSize / 4, speed * 4, currentSize / 2);
+            ctx.restore();
+        }
+
+        // Draw ring particles
+        let lastRingColor = null;
+        for (let i = 0; i < this.pool.length; i++) {
+            const p = this.pool[i];
+            if (!p.active || p.type !== 'ring') continue;
+
+            const progress = 1 - (p.life / p.maxLife);
+            const alpha = p.fadeOut ? (1 - progress) : 1;
+            const currentSize = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
+
+            if (alpha < 0.01) continue;
+
+            ctx.globalAlpha = alpha;
+            if (p.color !== lastRingColor) {
+                ctx.strokeStyle = p.color;
+                lastRingColor = p.color;
+            }
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, currentSize * (1 + progress), 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
         // Reset globalAlpha after particle drawing
         ctx.globalAlpha = 1;
     }

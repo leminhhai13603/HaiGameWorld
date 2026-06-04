@@ -492,10 +492,103 @@ class FormationManager {
         this.enemies.length = writeIdx;
     }
 
-    // Draw all enemies
+    // Draw all enemies (batched by draw phase to minimize state changes)
     draw(ctx) {
-        for (const enemy of this.enemies) {
-            enemy.draw(ctx);
+        const enemies = this.enemies;
+        let lastFill = null;
+
+        // Phase 1: Body ellipses
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active) continue;
+            const color = e.hitFlash > 0 ? '#fff' : e.color;
+            if (color !== lastFill) { ctx.fillStyle = color; lastFill = color; }
+            ctx.beginPath();
+            ctx.ellipse(e.x, e.y, e.width / 2, e.height / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Phase 2: Belly ellipses
+        lastFill = null;
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active) continue;
+            const color = e.hitFlash > 0 ? '#eee' : e._lightColor;
+            if (color !== lastFill) { ctx.fillStyle = color; lastFill = color; }
+            ctx.beginPath();
+            ctx.ellipse(e.x, e.y + 2, e.width * 0.35, e.height * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Phase 3: Wings (same color as body)
+        lastFill = null;
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active) continue;
+            const color = e.hitFlash > 0 ? '#fff' : e.color;
+            if (color !== lastFill) { ctx.fillStyle = color; lastFill = color; }
+            const hw = e.width / 2;
+            const wingY = e.wingAngle === 0 ? -3 : 3;
+            ctx.beginPath();
+            ctx.moveTo(e.x - hw * 0.6, e.y);
+            ctx.lineTo(e.x - hw - 5, e.y + wingY - 2);
+            ctx.lineTo(e.x - hw * 0.5, e.y + 3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(e.x + hw * 0.6, e.y);
+            ctx.lineTo(e.x + hw + 5, e.y + wingY - 2);
+            ctx.lineTo(e.x + hw * 0.5, e.y + 3);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Phase 4: Eyes (all white)
+        ctx.fillStyle = '#fff';
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active) continue;
+            ctx.beginPath();
+            ctx.arc(e.x - 5, e.y - 4, 4, 0, Math.PI * 2);
+            ctx.arc(e.x + 5, e.y - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Phase 5: Pupils (all dark)
+        ctx.fillStyle = '#222';
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active) continue;
+            ctx.beginPath();
+            ctx.arc(e.x - 4, e.y - 4, 2, 0, Math.PI * 2);
+            ctx.arc(e.x + 6, e.y - 4, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Phase 6: Beaks (all orange)
+        ctx.fillStyle = '#ff8800';
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active) continue;
+            ctx.beginPath();
+            ctx.moveTo(e.x, e.y + 1);
+            ctx.lineTo(e.x - 3, e.y + 7);
+            ctx.lineTo(e.x + 3, e.y + 7);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Phase 7: Health bars
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            if (!e.active || e.maxHealth <= 1 || e.health >= e.maxHealth) continue;
+            const barW = e.width + 4;
+            const barH = 3;
+            const barY = e.y - e.height / 2 - 6;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(e.x - barW / 2, barY, barW, barH);
+            ctx.fillStyle = e.health > e.maxHealth * 0.5 ? '#0f0' : e.health > e.maxHealth * 0.25 ? '#fa0' : '#f00';
+            ctx.fillRect(e.x - barW / 2, barY, barW * (e.health / e.maxHealth), barH);
         }
     }
 

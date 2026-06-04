@@ -122,17 +122,17 @@ class Boss {
 
         switch (pattern) {
             case 'spread':
-                if (this.attackTimer % (35 * spd) < 1) this._spreadShot(bulletPool);
+                if (this.attackTimer % (40 * spd) < 1) this._spreadShot(bulletPool);
                 break;
             case 'aimed':
-                if (this.attackTimer % (45 * spd) < 1) this._aimedShot(playerX, playerY, bulletPool);
+                if (this.attackTimer % (50 * spd) < 1) this._aimedShot(playerX, playerY, bulletPool);
                 break;
             case 'spiral':
-                // Slowed down: 22 instead of 15 (enraged: 18 instead of 12)
-                if (this.attackTimer % (22 * spd) < 1) this._spiralShot(bulletPool);
+                if (this.attackTimer % (25 * spd) < 1) this._spiralShot(bulletPool);
                 break;
             case 'rain':
-                if (this.attackTimer % (12 * spd) < 1) this._rainShot(bulletPool);
+                // Slowed down significantly: 25 instead of 12 (enraged: 20 instead of 9.6)
+                if (this.attackTimer % (25 * spd) < 1) this._rainShot(bulletPool);
                 break;
         }
     }
@@ -287,7 +287,6 @@ class Boss {
         ctx.fillRect(barX - 2, barY - 2, barW + 4, barH + 4);
 
         const hp = this.health / this.maxHealth;
-        // Use solid color instead of creating gradient every frame
         ctx.fillStyle = this.enraged ? '#ff2222' : '#ff4444';
         ctx.fillRect(barX, barY, barW * hp, barH);
 
