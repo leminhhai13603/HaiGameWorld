@@ -360,9 +360,9 @@ class FormationManager {
             return this._generateBossMinions(waveNumber);
         }
 
-        // Calculate formation size based on wave (optimized for performance)
-        const cols = Math.min(5 + Math.floor(waveNumber / 4), 8);
-        const rows = Math.min(2 + Math.floor(waveNumber / 5), 3);
+        // Calculate formation size based on wave
+        const cols = Math.min(7 + Math.floor(waveNumber / 3), 11);
+        const rows = Math.min(3 + Math.floor(waveNumber / 4), 5);
         const types = this._getWaveTypes(waveNumber);
 
         // Spacing

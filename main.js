@@ -29,9 +29,9 @@ class Game {
         this.enemiesKilled = 0;
         this.totalEnemies = 0;
 
-        // Smaller pools
-        this.bulletPool = new BulletPool(200);
-        this.particlePool = new ParticlePool(200);
+        // Pools sized for full formations
+        this.bulletPool = new BulletPool(300);
+        this.particlePool = new ParticlePool(350);
         this.formationManager = new FormationManager(this.canvas.width, this.canvas.height);
         this.dropManager = new DropManager(this.canvas.width, this.canvas.height);
         this.ui = new UI(this.canvas.width, this.canvas.height);
@@ -505,7 +505,7 @@ class Background {
         this.height = height;
 
         this.stars = [];
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 80; i++) {
             this.stars.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
@@ -515,12 +515,12 @@ class Background {
         }
 
         this.nebulae = [];
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 3; i++) {
             this.nebulae.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                radius: 80 + Math.random() * 80,
-                color: i === 0 ? { r: 80, g: 0, b: 120 } : { r: 0, g: 40, b: 120 },
+                radius: 80 + Math.random() * 100,
+                color: i === 0 ? { r: 80, g: 0, b: 120 } : i === 1 ? { r: 0, g: 40, b: 120 } : { r: 120, g: 0, b: 50 },
                 speed: 0.08 + Math.random() * 0.1,
                 alpha: 0.04
             });
