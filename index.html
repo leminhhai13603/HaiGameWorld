@@ -2,16 +2,27 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Avian Assault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Chicken Invaders Galaxy</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
+
+        <!-- Mobile touch controls -->
+        <div id="touch-controls">
+            <div id="btn-up" class="touch-btn">▲</div>
+            <div id="btn-left" class="touch-btn">◀</div>
+            <div id="btn-right" class="touch-btn">▶</div>
+            <div id="btn-down" class="touch-btn">▼</div>
+            <div id="btn-fire" class="touch-btn">🔥</div>
+            <div id="btn-switch" class="touch-btn">Q</div>
+        </div>
     </div>
 
-    <!-- Load modules in dependency order -->
     <script src="storage.js"></script>
     <script src="audio.js"></script>
     <script src="particle.js"></script>

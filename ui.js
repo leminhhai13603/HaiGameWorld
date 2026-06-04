@@ -242,24 +242,44 @@ class UI {
         ctx.lineTo(600, 215);
         ctx.stroke();
 
-        // Controls
+        // Controls - detect mobile
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         ctx.font = '12px monospace';
-        const controls = [
-            ['← → ↑ ↓ / WASD', 'Di chuyển'],
-            ['Chuột trái', 'Bắn'],
-            ['Q', 'Đổi loại đạn'],
-            ['P / ESC', 'Tạm dừng'],
-            ['M', 'Tắt/Bật âm thanh']
-        ];
 
-        controls.forEach((ctrl, i) => {
-            ctx.textAlign = 'right';
-            ctx.fillStyle = '#00ffff';
-            ctx.fillText(ctrl[0], this.canvasWidth / 2 - 15, 245 + i * 22);
-            ctx.textAlign = 'left';
-            ctx.fillStyle = '#ccc';
-            ctx.fillText(ctrl[1], this.canvasWidth / 2 + 15, 245 + i * 22);
-        });
+        if (isMobile) {
+            const controls = [
+                ['▲ ▼ ◀ ▶', 'Di chuyển (nút ảo)'],
+                ['Chạm màn hình', 'Bắn + Aim'],
+                ['Nút Q', 'Đổi loại đạn'],
+                ['Chạm khi pause', 'Tiếp tục']
+            ];
+
+            controls.forEach((ctrl, i) => {
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#00ffff';
+                ctx.fillText(ctrl[0], this.canvasWidth / 2 - 15, 245 + i * 22);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ccc';
+                ctx.fillText(ctrl[1], this.canvasWidth / 2 + 15, 245 + i * 22);
+            });
+        } else {
+            const controls = [
+                ['← → ↑ ↓ / WASD', 'Di chuyển'],
+                ['Chuột trái', 'Bắn'],
+                ['Q', 'Đổi loại đạn'],
+                ['P / ESC', 'Tạm dừng'],
+                ['M', 'Tắt/Bật âm thanh']
+            ];
+
+            controls.forEach((ctrl, i) => {
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#00ffff';
+                ctx.fillText(ctrl[0], this.canvasWidth / 2 - 15, 245 + i * 22);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ccc';
+                ctx.fillText(ctrl[1], this.canvasWidth / 2 + 15, 245 + i * 22);
+            });
+        }
 
         // Divider
         ctx.beginPath();
@@ -288,9 +308,15 @@ class UI {
         if (Math.floor(Date.now() / 600) % 2 === 0) {
             ctx.shadowColor = '#00ff00';
             ctx.shadowBlur = 10;
-            ctx.fillText('[ CLICK hoặc SPACE để bắt đầu ]', this.canvasWidth / 2, 510);
+            ctx.fillText('[ CLICK hoặc SPACE để bắt đầu ]', this.canvasWidth / 2, 500);
             ctx.shadowBlur = 0;
         }
+
+        // Credit
+        ctx.fillStyle = '#555';
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Made by Lê Minh Hải', this.canvasWidth / 2, 545);
 
         ctx.restore();
     }

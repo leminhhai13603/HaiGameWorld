@@ -65,9 +65,11 @@ class Game {
     }
 
     _setupInput() {
+        // Keyboard
         document.addEventListener('keydown', (e) => this._handleKeyDown(e));
         document.addEventListener('keyup', (e) => this._handleKeyUp(e));
 
+        // Mouse
         this.canvas.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
             this.mouse.x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
@@ -87,6 +89,98 @@ class Game {
         });
 
         this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Canvas touch for aiming
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            AudioManager.resume();
+            const touch = e.touches[0];
+            const rect = this.canvas.getBoundingClientRect();
+            this.mouse.x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+            this.mouse.y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+            this.mouse.down = true;
+            this._handleAction();
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = this.canvas.getBoundingClientRect();
+            this.mouse.x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+            this.mouse.y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.mouse.down = false;
+        }, { passive: false });
+
+        // Mobile touch buttons
+        this._setupTouchButtons();
+    }
+
+    // Setup mobile touch buttons
+    _setupTouchButtons() {
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (!isTouchDevice) return;
+
+        const addTouchEvent = (id, key) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.keys[key] = true;
+                AudioManager.resume();
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.keys[key] = false;
+            }, { passive: false });
+
+            btn.addEventListener('touchcancel', (e) => {
+                this.keys[key] = false;
+            });
+        };
+
+        addTouchEvent('btn-left', 'left');
+        addTouchEvent('btn-right', 'right');
+        addTouchEvent('btn-up', 'up');
+        addTouchEvent('btn-down', 'down');
+
+        // Fire button
+        const fireBtn = document.getElementById('btn-fire');
+        if (fireBtn) {
+            fireBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.mouse.down = true;
+                AudioManager.resume();
+                this._handleAction();
+            }, { passive: false });
+
+            fireBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.mouse.down = false;
+            }, { passive: false });
+        }
+
+        // Switch weapon button
+        const switchBtn = document.getElementById('btn-switch');
+        if (switchBtn) {
+            switchBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (this.state === GameState.PLAYING) {
+                    this.player.weaponType = this.player.weaponType === 'rapid' ? 'spread' : 'rapid';
+                }
+            }, { passive: false });
+        }
+
+        // Auto-aim: set mouse to above player for mobile
+        if (this.state === GameState.PLAYING) {
+            this.mouse.x = this.player.x;
+            this.mouse.y = this.player.y - 200;
+        }
     }
 
     _handleAction() {
@@ -213,6 +307,13 @@ class Game {
         if (this.state !== GameState.PLAYING) return;
 
         const dt = this.slowMo.active ? this.slowMo.factor : 1;
+
+        // Auto-aim for mobile (aim upward)
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouchDevice && !this.mouse.down) {
+            this.mouse.x = this.player.x;
+            this.mouse.y = this.player.y - 300;
+        }
 
         this.player.update(this.keys, this.mouse, this.bulletPool, dt);
 
