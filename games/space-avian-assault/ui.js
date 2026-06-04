@@ -312,12 +312,6 @@ class UI {
             ctx.shadowBlur = 0;
         }
 
-        // Credit
-        ctx.fillStyle = '#555';
-        ctx.font = '11px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('Made by Lê Minh Hải', this.canvasWidth / 2, 545);
-
         ctx.restore();
     }
 

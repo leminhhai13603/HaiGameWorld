@@ -1,0 +1,59 @@
+/* Battle City - Game Styles */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #111;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+#back-btn {
+    position: fixed;
+    top: 8px; left: 8px;
+    z-index: 100;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+}
+#back-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+
+#game-container {
+    position: relative;
+}
+
+#gameCanvas {
+    display: block;
+    background: #000;
+    border-radius: 4px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.6);
+    cursor: crosshair;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+@media (max-width: 860px) {
+    #gameCanvas {
+        max-width: 100vw;
+        max-height: 95vh;
+    }
+}

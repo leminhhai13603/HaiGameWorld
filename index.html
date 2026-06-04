@@ -2,36 +2,56 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Space Avian Assault</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Game Hub</title>
+    <link rel="stylesheet" href="css/hub.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+    <div class="bg-stars"></div>
 
-        <!-- Mobile touch controls -->
-        <div id="touch-controls">
-            <div id="btn-up" class="touch-btn">▲</div>
-            <div id="btn-left" class="touch-btn">◀</div>
-            <div id="btn-right" class="touch-btn">▶</div>
-            <div id="btn-down" class="touch-btn">▼</div>
-            <div id="btn-fire" class="touch-btn">🔥</div>
-            <div id="btn-switch" class="touch-btn">Q</div>
+    <div class="hub-container">
+        <!-- Hero -->
+        <header class="hero animate-in">
+            <h1 class="hero-logo">Hải Game World</h1>
+            <p class="hero-sub">Play. Compete. Repeat.</p>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-bar animate-in delay-1">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-games">0</div>
+                <div class="stat-label">Games</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-plays">0</div>
+                <div class="stat-label">Total Plays</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-best">—</div>
+                <div class="stat-label">Best Score</div>
+            </div>
         </div>
+
+        <!-- Featured Game -->
+        <div id="featured-game" class="animate-in delay-2"></div>
+
+        <!-- All Games -->
+        <h2 class="section-title animate-in delay-3">All Games</h2>
+        <div id="games-grid" class="games-grid"></div>
+
+        <!-- Footer -->
+        <footer class="hub-footer">
+            <div class="footer-brand">
+                <span class="footer-logo">🎮</span>
+                <span class="footer-title">MINI GAME HUB</span>
+            </div>
+            <div class="footer-author">
+                Crafted with <span class="footer-heart">♥</span> by <span class="footer-name">Lê Minh Hải</span>
+            </div>
+            <div class="footer-tech"><a href="mailto:minhhai123a@gmail.com" class="footer-email">minhhai123a@gmail.com</a></div>
+        </footer>
     </div>
 
-    <script src="storage.js"></script>
-    <script src="audio.js"></script>
-    <script src="particle.js"></script>
-    <script src="bullet.js"></script>
-    <script src="drops.js"></script>
-    <script src="player.js"></script>
-    <script src="enemy.js"></script>
-    <script src="boss.js"></script>
-    <script src="ui.js"></script>
-    <script src="main.js"></script>
+    <script src="js/hub.js"></script>
 </body>
 </html>

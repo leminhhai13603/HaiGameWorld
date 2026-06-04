@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pikachu Classic</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="../../index.html" id="back-btn">&#8592; Hub</a>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="controls-bar">
+            <button id="btn-hint" title="Hint (H)">💡 Hint</button>
+            <button id="btn-shuffle" title="Shuffle (S)">🔀 Shuffle</button>
+        </div>
+    </div>
+
+    <script src="js/audioManager.js"></script>
+    <script src="js/saveManager.js"></script>
+    <script src="js/pathfinder.js"></script>
+    <script src="js/board.js"></script>
+    <script src="js/levelManager.js"></script>
+    <script src="js/uiManager.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        // Wire up hint/shuffle buttons
+        document.getElementById('btn-hint').addEventListener('click', () => {
+            if (window._pikachuGame) window._pikachuGame._useHint();
+        });
+        document.getElementById('btn-shuffle').addEventListener('click', () => {
+            if (window._pikachuGame) window._pikachuGame._useShuffle();
+        });
+    </script>
+</body>
+</html>

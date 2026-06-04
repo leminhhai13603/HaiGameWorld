@@ -92,27 +92,16 @@ class Boss {
         const hp = this.health / this.maxHealth;
         if (this.currentPhaseIndex < this.phaseThresholds.length && hp <= this.phaseThresholds[this.currentPhaseIndex]) {
             this.currentPhaseIndex++;
-            this.speed += 0.2;
             if (hp <= 0.25 && !this.enraged) this.enraged = true;
         }
     }
 
     _updateMovement(dt) {
         const s = this.speed * dt;
-        switch (this.phase % 3) {
-            case 0:
-                this.x += s * this.moveDir;
-                if (this.x > this.canvasWidth - this.width / 2 - 20) this.moveDir = -1;
-                else if (this.x < this.width / 2 + 20) this.moveDir = 1;
-                break;
-            case 1:
-                this.x = this.canvasWidth / 2 + Math.sin(this.time * 1.5) * 150;
-                break;
-            case 2:
-                const dx = playerX - this.x;
-                this.x += Math.sign(dx) * Math.min(Math.abs(dx) * 0.02, s);
-                break;
-        }
+        // Simple horizontal bounce only - no sine wave, no tracking
+        this.x += s * this.moveDir;
+        if (this.x > this.canvasWidth - this.width / 2 - 20) this.moveDir = -1;
+        else if (this.x < this.width / 2 + 20) this.moveDir = 1;
         this.x = Math.max(this.width / 2, Math.min(this.canvasWidth - this.width / 2, this.x));
     }
 
