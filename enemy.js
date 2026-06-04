@@ -44,7 +44,7 @@ class Enemy {
                 this.color = '#ffcc00';
                 this.canShoot = true;
                 this.shootChance = 0.003;
-                this.dropRate = 0.08;
+                this.dropRate = 0.03;
                 break;
 
             case 'hen':
@@ -56,7 +56,7 @@ class Enemy {
                 this.color = '#ff8844';
                 this.canShoot = true;
                 this.shootChance = 0.005;
-                this.dropRate = 0.12;
+                this.dropRate = 0.05;
                 break;
 
             case 'rooster':
@@ -68,7 +68,7 @@ class Enemy {
                 this.color = '#ff4444';
                 this.canShoot = true;
                 this.shootChance = 0.008;
-                this.dropRate = 0.18;
+                this.dropRate = 0.08;
                 break;
 
             case 'eagle':
@@ -80,7 +80,7 @@ class Enemy {
                 this.color = '#8888ff';
                 this.canShoot = true;
                 this.shootChance = 0.006;
-                this.dropRate = 0.15;
+                this.dropRate = 0.06;
                 break;
 
             case 'phoenix':
@@ -92,7 +92,7 @@ class Enemy {
                 this.color = '#ff00ff';
                 this.canShoot = true;
                 this.shootChance = 0.01;
-                this.dropRate = 0.25;
+                this.dropRate = 0.12;
                 break;
         }
     }
