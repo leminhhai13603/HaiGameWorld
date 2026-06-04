@@ -14,6 +14,8 @@ class Bullet {
         this.type = 'player';
         this.color = '#00ffff';
         this.piercing = false;
+        // Cached bounds object (reused, never reallocated)
+        this._bounds = { x: 0, y: 0, width: 0, height: 0 };
     }
 
     init(config) {
@@ -65,12 +67,11 @@ class Bullet {
     }
 
     getBounds() {
-        return {
-            x: this.x - this.width / 2,
-            y: this.y - this.height / 2,
-            width: this.width,
-            height: this.height
-        };
+        this._bounds.x = this.x - this.width / 2;
+        this._bounds.y = this.y - this.height / 2;
+        this._bounds.width = this.width;
+        this._bounds.height = this.height;
+        return this._bounds;
     }
 }
 
@@ -109,6 +110,14 @@ class BulletPool {
     draw(ctx) {
         for (let i = 0; i < this.pool.length; i++) {
             this.pool[i].draw(ctx);
+        }
+    }
+
+    // Optimized: iterate directly without allocating arrays
+    forEachActive(type, callback) {
+        for (let i = 0; i < this.pool.length; i++) {
+            const b = this.pool[i];
+            if (b.active && b.type === type) callback(b);
         }
     }
 

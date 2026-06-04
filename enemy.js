@@ -30,6 +30,11 @@ class Enemy {
         // Movement offset (for formation movement)
         this.formationOffsetX = 0;
         this.formationOffsetY = 0;
+
+        // Cached bounds object (reused, never reallocated)
+        this._bounds = { x: 0, y: 0, width: 0, height: 0 };
+        // Cached lightened color
+        this._lightColor = null;
     }
 
     // Set properties based on enemy type
@@ -95,6 +100,8 @@ class Enemy {
                 this.dropRate = 0.12;
                 break;
         }
+        // Pre-compute lightened color
+        this._lightColor = this._lighten(this.color, 0.2);
     }
 
     // Update enemy
@@ -195,8 +202,8 @@ class Enemy {
         ctx.ellipse(x, y, hw, hh, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Belly
-        ctx.fillStyle = this.hitFlash > 0 ? '#eee' : this._lighten(this.color, 0.2);
+        // Belly - use cached lightened color
+        ctx.fillStyle = this.hitFlash > 0 ? '#eee' : this._lightColor;
         ctx.beginPath();
         ctx.ellipse(x, y + 2, hw * 0.7, hh * 0.6, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -304,7 +311,7 @@ class Enemy {
         ctx.fillRect(-barWidth / 2, barY, barWidth * healthPercent, barHeight);
     }
 
-    // Lighten color
+    // Lighten color (called once in constructor, result cached)
     _lighten(hex, factor) {
         const r = Math.min(255, parseInt(hex.slice(1, 3), 16) + 255 * factor);
         const g = Math.min(255, parseInt(hex.slice(3, 5), 16) + 255 * factor);
@@ -312,14 +319,13 @@ class Enemy {
         return `rgb(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)})`;
     }
 
-    // Get bounding box
+    // Get bounding box (reuses cached object)
     getBounds() {
-        return {
-            x: this.x - this.width / 2,
-            y: this.y - this.height / 2,
-            width: this.width,
-            height: this.height
-        };
+        this._bounds.x = this.x - this.width / 2;
+        this._bounds.y = this.y - this.height / 2;
+        this._bounds.width = this.width;
+        this._bounds.height = this.height;
+        return this._bounds;
     }
 }
 
@@ -476,8 +482,14 @@ class FormationManager {
             enemy.update(this.canvasWidth, this.canvasHeight, this.dirX * this.moveSpeed, 0, dt);
         }
 
-        // Remove dead enemies
-        this.enemies = this.enemies.filter(e => e.active);
+        // Remove dead enemies in-place (no array allocation)
+        let writeIdx = 0;
+        for (let i = 0; i < this.enemies.length; i++) {
+            if (this.enemies[i].active) {
+                this.enemies[writeIdx++] = this.enemies[i];
+            }
+        }
+        this.enemies.length = writeIdx;
     }
 
     // Draw all enemies
@@ -497,9 +509,9 @@ class FormationManager {
         return this.enemies.length === 0;
     }
 
-    // Get alive count
+    // Get alive count (just return length since dead are already filtered)
     getAliveCount() {
-        return this.enemies.filter(e => e.active).length;
+        return this.enemies.length;
     }
 
     // Clear all

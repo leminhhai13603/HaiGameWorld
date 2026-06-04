@@ -59,6 +59,9 @@ class Game {
         // Skip frames counter for heavy effects
         this.frameCount = 0;
 
+        // Cached player bounds object (reused every frame)
+        this._playerBounds = { x: 0, y: 0, width: 0, height: 0 };
+
         AudioManager.init();
         this._setupInput();
         this._gameLoop(performance.now());
@@ -388,15 +391,15 @@ class Game {
         this.bossActive = false;
     }
 
+    // Optimized collision detection - no array allocations
     _checkCollisions() {
         const playerBounds = this.player.getBounds();
-        const playerBullets = this.bulletPool.getActive('player');
-        const laserBullets = this.bulletPool.getActive('laser');
-        const allPlayerBullets = playerBullets.concat(laserBullets);
         const enemies = this.formationManager.getEnemies();
+        const hasBoss = this.boss && this.boss.active && !this.boss.entering;
+        const bossBounds = hasBoss ? this.boss.getBounds() : null;
 
-        for (const bullet of allPlayerBullets) {
-            if (!bullet.active) continue;
+        // Player bullets vs enemies + boss (single pass, no getActive/concat)
+        this.bulletPool.forEachActive('player', (bullet) => {
             const bb = bullet.getBounds();
 
             for (const enemy of enemies) {
@@ -413,18 +416,46 @@ class Game {
                 }
             }
 
-            if (this.boss && this.boss.active && !this.boss.entering) {
-                if (this._collides(bb, this.boss.getBounds())) {
+            if (hasBoss && bullet.active) {
+                if (this._collides(bb, bossBounds)) {
                     this.boss.takeDamage(bullet.damage);
                     this.particlePool.explosion(bullet.x, bullet.y, 5, '#ff4444', { speed: 2, maxSize: 2 });
                     AudioManager.play('bossHit');
                     if (!bullet.piercing) bullet.active = false;
                 }
             }
-        }
+        });
 
-        for (const bullet of this.bulletPool.getActive('enemy')) {
-            if (!bullet.active) continue;
+        // Laser bullets vs enemies + boss (single pass)
+        this.bulletPool.forEachActive('laser', (bullet) => {
+            const bb = bullet.getBounds();
+
+            for (const enemy of enemies) {
+                if (!enemy.active) continue;
+                if (this._collides(bb, enemy.getBounds())) {
+                    if (enemy.takeDamage(bullet.damage)) {
+                        this._onEnemyKilled(enemy);
+                    } else {
+                        this.particlePool.explosion(bullet.x, bullet.y, 4, enemy.color, { speed: 2, maxSize: 2 });
+                        AudioManager.play('enemyHit');
+                    }
+                    if (!bullet.piercing) bullet.active = false;
+                    break;
+                }
+            }
+
+            if (hasBoss && bullet.active) {
+                if (this._collides(bb, bossBounds)) {
+                    this.boss.takeDamage(bullet.damage);
+                    this.particlePool.explosion(bullet.x, bullet.y, 5, '#ff4444', { speed: 2, maxSize: 2 });
+                    AudioManager.play('bossHit');
+                    if (!bullet.piercing) bullet.active = false;
+                }
+            }
+        });
+
+        // Enemy bullets vs player (single pass)
+        this.bulletPool.forEachActive('enemy', (bullet) => {
             if (this._collides(bullet.getBounds(), playerBounds)) {
                 if (this.player.takeDamage(this.particlePool)) {
                     if (!this.player.isAlive()) this._gameOver();
@@ -433,7 +464,7 @@ class Game {
                 this.ui.applyShake(6, 10);
                 this.triggerFlash('#ff0000', 6);
             }
-        }
+        });
 
         if (this.dropManager.checkPoopCollision(playerBounds)) {
             if (this.player.takeDamage(this.particlePool)) {
@@ -454,8 +485,8 @@ class Game {
             this.addFloatingText(this.player.x, this.player.y - 35, `${type.toUpperCase()} LV${level}!`, type === 'rapid' ? '#ffaa00' : '#00ffcc', 18);
         }
 
-        if (this.boss && this.boss.active && !this.boss.entering) {
-            if (this._collides(this.boss.getBounds(), playerBounds)) {
+        if (hasBoss) {
+            if (this._collides(bossBounds, playerBounds)) {
                 if (this.player.takeDamage(this.particlePool)) {
                     if (!this.player.isAlive()) this._gameOver();
                 }
@@ -598,7 +629,7 @@ class Game {
 }
 
 /**
- * Background - Lightweight parallax
+ * Background - Lightweight parallax with cached gradients
  */
 class Background {
     constructor(width, height) {
@@ -629,6 +660,9 @@ class Background {
 
         this.meteors = [];
         this.meteorTimer = 0;
+
+        // Cache the background gradient (created once)
+        this._bgGradient = null;
     }
 
     update() {
@@ -671,21 +705,22 @@ class Background {
     }
 
     draw(ctx) {
-        // Gradient background
-        const gradient = ctx.createLinearGradient(0, 0, 0, this.height);
-        gradient.addColorStop(0, '#050510');
-        gradient.addColorStop(0.5, '#0a0a25');
-        gradient.addColorStop(1, '#0a0515');
-        ctx.fillStyle = gradient;
+        // Cached background gradient
+        if (!this._bgGradient) {
+            this._bgGradient = ctx.createLinearGradient(0, 0, 0, this.height);
+            this._bgGradient.addColorStop(0, '#050510');
+            this._bgGradient.addColorStop(0.5, '#0a0a25');
+            this._bgGradient.addColorStop(1, '#0a0515');
+        }
+        ctx.fillStyle = this._bgGradient;
         ctx.fillRect(0, 0, this.width, this.height);
 
-        // Nebulae
+        // Nebulae - draw with simple fillStyle (skip expensive radial gradients)
         for (const neb of this.nebulae) {
-            const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.radius);
-            grad.addColorStop(0, `rgba(${neb.color.r}, ${neb.color.g}, ${neb.color.b}, ${neb.alpha})`);
-            grad.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(neb.x - neb.radius, neb.y - neb.radius, neb.radius * 2, neb.radius * 2);
+            ctx.fillStyle = `rgba(${neb.color.r}, ${neb.color.g}, ${neb.color.b}, ${neb.alpha})`;
+            ctx.beginPath();
+            ctx.arc(neb.x, neb.y, neb.radius, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         // Stars

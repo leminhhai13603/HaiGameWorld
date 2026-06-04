@@ -350,12 +350,14 @@ class Player {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.tilt);
 
-        // Ship body - sleek fighter
-        const gradient = ctx.createLinearGradient(0, -this.height / 2, 0, this.height / 2);
-        gradient.addColorStop(0, '#6699ff');
-        gradient.addColorStop(0.5, '#4477dd');
-        gradient.addColorStop(1, '#3355aa');
-        ctx.fillStyle = gradient;
+        // Ship body - sleek fighter (cached gradient)
+        if (!this._bodyGradient) {
+            this._bodyGradient = ctx.createLinearGradient(0, -this.height / 2, 0, this.height / 2);
+            this._bodyGradient.addColorStop(0, '#6699ff');
+            this._bodyGradient.addColorStop(0.5, '#4477dd');
+            this._bodyGradient.addColorStop(1, '#3355aa');
+        }
+        ctx.fillStyle = this._bodyGradient;
 
         ctx.beginPath();
         ctx.moveTo(0, -this.height / 2);
@@ -370,11 +372,13 @@ class Player {
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Cockpit
-        const cockpitGrad = ctx.createRadialGradient(0, -this.height / 6, 2, 0, -this.height / 6, 8);
-        cockpitGrad.addColorStop(0, '#aaddff');
-        cockpitGrad.addColorStop(1, '#4488cc');
-        ctx.fillStyle = cockpitGrad;
+        // Cockpit (cached gradient)
+        if (!this._cockpitGrad) {
+            this._cockpitGrad = ctx.createRadialGradient(0, -this.height / 6, 2, 0, -this.height / 6, 8);
+            this._cockpitGrad.addColorStop(0, '#aaddff');
+            this._cockpitGrad.addColorStop(1, '#4488cc');
+        }
+        ctx.fillStyle = this._cockpitGrad;
         ctx.beginPath();
         ctx.ellipse(0, -this.height / 6, 6, 10, 0, 0, Math.PI * 2);
         ctx.fill();

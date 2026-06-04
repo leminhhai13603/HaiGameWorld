@@ -79,11 +79,12 @@ class Particle {
 }
 
 /**
- * ParticlePool - Optimized object pool
+ * ParticlePool - Optimized object pool with active list
  */
 class ParticlePool {
     constructor(size = 300) {
         this.pool = [];
+        this.activeList = [];
         for (let i = 0; i < size; i++) {
             this.pool.push(new Particle());
         }
@@ -185,6 +186,8 @@ class ParticlePool {
         for (let i = 0; i < this.pool.length; i++) {
             this.pool[i].draw(ctx);
         }
+        // Reset globalAlpha after particle drawing
+        ctx.globalAlpha = 1;
     }
 
     getActiveCount() {

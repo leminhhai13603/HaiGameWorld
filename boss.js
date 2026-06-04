@@ -37,6 +37,9 @@ class Boss {
         this.hitFlash = 0;
         this.pulseTime = 0;
 
+        // Cached bounds object (reused, never reallocated)
+        this._bounds = { x: 0, y: 0, width: 0, height: 0 };
+
         this.setTierVisuals();
     }
 
@@ -125,7 +128,8 @@ class Boss {
                 if (this.attackTimer % (45 * spd) < 1) this._aimedShot(playerX, playerY, bulletPool);
                 break;
             case 'spiral':
-                if (this.attackTimer % (15 * spd) < 1) this._spiralShot(bulletPool);
+                // Slowed down: 22 instead of 15 (enraged: 18 instead of 12)
+                if (this.attackTimer % (22 * spd) < 1) this._spiralShot(bulletPool);
                 break;
             case 'rain':
                 if (this.attackTimer % (12 * spd) < 1) this._rainShot(bulletPool);
@@ -283,10 +287,8 @@ class Boss {
         ctx.fillRect(barX - 2, barY - 2, barW + 4, barH + 4);
 
         const hp = this.health / this.maxHealth;
-        const grad = ctx.createLinearGradient(barX, barY, barX + barW, barY);
-        grad.addColorStop(0, '#f00');
-        grad.addColorStop(1, this.enraged ? '#ff4444' : '#ff8888');
-        ctx.fillStyle = grad;
+        // Use solid color instead of creating gradient every frame
+        ctx.fillStyle = this.enraged ? '#ff2222' : '#ff4444';
         ctx.fillRect(barX, barY, barW * hp, barH);
 
         ctx.strokeStyle = '#888';
@@ -301,11 +303,10 @@ class Boss {
     }
 
     getBounds() {
-        return {
-            x: this.x - this.width / 2,
-            y: this.y - this.height / 2,
-            width: this.width,
-            height: this.height
-        };
+        this._bounds.x = this.x - this.width / 2;
+        this._bounds.y = this.y - this.height / 2;
+        this._bounds.width = this.width;
+        this._bounds.height = this.height;
+        return this._bounds;
     }
 }
