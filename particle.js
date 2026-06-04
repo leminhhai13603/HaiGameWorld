@@ -132,17 +132,17 @@ class ParticlePool {
 
     bossExplosion(x, y) {
         const colors = ['#ff0000', '#ff6600', '#ffaa00', '#ffff00'];
-        this.explosion(x, y, 30, '#ff6600', {
-            speed: 6, maxSize: 6, colors: colors, shockwave: 30
+        this.explosion(x, y, 20, '#ff6600', {
+            speed: 5, maxSize: 5, colors: colors, shockwave: 25
         });
-        for (let wave = 0; wave < 4; wave++) {
+        for (let wave = 0; wave < 3; wave++) {
             setTimeout(() => {
-                const ox = (Math.random() - 0.5) * 60;
-                const oy = (Math.random() - 0.5) * 40;
-                this.explosion(x + ox, y + oy, 15, '#ff6600', {
-                    speed: 4, maxSize: 4, colors: colors
+                const ox = (Math.random() - 0.5) * 50;
+                const oy = (Math.random() - 0.5) * 30;
+                this.explosion(x + ox, y + oy, 10, '#ff6600', {
+                    speed: 3, maxSize: 3, colors: colors
                 });
-            }, wave * 100);
+            }, wave * 120);
         }
     }
 
