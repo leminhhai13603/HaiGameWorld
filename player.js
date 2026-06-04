@@ -100,7 +100,7 @@ class Player {
         this.downgradeWeapon();
 
         // Hit effect
-        particlePool.explosion(this.x, this.y, 15, '#ff4444', {
+        particlePool.explosion(this.x, this.y, 8, '#ff4444', {
             speed: 4, maxSize: 4
         });
 

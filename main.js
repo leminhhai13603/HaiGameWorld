@@ -408,7 +408,7 @@ class Game {
                     if (enemy.takeDamage(bullet.damage)) {
                         this._onEnemyKilled(enemy);
                     } else {
-                        this.particlePool.explosion(bullet.x, bullet.y, 4, enemy.color, { speed: 2, maxSize: 2 });
+                        this.particlePool.explosion(bullet.x, bullet.y, 2, enemy.color, { speed: 2, maxSize: 2 });
                         AudioManager.play('enemyHit');
                     }
                     if (!bullet.piercing) bullet.active = false;
@@ -419,7 +419,7 @@ class Game {
             if (hasBoss && bullet.active) {
                 if (this._collides(bb, bossBounds)) {
                     this.boss.takeDamage(bullet.damage);
-                    this.particlePool.explosion(bullet.x, bullet.y, 5, '#ff4444', { speed: 2, maxSize: 2 });
+                    this.particlePool.explosion(bullet.x, bullet.y, 2, '#ff4444', { speed: 2, maxSize: 2 });
                     AudioManager.play('bossHit');
                     if (!bullet.piercing) bullet.active = false;
                 }
@@ -436,7 +436,7 @@ class Game {
                     if (enemy.takeDamage(bullet.damage)) {
                         this._onEnemyKilled(enemy);
                     } else {
-                        this.particlePool.explosion(bullet.x, bullet.y, 4, enemy.color, { speed: 2, maxSize: 2 });
+                        this.particlePool.explosion(bullet.x, bullet.y, 2, enemy.color, { speed: 2, maxSize: 2 });
                         AudioManager.play('enemyHit');
                     }
                     if (!bullet.piercing) bullet.active = false;
@@ -447,7 +447,7 @@ class Game {
             if (hasBoss && bullet.active) {
                 if (this._collides(bb, bossBounds)) {
                     this.boss.takeDamage(bullet.damage);
-                    this.particlePool.explosion(bullet.x, bullet.y, 5, '#ff4444', { speed: 2, maxSize: 2 });
+                    this.particlePool.explosion(bullet.x, bullet.y, 2, '#ff4444', { speed: 2, maxSize: 2 });
                     AudioManager.play('bossHit');
                     if (!bullet.piercing) bullet.active = false;
                 }
@@ -509,7 +509,7 @@ class Game {
             this.addFloatingText(this.canvas.width / 2, 90, `x${this.combo} COMBO!`, '#ffaa00', 24);
         }
 
-        this.particlePool.explosion(enemy.x, enemy.y, 12, enemy.color, { speed: 3, maxSize: 3 });
+        this.particlePool.explosion(enemy.x, enemy.y, 6, enemy.color, { speed: 3, maxSize: 3 });
         AudioManager.play('explosion');
         this.addFloatingText(enemy.x, enemy.y - 15, `+${earnedScore}`, '#ffff00', 14);
 

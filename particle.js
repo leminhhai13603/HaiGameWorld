@@ -37,7 +37,6 @@ class Particle {
     }
 
     update(dt) {
-        if (!this.active) return;
         this.vx *= this.friction;
         this.vy *= this.friction;
         this.vy += this.gravity * dt;
@@ -46,45 +45,15 @@ class Particle {
         this.life -= dt;
         if (this.life <= 0) this.active = false;
     }
-
-    draw(ctx) {
-        if (!this.active) return;
-        const progress = 1 - (this.life / this.maxLife);
-        const alpha = this.fadeOut ? (1 - progress) : 1;
-        const currentSize = this.shrink ? this.size * (1 - progress * 0.5) : this.size;
-
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = this.color;
-
-        if (this.type === 'circle') {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (this.type === 'spark') {
-            const angle = Math.atan2(this.vy, this.vx);
-            const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(angle);
-            ctx.fillRect(-speed * 2, -currentSize / 4, speed * 4, currentSize / 2);
-            ctx.restore();
-        } else if (this.type === 'ring') {
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, currentSize * (1 + progress), 0, Math.PI * 2);
-            ctx.stroke();
-        }
-    }
 }
 
 /**
- * ParticlePool - Optimized object pool with active list
+ * ParticlePool - Active-list based, no full pool iteration
  */
 class ParticlePool {
-    constructor(size = 300) {
+    constructor(size = 200) {
         this.pool = [];
-        this.activeList = [];
+        this.active = []; // Active particle references only
         for (let i = 0; i < size; i++) {
             this.pool.push(new Particle());
         }
@@ -102,10 +71,11 @@ class ParticlePool {
     emit(config) {
         const p = this.get();
         p.init(config);
+        this.active.push(p);
         return p;
     }
 
-    explosion(x, y, count = 15, color = '#ff6600', options = {}) {
+    explosion(x, y, count = 10, color = '#ff6600', options = {}) {
         const colors = options.colors || [color, '#ff3300', '#ffaa00'];
         for (let i = 0; i < count; i++) {
             const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
@@ -133,14 +103,14 @@ class ParticlePool {
 
     bossExplosion(x, y) {
         const colors = ['#ff0000', '#ff6600', '#ffaa00', '#ffff00'];
-        this.explosion(x, y, 20, '#ff6600', {
+        this.explosion(x, y, 12, '#ff6600', {
             speed: 5, maxSize: 5, colors: colors, shockwave: 25
         });
-        for (let wave = 0; wave < 3; wave++) {
+        for (let wave = 0; wave < 2; wave++) {
             setTimeout(() => {
                 const ox = (Math.random() - 0.5) * 50;
                 const oy = (Math.random() - 0.5) * 30;
-                this.explosion(x + ox, y + oy, 10, '#ff6600', {
+                this.explosion(x + ox, y + oy, 6, '#ff6600', {
                     speed: 3, maxSize: 3, colors: colors
                 });
             }, wave * 120);
@@ -177,88 +147,85 @@ class ParticlePool {
     }
 
     update(dt) {
-        for (let i = 0; i < this.pool.length; i++) {
-            this.pool[i].update(dt);
+        // Only iterate active particles
+        let writeIdx = 0;
+        for (let i = 0; i < this.active.length; i++) {
+            const p = this.active[i];
+            if (p.active) {
+                p.update(dt);
+                this.active[writeIdx++] = p;
+            }
         }
+        this.active.length = writeIdx;
     }
 
     draw(ctx) {
-        // Batch circle particles by color to minimize fillStyle changes
+        const active = this.active;
+        const len = active.length;
+
+        // Circle particles - use fillRect (faster than arc for small sizes)
+        // Group by color to minimize fillStyle changes
         let lastColor = null;
-        for (let i = 0; i < this.pool.length; i++) {
-            const p = this.pool[i];
-            if (!p.active || p.type !== 'circle') continue;
+        for (let i = 0; i < len; i++) {
+            const p = active[i];
+            if (p.type !== 'circle') continue;
 
             const progress = 1 - (p.life / p.maxLife);
             const alpha = p.fadeOut ? (1 - progress) : 1;
-            const currentSize = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
-
-            if (alpha < 0.01) continue;
+            if (alpha < 0.05) continue;
+            const sz = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
+            if (sz < 0.5) continue;
 
             ctx.globalAlpha = alpha;
-            if (p.color !== lastColor) {
-                ctx.fillStyle = p.color;
-                lastColor = p.color;
-            }
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
-            ctx.fill();
+            if (p.color !== lastColor) { ctx.fillStyle = p.color; lastColor = p.color; }
+            // fillRect is much faster than arc for small particles
+            ctx.fillRect(p.x - sz, p.y - sz, sz * 2, sz * 2);
         }
 
-        // Draw spark particles (need save/restore for rotation)
-        for (let i = 0; i < this.pool.length; i++) {
-            const p = this.pool[i];
-            if (!p.active || p.type !== 'spark') continue;
+        // Spark particles (need rotation)
+        for (let i = 0; i < len; i++) {
+            const p = active[i];
+            if (p.type !== 'spark') continue;
 
             const progress = 1 - (p.life / p.maxLife);
             const alpha = p.fadeOut ? (1 - progress) : 1;
-            const currentSize = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
-
-            if (alpha < 0.01) continue;
+            if (alpha < 0.05) continue;
+            const sz = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
 
             ctx.globalAlpha = alpha;
             ctx.fillStyle = p.color;
-            const angle = Math.atan2(p.vy, p.vx);
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+            const angle = Math.atan2(p.vy, p.vx);
             ctx.save();
             ctx.translate(p.x, p.y);
             ctx.rotate(angle);
-            ctx.fillRect(-speed * 2, -currentSize / 4, speed * 4, currentSize / 2);
+            ctx.fillRect(-speed * 2, -sz / 4, speed * 4, sz / 2);
             ctx.restore();
         }
 
-        // Draw ring particles
+        // Ring particles
         let lastRingColor = null;
-        for (let i = 0; i < this.pool.length; i++) {
-            const p = this.pool[i];
-            if (!p.active || p.type !== 'ring') continue;
+        for (let i = 0; i < len; i++) {
+            const p = active[i];
+            if (p.type !== 'ring') continue;
 
             const progress = 1 - (p.life / p.maxLife);
             const alpha = p.fadeOut ? (1 - progress) : 1;
-            const currentSize = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
-
-            if (alpha < 0.01) continue;
+            if (alpha < 0.05) continue;
+            const sz = p.shrink ? p.size * (1 - progress * 0.5) : p.size;
 
             ctx.globalAlpha = alpha;
-            if (p.color !== lastRingColor) {
-                ctx.strokeStyle = p.color;
-                lastRingColor = p.color;
-            }
+            if (p.color !== lastRingColor) { ctx.strokeStyle = p.color; lastRingColor = p.color; }
             ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, currentSize * (1 + progress), 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, sz * (1 + progress), 0, Math.PI * 2);
             ctx.stroke();
         }
 
-        // Reset globalAlpha after particle drawing
         ctx.globalAlpha = 1;
     }
 
     getActiveCount() {
-        let count = 0;
-        for (let i = 0; i < this.pool.length; i++) {
-            if (this.pool[i].active) count++;
-        }
-        return count;
+        return this.active.length;
     }
 }
