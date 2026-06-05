@@ -140,21 +140,34 @@ body {
     letter-spacing: 1px;
 }
 
-/* ---- Featured Game ---- */
-.featured {
+/* ---- Featured Carousel ---- */
+.carousel {
     position: relative;
     border-radius: var(--card-radius);
     overflow: hidden;
     margin-bottom: 40px;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-    background: linear-gradient(135deg, #1a0a2e 0%, #0d1b3e 50%, #1a0a2e 100%);
     border: 1px solid var(--border);
+    background: linear-gradient(135deg, #1a0a2e 0%, #0d1b3e 50%, #1a0a2e 100%);
 }
 
-.featured:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 229, 255, 0.15);
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+.carousel-slide:hover {
+    transform: scale(1.005);
+}
+
+.featured {
+    position: relative;
+    overflow: hidden;
 }
 
 .featured-inner {
@@ -216,6 +229,57 @@ body {
     font-size: 15px;
     line-height: 1.5;
     margin-bottom: 18px;
+}
+
+/* Carousel controls */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+}
+.carousel-btn:hover {
+    background: rgba(0, 229, 255, 0.3);
+    border-color: var(--accent);
+}
+.carousel-prev { left: 12px; }
+.carousel-next { right: 12px; }
+
+.carousel-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.carousel-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    transform: scale(1.2);
 }
 
 .btn-play {
@@ -484,6 +548,13 @@ body {
         width: 180px;
         height: 120px;
     }
+    .carousel-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+    .carousel-prev { left: 6px; }
+    .carousel-next { right: 6px; }
     .stats-bar {
         gap: 20px;
     }

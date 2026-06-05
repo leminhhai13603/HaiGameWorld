@@ -75,6 +75,9 @@ const Hub = {
         }
     ],
 
+    _carouselIndex: 0,
+    _carouselTimer: null,
+
     init() {
         this.renderFeatured();
         this.renderGrid();
@@ -82,23 +85,94 @@ const Hub = {
     },
 
     renderFeatured() {
-        const featured = this.games.find(g => g.featured);
-        if (!featured) return;
-
         const el = document.getElementById('featured-game');
+        const games = this.games;
+
         el.innerHTML = `
-            <a href="${featured.path}" class="featured" style="text-decoration:none;color:inherit;">
-                <div class="featured-inner">
-                    <div class="featured-thumb">${featured.thumb}</div>
-                    <div class="featured-info">
-                        <div class="featured-badge">Featured</div>
-                        <h2 class="featured-name">${featured.name}</h2>
-                        <p class="featured-desc">${featured.desc}</p>
-                        <span class="btn-play">▶ Play Now</span>
-                    </div>
+            <div class="carousel">
+                <div class="carousel-track" id="carousel-track">
+                    ${games.map((g, i) => `
+                        <a href="${g.path}" class="featured carousel-slide" style="text-decoration:none;color:inherit;" data-index="${i}">
+                            <div class="featured-inner">
+                                <div class="featured-thumb ${g.thumbClass}">${g.thumb}</div>
+                                <div class="featured-info">
+                                    <div class="featured-badge">${g.tag}</div>
+                                    <h2 class="featured-name">${g.name}</h2>
+                                    <p class="featured-desc">${g.desc}</p>
+                                    <span class="btn-play">▶ Play Now</span>
+                                </div>
+                            </div>
+                        </a>
+                    `).join('')}
                 </div>
-            </a>
+                <button class="carousel-btn carousel-prev" id="carousel-prev">‹</button>
+                <button class="carousel-btn carousel-next" id="carousel-next">›</button>
+                <div class="carousel-dots" id="carousel-dots">
+                    ${games.map((_, i) => `<span class="carousel-dot${i === 0 ? ' active' : ''}" data-index="${i}"></span>`).join('')}
+                </div>
+            </div>
         `;
+
+        this._carouselIndex = 0;
+        this._updateCarousel();
+
+        // Buttons
+        document.getElementById('carousel-prev').addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            this._carouselIndex = (this._carouselIndex - 1 + games.length) % games.length;
+            this._updateCarousel(); this._resetAutoplay();
+        });
+        document.getElementById('carousel-next').addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            this._carouselIndex = (this._carouselIndex + 1) % games.length;
+            this._updateCarousel(); this._resetAutoplay();
+        });
+
+        // Dots
+        document.querySelectorAll('.carousel-dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                this._carouselIndex = parseInt(dot.dataset.index);
+                this._updateCarousel(); this._resetAutoplay();
+            });
+        });
+
+        // Touch swipe
+        let touchStartX = 0;
+        const track = document.getElementById('carousel-track');
+        track.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        track.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) > 40) {
+                this._carouselIndex = (this._carouselIndex + (dx > 0 ? -1 : 1) + games.length) % games.length;
+                this._updateCarousel(); this._resetAutoplay();
+            }
+        }, { passive: true });
+
+        // Autoplay
+        this._startAutoplay();
+    },
+
+    _updateCarousel() {
+        const track = document.getElementById('carousel-track');
+        if (!track) return;
+        track.style.transform = `translateX(-${this._carouselIndex * 100}%)`;
+
+        document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === this._carouselIndex);
+        });
+    },
+
+    _startAutoplay() {
+        this._carouselTimer = setInterval(() => {
+            this._carouselIndex = (this._carouselIndex + 1) % this.games.length;
+            this._updateCarousel();
+        }, 4000);
+    },
+
+    _resetAutoplay() {
+        clearInterval(this._carouselTimer);
+        this._startAutoplay();
     },
 
     renderGrid() {
