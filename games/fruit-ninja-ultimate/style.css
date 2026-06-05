@@ -1,0 +1,62 @@
+/* Fruit Ninja Ultimate - Game Styles */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #0a0a0a;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+}
+
+#back-btn {
+    position: fixed;
+    top: 8px; left: 8px;
+    z-index: 100;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+}
+#back-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+
+#game-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#gameCanvas {
+    display: block;
+    border-radius: 6px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    cursor: crosshair;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+@media (max-width: 650px) {
+    #gameCanvas {
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}

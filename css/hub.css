@@ -382,6 +382,10 @@ body {
     background: linear-gradient(135deg, #0a1a0a, #1a3a1a, #2d5a1a);
 }
 
+.card-thumb.fruit-thumb {
+    background: linear-gradient(135deg, #1a0a00, #3a1a0a, #5a2a10);
+}
+
 .card-thumb::after {
     content: '';
     position: absolute;
@@ -604,3 +608,4 @@ body {
 .delay-8 { animation-delay: 0.8s; opacity: 0; }
 .delay-9 { animation-delay: 0.9s; opacity: 0; }
 .delay-10 { animation-delay: 1.0s; opacity: 0; }
+.delay-11 { animation-delay: 1.1s; opacity: 0; }

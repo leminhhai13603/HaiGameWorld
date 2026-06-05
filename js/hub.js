@@ -102,6 +102,16 @@ const Hub = {
             thumbClass: 'zuma-thumb',
             path: 'games/zuma-deluxe-remastered/index.html',
             featured: false
+        },
+        {
+            id: 'fruit-ninja-ultimate',
+            name: 'Fruit Ninja Ultimate',
+            desc: 'Chém trái cây — vuốt chém, combo, tránh bom, power-ups, 3 chế độ chơi!',
+            tag: 'Arcade',
+            thumb: '🍉',
+            thumbClass: 'fruit-thumb',
+            path: 'games/fruit-ninja-ultimate/index.html',
+            featured: false
         }
     ],
 
@@ -280,6 +290,14 @@ const Hub = {
             const zuma = JSON.parse(localStorage.getItem('zumaDeluxeRemastered') || '{}');
             if (zuma.bestScore) highScores.push({ game: 'Zuma Deluxe Remastered', score: zuma.bestScore });
             if (zuma.gamesPlayed) totalPlays += zuma.gamesPlayed;
+        } catch(e) {}
+
+        // Fruit Ninja Ultimate stats
+        try {
+            const fn = JSON.parse(localStorage.getItem('fruitNinjaUltimate') || '{}');
+            const fnBest = Math.max(fn.bestScoreClassic || 0, fn.bestScoreArcade || 0, fn.bestScoreZen || 0);
+            if (fnBest) highScores.push({ game: 'Fruit Ninja Ultimate', score: fnBest });
+            if (fn.gamesPlayed) totalPlays += fn.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
