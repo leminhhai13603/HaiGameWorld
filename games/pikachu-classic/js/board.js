@@ -7,6 +7,9 @@ class Board {
         this.cols = cols;
         this.rows = rows;
         this.grid = []; // 2D array of tile type IDs (0 = empty)
+        for (let r = 0; r < rows; r++) {
+            this.grid[r] = new Array(cols).fill(0);
+        }
         this.pathfinder = new Pathfinder(cols, rows);
         this.tileTypes = 36; // Number of unique tile types
     }
