@@ -30,11 +30,11 @@ class FlappyGame {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
 
-        // Game dimensions
+        // Game dimensions (logical)
         this.W = 400;
         this.H = 600;
-        this.canvas.width = this.W;
-        this.canvas.height = this.H;
+        this._resize();
+        window.addEventListener('resize', () => this._resize());
 
         this.state = GameState.READY;
         this.score = 0;
@@ -78,6 +78,16 @@ class FlappyGame {
         this._gameLoop(performance.now());
     }
 
+    _resize() {
+        const maxW = window.innerWidth;
+        const maxH = window.innerHeight;
+        const scale = Math.min(maxW / this.W, maxH / this.H, 1);
+        this.canvas.width = this.W;
+        this.canvas.height = this.H;
+        this.canvas.style.width = Math.floor(this.W * scale) + 'px';
+        this.canvas.style.height = Math.floor(this.H * scale) + 'px';
+    }
+
     _setupInput() {
         const action = () => {
             AudioManager.resume();
@@ -97,11 +107,22 @@ class FlappyGame {
             }
         };
 
-        this.canvas.addEventListener('click', action);
+        // Touch handling - prevent double-fire with click
+        let touchHandled = false;
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            touchHandled = true;
             action();
         }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent page scroll
+        }, { passive: false });
+
+        this.canvas.addEventListener('click', () => {
+            if (touchHandled) { touchHandled = false; return; }
+            action();
+        });
 
         document.addEventListener('keydown', (e) => {
             switch (e.key) {

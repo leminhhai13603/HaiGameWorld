@@ -10,6 +10,8 @@ html, body {
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
+    position: fixed;
+    -webkit-overflow-scrolling: none;
 }
 
 body {
@@ -154,4 +156,6 @@ body {
     .score-box { padding: 4px 10px; min-width: 55px; }
     .score-box-value { font-size: 15px; }
     .btn { padding: 8px 14px; font-size: 12px; }
+    .game-hint { display: none; }
+    #back-btn { padding: 8px 14px; font-size: 15px; }
 }

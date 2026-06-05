@@ -141,6 +141,10 @@ class Game2048 {
             this.touchStartY = t.clientY;
         }, { passive: false });
 
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent page scroll while swiping
+        }, { passive: false });
+
         this.canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             if (e.changedTouches.length === 0) return;
