@@ -37,16 +37,16 @@ const FruitManager = (() => {
     function spawnFruit(W, H, mode) {
         const type = _weightedRandom();
         const x = 80 + Math.random() * (W - 160);
-        const speedY = -(400 + Math.random() * 200); // upward
+        const speedY = -(550 + Math.random() * 300); // upward (much higher)
         const speedX = (Math.random() - 0.5) * 100; // slight horizontal
-        const gravity = 600;
+        const gravity = 480; // lower gravity for higher arcs
 
         // Calculate time to peak and peak height
         const timeToPeak = -speedY / gravity;
         const peakY = H + speedY * timeToPeak + 0.5 * gravity * timeToPeak * timeToPeak;
 
-        // Only spawn if peak is visible
-        if (peakY > H * 0.15) {
+        // Only spawn if peak is visible (at least 60% up)
+        if (peakY > H * 0.05) {
             fruits.push({
                 x: x,
                 y: H + type.radius,
@@ -65,7 +65,7 @@ const FruitManager = (() => {
 
     function spawnBomb(W, H) {
         const x = 80 + Math.random() * (W - 160);
-        const speedY = -(350 + Math.random() * 150);
+        const speedY = -(500 + Math.random() * 250);
         const speedX = (Math.random() - 0.5) * 80;
 
         fruits.push({
@@ -128,7 +128,7 @@ const FruitManager = (() => {
             if (!f.active) continue;
 
             f.x += f.vx * dt * ff;
-            f.vy += 600 * dt * ff; // gravity
+            f.vy += 480 * dt * ff; // gravity (reduced for higher arcs)
             f.y += f.vy * dt * ff;
             f.rotation += f.rotSpeed * dt * ff;
 
