@@ -62,6 +62,16 @@ const Hub = {
             thumbClass: 'thumb-2048',
             path: 'games/2048/index.html',
             featured: false
+        },
+        {
+            id: 'dino-hunter',
+            name: 'Dino Hunter',
+            desc: 'Modern endless runner inspired by Chrome Dino. Run, jump, dodge, collect, survive!',
+            tag: 'Arcade',
+            thumb: '🦖',
+            thumbClass: 'dino-thumb',
+            path: 'games/dino-hunter/index.html',
+            featured: false
         }
     ],
 
@@ -138,6 +148,13 @@ const Hub = {
             const g2048 = JSON.parse(localStorage.getItem('game2048') || '{}');
             if (g2048.bestScore) highScores.push({ game: '2048', score: g2048.bestScore });
             if (g2048.gamesPlayed) totalPlays += g2048.gamesPlayed;
+        } catch(e) {}
+
+        // Dino Hunter stats
+        try {
+            const dh = JSON.parse(localStorage.getItem('dinoHunter') || '{}');
+            if (dh.bestScore) highScores.push({ game: 'Dino Hunter', score: dh.bestScore });
+            if (dh.gamesPlayed) totalPlays += dh.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
