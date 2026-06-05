@@ -6,7 +6,7 @@ const Hub = {
         {
             id: 'space-avian-assault',
             name: 'Space Avian Assault',
-            desc: 'Bắn gà không gian — tiêu diệt waves of alien birds, săn boss, nâng cấp vũ khí.',
+            desc: 'Bắn gà không gian — tiêu diệt đàn gà alien, săn boss, nâng cấp vũ khí.',
             tag: 'Shooter',
             thumb: '🚀',
             thumbClass: 'space-thumb',
@@ -16,7 +16,7 @@ const Hub = {
         {
             id: 'gold-miner',
             name: 'Gold Miner',
-            desc: 'Kéo vàng cổ điển — swing your hook, grab gold, diamonds and beat the clock!',
+            desc: 'Kéo vàng cổ điển — quăng dây kéo vàng, kim cương, vượt qua mỗi màn!',
             tag: 'Arcade',
             thumb: '⛏️',
             thumbClass: 'gold-thumb',
@@ -26,7 +26,7 @@ const Hub = {
         {
             id: 'pikachu-classic',
             name: 'Pikachu Classic',
-            desc: 'Onet Connect — match identical tiles with max 2 turns. 25 levels, combo system!',
+            desc: 'Ghép hình Pikachu — nối 2 hình giống nhau trong tối đa 2 đường gấp. 25 màn!',
             tag: 'Puzzle',
             thumb: '🐶',
             thumbClass: 'pikachu-thumb',
@@ -36,7 +36,7 @@ const Hub = {
         {
             id: 'battle-city',
             name: 'Battle City',
-            desc: 'Tank 1990 remake — protect the Eagle Base! 35 levels, boss battles, co-op mode!',
+            desc: 'Tank 1990 — bảo vệ căn cứ Đại Bàng! 35 màn, đấu boss, chơi 2 người!',
             tag: 'Action',
             thumb: '🎯',
             thumbClass: 'battle-thumb',
@@ -46,7 +46,7 @@ const Hub = {
         {
             id: 'flappy-bird',
             name: 'Flappy Bird',
-            desc: 'Classic endless flying game. Avoid pipes and achieve the highest score.',
+            desc: 'Chim bay bất tận — né ống nước, đạt điểm cao nhất!',
             tag: 'Arcade',
             thumb: '🐦',
             thumbClass: 'flappy-thumb',
@@ -56,7 +56,7 @@ const Hub = {
         {
             id: '2048',
             name: '2048',
-            desc: 'Combine matching tiles to create larger numbers and achieve the highest score possible.',
+            desc: 'Ghép số — cộng các ô giống nhau để tạo số lớn hơn, đạt điểm cao nhất!',
             tag: 'Puzzle',
             thumb: '🔢',
             thumbClass: 'thumb-2048',
@@ -66,7 +66,7 @@ const Hub = {
         {
             id: 'dino-hunter',
             name: 'Dino Hunter',
-            desc: 'Modern endless runner inspired by Chrome Dino. Run, jump, dodge, collect, survive!',
+            desc: 'Chạy bất tận kiểu Chrome Dino — chạy, nhảy, né chướng ngại, thu thập, sống sót!',
             tag: 'Arcade',
             thumb: '🦖',
             thumbClass: 'dino-thumb',
@@ -76,7 +76,7 @@ const Hub = {
         {
             id: 'dx-ball-remastered',
             name: 'DX-Ball Remastered',
-            desc: 'Modern brick breaker arcade. Break bricks, collect power-ups, clear 20 levels!',
+            desc: 'Phá gạch cổ điển — đập gạch, nhặt power-up, vượt 20 màn!',
             tag: 'Arcade',
             thumb: '🧱',
             thumbClass: 'dxbal-thumb',
