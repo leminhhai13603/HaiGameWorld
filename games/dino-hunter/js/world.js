@@ -121,11 +121,11 @@ class Enemy {
 
         switch (type) {
             case 'scorpion':
-                this.width = 40; this.height = 28; this.y = groundY - 28; this.health = 2; this.score = 60; break;
+                this.width = 36; this.height = 22; this.y = groundY - 22; this.health = 2; this.score = 60; break;
             case 'drone':
-                this.width = 32; this.height = 24; this.y = groundY - 80 - Math.random() * 60; this.score = 80; break;
+                this.width = 32; this.height = 24; this.y = groundY - 130 - Math.random() * 40; this.score = 80; break;
             case 'mutantBird':
-                this.width = 38; this.height = 28; this.y = groundY - 50 - Math.random() * 80; this.health = 2; this.score = 100; break;
+                this.width = 38; this.height = 28; this.y = groundY - 100 - Math.random() * 60; this.health = 2; this.score = 100; break;
         }
     }
 
@@ -388,20 +388,23 @@ class WorldManager {
         this.distance += spd * dt * 0.1;
         this.score = Math.floor(this.distance);
 
-        // Spawn obstacles
-        this.obstacleTimer -= dt;
-        if (this.obstacleTimer <= 0) {
-            this._spawnObstacle(spd, hasDoubleJump);
-            this.obstacleTimer = 60 + Math.random() * 60 - Math.min(30, this.distance / 100);
-            if (this.obstacleTimer < 25) this.obstacleTimer = 25;
-        }
+        // Check if spawn zone is clear (nothing in rightmost 150px)
+        const spawnClear = this._isSpawnClear();
 
-        // Spawn enemies (after score 300)
-        if (this.score >= 300) {
-            this.enemyTimer -= dt;
-            if (this.enemyTimer <= 0) {
+        // Spawn obstacles OR enemies — only one at a time
+        this.obstacleTimer -= dt;
+        if (this.score >= 300) this.enemyTimer -= dt;
+
+        if (spawnClear) {
+            if (this.enemyTimer <= 0 && this.score >= 300) {
+                // Enemy takes priority when its timer is up
                 this._spawnEnemy(spd);
-                this.enemyTimer = 120 + Math.random() * 120;
+                this.enemyTimer = 150 + Math.random() * 100;
+                this.obstacleTimer = 60; // delay obstacle after enemy
+            } else if (this.obstacleTimer <= 0) {
+                this._spawnObstacle(spd, hasDoubleJump);
+                this.obstacleTimer = 70 + Math.random() * 60 - Math.min(30, this.distance / 100);
+                if (this.obstacleTimer < 40) this.obstacleTimer = 40;
             }
         }
 
@@ -436,6 +439,17 @@ class WorldManager {
         this.particles = this.particles.filter(p => p.active);
     }
 
+    _isSpawnClear() {
+        const zone = this.canvasW - 150;
+        for (const o of this.obstacles) {
+            if (o.x > zone) return false;
+        }
+        for (const e of this.enemies) {
+            if (e.x > zone) return false;
+        }
+        return true;
+    }
+
     _spawnObstacle(spd, hasDoubleJump) {
         const types = ['cactusSmall', 'cactusSmall', 'cactusLarge', 'rock'];
         if (this.score > 150) types.push('bird', 'bird');
@@ -444,8 +458,7 @@ class WorldManager {
     }
 
     _spawnEnemy(spd) {
-        const types = ['scorpion'];
-        if (this.score > 500) types.push('drone');
+        const types = ['drone'];
         if (this.score > 800) types.push('mutantBird');
         const type = types[Math.floor(Math.random() * types.length)];
         this.enemies.push(new Enemy(this.canvasW + 20, this.groundY, type, spd));
