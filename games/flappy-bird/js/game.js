@@ -208,9 +208,9 @@ class FlappyGame {
             this.gameOverTimer++;
             // Bird falls after death
             if (this.bird.y < this.groundY - this.bird.height) {
-                this.deadVelocity += 0.5;
+                this.deadVelocity += 0.35;
                 this.bird.y += this.deadVelocity;
-                this.bird.rotation = Math.min(1.5, this.bird.rotation + 0.05);
+                this.bird.rotation = Math.min(0.9, this.bird.rotation + 0.03);
                 if (this.bird.y >= this.groundY - this.bird.height) {
                     this.bird.y = this.groundY - this.bird.height;
                     this.deadVelocity = 0;
@@ -301,7 +301,7 @@ class FlappyGame {
         this.state = GameState.GAME_OVER;
         this.gameOverTimer = 0;
         this.flashTimer = 8;
-        this.deadVelocity = -4;
+        this.deadVelocity = -3;
         AudioManager.play('hit');
         setTimeout(() => AudioManager.play('swoosh'), 200);
 

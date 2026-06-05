@@ -10,9 +10,9 @@ class Bird {
         this.width = 34;
         this.height = 24;
         this.velocity = 0;
-        this.gravity = 0.5;
-        this.flapForce = -8;
-        this.maxFallSpeed = 12;
+        this.gravity = 0.38;
+        this.flapForce = -7;
+        this.maxFallSpeed = 8;
         this.rotation = 0;
         this.animTimer = 0;
         this.wingPhase = 0;
@@ -37,7 +37,7 @@ class Bird {
         if (this.velocity < 0) {
             this.rotation = Math.max(-0.5, this.velocity * 0.06);
         } else {
-            this.rotation = Math.min(1.5, this.velocity * 0.12);
+            this.rotation = Math.min(0.9, this.velocity * 0.08);
         }
     }
 
