@@ -72,6 +72,16 @@ const Hub = {
             thumbClass: 'dino-thumb',
             path: 'games/dino-hunter/index.html',
             featured: false
+        },
+        {
+            id: 'dx-ball-remastered',
+            name: 'DX-Ball Remastered',
+            desc: 'Modern brick breaker arcade. Break bricks, collect power-ups, clear 20 levels!',
+            tag: 'Arcade',
+            thumb: '🧱',
+            thumbClass: 'dxbal-thumb',
+            path: 'games/dx-ball-remastered/index.html',
+            featured: false
         }
     ],
 
@@ -229,6 +239,13 @@ const Hub = {
             const dh = JSON.parse(localStorage.getItem('dinoHunter') || '{}');
             if (dh.bestScore) highScores.push({ game: 'Dino Hunter', score: dh.bestScore });
             if (dh.gamesPlayed) totalPlays += dh.gamesPlayed;
+        } catch(e) {}
+
+        // DX-Ball stats
+        try {
+            const dx = JSON.parse(localStorage.getItem('dxBallRemastered') || '{}');
+            if (dx.bestScore) highScores.push({ game: 'DX-Ball', score: dx.bestScore });
+            if (dx.gamesPlayed) totalPlays += dx.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;

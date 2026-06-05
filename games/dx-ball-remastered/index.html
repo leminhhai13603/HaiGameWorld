@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DX-Ball Remastered</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="../../index.html" id="back-btn">&#8592; Hub</a>
+    <div id="game-container">
+        <div class="hud-bar">
+            <div class="hud-item">
+                <span class="label">SCORE</span>
+                <span class="value" id="hud-score">0</span>
+            </div>
+            <div class="hud-item">
+                <span class="label">LEVEL</span>
+                <span class="value" id="hud-level">1</span>
+            </div>
+            <div class="hud-item">
+                <span class="label">LIVES</span>
+                <span class="value" id="hud-lives">❤️❤️❤️</span>
+            </div>
+            <div class="hud-item">
+                <span class="label">BEST</span>
+                <span class="value" id="hud-best">0</span>
+            </div>
+            <div class="controls-bar">
+                <button class="btn" id="btn-new-game">↻ New</button>
+                <div class="sound-indicator" id="sound-toggle">🔊</div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="game-hint">Mouse/Touch = Move Paddle · Arrow Keys = Move · P = Pause · R = Restart</div>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
