@@ -42,6 +42,26 @@ const Hub = {
             thumbClass: 'battle-thumb',
             path: 'games/battle-city/index.html',
             featured: false
+        },
+        {
+            id: 'flappy-bird',
+            name: 'Flappy Bird',
+            desc: 'Classic endless flying game. Avoid pipes and achieve the highest score.',
+            tag: 'Arcade',
+            thumb: '🐦',
+            thumbClass: 'flappy-thumb',
+            path: 'games/flappy-bird/index.html',
+            featured: false
+        },
+        {
+            id: '2048',
+            name: '2048',
+            desc: 'Combine matching tiles to create larger numbers and achieve the highest score possible.',
+            tag: 'Puzzle',
+            thumb: '🔢',
+            thumbClass: 'thumb-2048',
+            path: 'games/2048/index.html',
+            featured: false
         }
     ],
 
@@ -104,6 +124,20 @@ const Hub = {
             const gm = JSON.parse(localStorage.getItem('goldMiner') || '{}');
             if (gm.highScore) highScores.push({ game: 'Gold Miner', score: gm.highScore });
             if (gm.gamesPlayed) totalPlays += gm.gamesPlayed;
+        } catch(e) {}
+
+        // Flappy Bird stats
+        try {
+            const fb = JSON.parse(localStorage.getItem('flappyBird') || '{}');
+            if (fb.highScore) highScores.push({ game: 'Flappy Bird', score: fb.highScore });
+            if (fb.gamesPlayed) totalPlays += fb.gamesPlayed;
+        } catch(e) {}
+
+        // 2048 stats
+        try {
+            const g2048 = JSON.parse(localStorage.getItem('game2048') || '{}');
+            if (g2048.bestScore) highScores.push({ game: '2048', score: g2048.bestScore });
+            if (g2048.gamesPlayed) totalPlays += g2048.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;

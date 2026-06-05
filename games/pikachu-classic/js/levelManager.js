@@ -36,7 +36,7 @@ const LevelDefs = [
     { timer: 180, tileVariety: 30, shift: null, holes: [], desc: 'Static challenge' },
     // Level 16: Holes in board
     { timer: 200, tileVariety: 24, shift: null,
-      holes: this._generateHoles ? [] : [
+      holes: [
         {r:4,c:7},{r:4,c:8}
       ],
       desc: 'Blocked areas' },

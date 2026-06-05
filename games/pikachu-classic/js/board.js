@@ -58,6 +58,21 @@ class Board {
                 this.grid[h.r][h.c] = 0;
             }
         }
+        // Ensure even number of remaining tiles (keep pairs balanced)
+        let remaining = 0;
+        for (let r = 0; r < this.rows; r++)
+            for (let c = 0; c < this.cols; c++)
+                if (this.grid[r][c] !== 0) remaining++;
+        if (remaining % 2 !== 0) {
+            // Remove one more tile to make count even
+            outer:
+            for (let r = 0; r < this.rows; r++)
+                for (let c = 0; c < this.cols; c++)
+                    if (this.grid[r][c] !== 0) {
+                        this.grid[r][c] = 0;
+                        break outer;
+                    }
+        }
     }
 
     /**

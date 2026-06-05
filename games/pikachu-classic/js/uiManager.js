@@ -273,7 +273,7 @@ class UIManager {
     /**
      * Draw HUD
      */
-    drawHUD(score, timer, level, hints, shuffles, combo) {
+    drawHUD(score, timer, level, hints, shuffles, combo, maxTimer = 300) {
         const ctx = this.ctx;
         const w = this.canvas.width;
 
@@ -305,7 +305,7 @@ class UIManager {
         ctx.fillStyle = '#333';
         ctx.fillRect(barX, 30, barW, 6);
         ctx.fillStyle = timer <= 30 ? '#ff4444' : '#00ccff';
-        ctx.fillRect(barX, 30, barW * Math.max(0, timer / 300), 6);
+        ctx.fillRect(barX, 30, barW * Math.max(0, timer / maxTimer), 6);
 
         // Hints + Shuffles
         ctx.textAlign = 'right';

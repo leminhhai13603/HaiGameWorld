@@ -179,11 +179,7 @@ class Game {
             }, { passive: false });
         }
 
-        // Auto-aim: set mouse to above player for mobile
-        if (this.state === GameState.PLAYING) {
-            this.mouse.x = this.player.x;
-            this.mouse.y = this.player.y - 200;
-        }
+        // Auto-aim: set mouse to above player (applied on each touch start instead)
     }
 
     _handleAction() {

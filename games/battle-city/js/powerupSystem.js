@@ -21,7 +21,7 @@ class Powerup {
         if (this.timer < 120 && this.flashTimer % 8 < 4) return; // Blink when expiring
 
         const x = this.x;
-        const y = this.y + HUD_H;
+        const y = this.y;
         const icons = ['⭐', '💣', '🛡️', '🧱', '🏆', '⏰'];
         const colors = ['#ffcc00', '#ff4444', '#00ccff', '#886622', '#44ff44', '#aa88ff'];
 

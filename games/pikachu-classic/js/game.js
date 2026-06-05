@@ -55,6 +55,7 @@ class PikachuGame {
 
         this.lastTime = 0;
         this.frameInterval = 1000 / 60;
+        this.maxTimer = 300;
 
         this._loadSave();
         this._setupInput();
@@ -242,6 +243,7 @@ class PikachuGame {
     _loadLevel(level) {
         const def = LevelManager.getLevel(level - 1);
         this.timer = def.timer;
+        this.maxTimer = def.timer;
         this.currentShift = def.shift;
         this.tileVariety = def.tileVariety;
         this.holes = def.holes || [];
@@ -450,7 +452,6 @@ class PikachuGame {
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
-        this.stats.totalPlayTime += 1/60;
         this._update();
         this._render();
     }
@@ -464,6 +465,7 @@ class PikachuGame {
 
         if (this.state === GameState.PLAYING) {
             this.timer -= 1/60;
+            this.stats.totalPlayTime += 1/60;
             if (this.timer <= 0) {
                 this.timer = 0;
                 this.state = GameState.GAME_OVER;
@@ -497,7 +499,7 @@ class PikachuGame {
             case GameState.PLAYING:
             case GameState.PAUSED:
                 this.ui.drawBoard(this.board, this.selected, this.ui.hintPair, this.combo);
-                this.ui.drawHUD(this.score, this.timer, this.level, this.hints, this.shuffles, this.combo);
+                this.ui.drawHUD(this.score, this.timer, this.level, this.hints, this.shuffles, this.combo, this.maxTimer);
                 if (this.state === GameState.PAUSED) this.ui.drawPaused();
                 break;
             case GameState.LEVEL_COMPLETE:

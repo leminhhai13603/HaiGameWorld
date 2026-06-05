@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2048</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="../../index.html" id="back-btn">&#8592; Hub</a>
+    <div id="game-container">
+        <div class="game-header">
+            <div class="game-title">2048</div>
+            <div class="scores-container">
+                <div class="score-box">
+                    <div class="score-box-label">Score</div>
+                    <div class="score-box-value" id="score-display">0</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-box-label">Best</div>
+                    <div class="score-box-value" id="best-display">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <button class="btn" id="btn-new-game">New Game</button>
+            <div class="sound-indicator" id="sound-toggle">🔊</div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="game-hint">Arrow Keys / WASD / Swipe to move · R to restart</div>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

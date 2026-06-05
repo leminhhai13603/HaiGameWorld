@@ -195,7 +195,6 @@ class BattleCityGame {
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
-        this.stats.totalPlayTime = (this.stats.totalPlayTime || 0) + 1 / 60;
         this._update();
         this._render();
     }
@@ -205,6 +204,7 @@ class BattleCityGame {
         if (this.state === GameState.LEVEL_START) { this.levelStartTimer--; if (this.levelStartTimer <= 0) this.state = GameState.PLAYING; return; }
         if (this.state === GameState.EDITOR) return;
         if (this.state !== GameState.PLAYING) return;
+        this.stats.totalPlayTime = (this.stats.totalPlayTime || 0) + 1 / 60;
         if (this.freezeTimer > 0) this.freezeTimer--;
 
         this.map.update();

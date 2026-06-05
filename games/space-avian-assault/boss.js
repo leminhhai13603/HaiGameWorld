@@ -36,6 +36,7 @@ class Boss {
 
         this.hitFlash = 0;
         this.pulseTime = 0;
+        this.tier = tier;
 
         // Cached bounds object (reused, never reallocated)
         this._bounds = { x: 0, y: 0, width: 0, height: 0 };

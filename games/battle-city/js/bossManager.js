@@ -13,6 +13,7 @@ class BossTank {
         this.shootTimer = 30; this.dirChangeTimer = 60;
         this.flashTimer = 0; this.spawnTimer = 90;
         this.stuckTimer = 0;
+        this.tier = Math.floor(level / 10);
         this._setStats(level);
     }
 
