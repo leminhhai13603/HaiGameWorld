@@ -440,25 +440,27 @@ class DinoHunterGame {
         }
 
         // Mountains (parallax)
-        ctx.fillStyle = this.cyclePhase === 2 ? '#1a2a1a' : '#7a9a7a';
+        ctx.fillStyle = this.cyclePhase === 2 ? '#1a2a1a' : '#6a8a6a';
         ctx.beginPath(); ctx.moveTo(0, this.GROUND_Y);
         for (let x = 0; x <= this.W; x += 40) {
             ctx.lineTo(x, this.GROUND_Y - 30 - Math.sin(x * 0.01 + this.groundOffset * 0.01) * 20);
         }
         ctx.lineTo(this.W, this.GROUND_Y); ctx.closePath(); ctx.fill();
 
-        // Ground
-        ctx.fillStyle = this.cyclePhase === 2 ? '#2a3a2a' : '#8B7355';
+        // Ground - lighter sand color for contrast
+        ctx.fillStyle = this.cyclePhase === 2 ? '#3a3a2a' : '#d4b896';
         ctx.fillRect(0, this.GROUND_Y, this.W, this.H - this.GROUND_Y);
-        ctx.fillStyle = this.cyclePhase === 2 ? '#1a2a1a' : '#6a8a3a';
+
+        // Horizon line (bright)
+        ctx.fillStyle = this.cyclePhase === 2 ? '#4a5a4a' : '#5a8a3a';
         ctx.fillRect(0, this.GROUND_Y, this.W, 4);
 
-        // Ground texture
-        ctx.fillStyle = this.cyclePhase === 2 ? '#3a4a3a' : '#9a8a6a';
+        // Ground texture - darker stripes
+        ctx.fillStyle = this.cyclePhase === 2 ? '#4a4a3a' : '#c4a880';
         for (let i = -1; i < this.W / 24 + 2; i++) {
             const sx = i * 24 - this.groundOffset;
-            ctx.fillRect(sx, this.GROUND_Y + 10, 12, 2);
-            ctx.fillRect(sx + 8, this.GROUND_Y + 24, 10, 2);
+            ctx.fillRect(sx, this.GROUND_Y + 10, 14, 3);
+            ctx.fillRect(sx + 8, this.GROUND_Y + 26, 12, 3);
         }
 
         // World objects

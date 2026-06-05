@@ -12,11 +12,11 @@ class Obstacle {
 
         switch (type) {
             case 'cactusSmall':
-                this.width = 16; this.height = 34; this.y = groundY - 34; break;
+                this.width = 20; this.height = 40; this.y = groundY - 40; break;
             case 'cactusLarge':
-                this.width = 24; this.height = 48; this.y = groundY - 48; break;
+                this.width = 28; this.height = 56; this.y = groundY - 56; break;
             case 'rock':
-                this.width = 32; this.height = 24; this.y = groundY - 24; break;
+                this.width = 36; this.height = 28; this.y = groundY - 28; break;
             case 'bird':
                 this.width = 34; this.height = 24;
                 this.y = groundY - 60 - Math.random() * 80;
@@ -35,51 +35,74 @@ class Obstacle {
     draw(ctx) {
         switch (this.type) {
             case 'cactusSmall':
-                ctx.fillStyle = '#2d6b3e';
-                ctx.fillRect(this.x + 4, this.y, 8, this.height);
-                ctx.fillRect(this.x, this.y + 8, 6, 8);
-                ctx.fillRect(this.x + 10, this.y + 14, 6, 8);
+                // Bright green cactus with dark outline
+                ctx.strokeStyle = '#1a4a2a'; ctx.lineWidth = 2;
+                ctx.fillStyle = '#33cc55';
+                ctx.fillRect(this.x + 5, this.y, 10, this.height);
+                ctx.strokeRect(this.x + 5, this.y, 10, this.height);
+                ctx.fillRect(this.x, this.y + 10, 7, 10);
+                ctx.strokeRect(this.x, this.y + 10, 7, 10);
+                ctx.fillRect(this.x + 13, this.y + 16, 7, 10);
+                ctx.strokeRect(this.x + 13, this.y + 16, 7, 10);
+                // Highlight
+                ctx.fillStyle = '#55ee77';
+                ctx.fillRect(this.x + 7, this.y + 2, 2, this.height - 4);
                 break;
             case 'cactusLarge':
-                ctx.fillStyle = '#1e5a30';
-                ctx.fillRect(this.x + 6, this.y, 12, this.height);
-                ctx.fillRect(this.x, this.y + 12, 8, 10);
-                ctx.fillRect(this.x + 16, this.y + 20, 8, 10);
+                ctx.strokeStyle = '#1a4a2a'; ctx.lineWidth = 2;
+                ctx.fillStyle = '#22bb44';
+                ctx.fillRect(this.x + 7, this.y, 14, this.height);
+                ctx.strokeRect(this.x + 7, this.y, 14, this.height);
+                ctx.fillRect(this.x, this.y + 14, 9, 12);
+                ctx.strokeRect(this.x, this.y + 14, 9, 12);
+                ctx.fillRect(this.x + 19, this.y + 22, 9, 12);
+                ctx.strokeRect(this.x + 19, this.y + 22, 9, 12);
+                ctx.fillStyle = '#44dd66';
+                ctx.fillRect(this.x + 10, this.y + 2, 3, this.height - 4);
                 break;
             case 'rock':
-                ctx.fillStyle = '#888';
+                ctx.fillStyle = '#bbb';
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y + this.height);
-                ctx.lineTo(this.x + 8, this.y);
-                ctx.lineTo(this.x + 24, this.y + 2);
+                ctx.lineTo(this.x + 10, this.y);
+                ctx.lineTo(this.x + 26, this.y + 2);
                 ctx.lineTo(this.x + this.width, this.y + this.height);
                 ctx.closePath(); ctx.fill();
-                ctx.fillStyle = '#999';
-                ctx.fillRect(this.x + 6, this.y + 4, 12, 6);
+                ctx.strokeStyle = '#777'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#ddd';
+                ctx.fillRect(this.x + 8, this.y + 5, 14, 7);
+                // Crack
+                ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(this.x + 16, this.y + 7);
+                ctx.lineTo(this.x + 20, this.y + 16);
+                ctx.stroke();
                 break;
             case 'bird':
-                const wingY = Math.sin(this.wingPhase * Math.PI) * 6;
-                ctx.fillStyle = '#cc4444';
+                const wingY = Math.sin(this.wingPhase * Math.PI) * 8;
+                // Body
+                ctx.fillStyle = '#ff5555';
                 ctx.beginPath();
                 ctx.ellipse(this.x + 17, this.y + 12, 15, 10, 0, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.strokeStyle = '#cc2222'; ctx.lineWidth = 1.5; ctx.stroke();
                 // Wings
-                ctx.fillStyle = '#aa3333';
+                ctx.fillStyle = '#dd3333';
                 ctx.beginPath();
                 ctx.moveTo(this.x + 5, this.y + 10);
-                ctx.lineTo(this.x - 4, this.y + wingY);
+                ctx.lineTo(this.x - 6, this.y + wingY);
                 ctx.lineTo(this.x + 10, this.y + 12);
                 ctx.closePath(); ctx.fill();
                 ctx.beginPath();
                 ctx.moveTo(this.x + 24, this.y + 10);
-                ctx.lineTo(this.x + 38, this.y + wingY);
+                ctx.lineTo(this.x + 40, this.y + wingY);
                 ctx.lineTo(this.x + 24, this.y + 12);
                 ctx.closePath(); ctx.fill();
                 // Eye
                 ctx.fillStyle = '#fff';
-                ctx.beginPath(); ctx.arc(this.x + 24, this.y + 8, 3, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x + 24, this.y + 8, 4, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = '#000';
-                ctx.beginPath(); ctx.arc(this.x + 25, this.y + 8, 1.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x + 25, this.y + 8, 2, 0, Math.PI * 2); ctx.fill();
                 break;
         }
     }

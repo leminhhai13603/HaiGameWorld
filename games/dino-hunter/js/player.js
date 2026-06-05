@@ -206,72 +206,198 @@ class Player {
     _drawDino(ctx, color) {
         const x = this.x;
         const y = this.y;
+        const dark = '#2d6b3e';
+        const light = '#6adb8a';
+        const belly = '#c8f0d0';
 
         if (this.ducking && this.isGrounded) {
-            // Ducking dino - wider, shorter
+            // Ducking - low profile T-Rex
+            ctx.save();
+            // Body (flattened)
             ctx.fillStyle = color;
-            ctx.fillRect(x, y, 56, 20);
-            ctx.fillRect(x + 46, y - 8, 12, 12);
+            ctx.beginPath();
+            ctx.ellipse(x + 28, y + 14, 28, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = dark; ctx.lineWidth = 1.5; ctx.stroke();
+            // Belly
+            ctx.fillStyle = belly;
+            ctx.beginPath();
+            ctx.ellipse(x + 28, y + 16, 20, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Head
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.ellipse(x + 50, y + 8, 10, 10, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = dark; ctx.stroke();
+            // Jaw
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 52, y + 12, 10, 5);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x + 56, y + 13, 4, 1);
             // Eye
             ctx.fillStyle = '#fff';
-            ctx.fillRect(x + 50, y - 6, 4, 4);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(x + 51, y - 5, 2, 2);
+            ctx.beginPath(); ctx.arc(x + 52, y + 5, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#111';
+            ctx.beginPath(); ctx.arc(x + 53, y + 5, 2, 0, Math.PI * 2); ctx.fill();
+            // Spine bumps
+            ctx.fillStyle = light;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath(); ctx.arc(x + 10 + i * 9, y + 3, 3, 0, Math.PI * 2); ctx.fill();
+            }
             // Legs
-            ctx.fillStyle = color;
             const legOff = this.runFrame * 4;
-            ctx.fillRect(x + 10 + legOff, y + 20, 6, 8);
-            ctx.fillRect(x + 30 - legOff, y + 20, 6, 8);
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 14 + legOff, y + 22, 6, 8);
+            ctx.fillRect(x + 32 - legOff, y + 22, 6, 8);
+            ctx.fillStyle = dark;
+            ctx.fillRect(x + 14 + legOff, y + 26, 7, 4);
+            ctx.fillRect(x + 31 - legOff, y + 26, 7, 4);
+            // Tail
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y + 10);
+            ctx.lineTo(x - 8, y + 6);
+            ctx.lineTo(x - 6, y + 14);
+            ctx.lineTo(x, y + 16);
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
             return;
         }
 
-        const w = this.width;
-        const h = this.height;
-
-        // Body
-        ctx.fillStyle = color;
-        ctx.fillRect(x + 8, y + 4, w - 16, h - 16);
-
-        // Head
-        ctx.fillRect(x + 20, y - 4, w - 20, 18);
-
-        // Mouth/jaw
-        ctx.fillRect(x + 30, y + 10, 16, 6);
-
-        // Eye
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(x + 32, y, 6, 6);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(x + 34, y + 1, 3, 3);
-
-        // Arms
-        ctx.fillStyle = color;
-        if (this.state === 'jump' || this.state === 'doubleJump') {
-            ctx.fillRect(x + 4, y + 12, 6, 10);
-        } else {
-            ctx.fillRect(x + 6, y + 14, 5, 8);
-        }
+        ctx.save();
 
         // Tail
-        ctx.fillRect(x, y + 8, 10, 6);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x + 2, y + 16);
+        ctx.lineTo(x - 10, y + 10);
+        ctx.lineTo(x - 12, y + 14);
+        ctx.lineTo(x - 8, y + 20);
+        ctx.lineTo(x + 2, y + 22);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = dark; ctx.lineWidth = 1; ctx.stroke();
+
+        // Body (oval)
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(x + 20, y + 22, 16, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = dark; ctx.lineWidth = 1.5; ctx.stroke();
+
+        // Belly
+        ctx.fillStyle = belly;
+        ctx.beginPath();
+        ctx.ellipse(x + 20, y + 26, 10, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Spine ridges
+        ctx.fillStyle = light;
+        for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.arc(x + 6 + i * 7, y + 9, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Head
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(x + 36, y + 8, 14, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = dark; ctx.lineWidth = 1.5; ctx.stroke();
+
+        // Snout / jaw
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x + 40, y + 10);
+        ctx.lineTo(x + 54, y + 8);
+        ctx.lineTo(x + 54, y + 16);
+        ctx.lineTo(x + 40, y + 18);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = dark; ctx.stroke();
+
+        // Teeth
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x + 44, y + 14, 2, 3);
+        ctx.fillRect(x + 48, y + 14, 2, 3);
+        ctx.fillRect(x + 52, y + 14, 2, 3);
+
+        // Upper teeth
+        ctx.fillRect(x + 44, y + 9, 2, 2);
+        ctx.fillRect(x + 48, y + 9, 2, 2);
+
+        // Nostril
+        ctx.fillStyle = dark;
+        ctx.beginPath(); ctx.arc(x + 52, y + 10, 1.5, 0, Math.PI * 2); ctx.fill();
+
+        // Eye (white)
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x + 40, y + 4, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = dark; ctx.lineWidth = 1; ctx.stroke();
+        // Pupil
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(x + 41, y + 4, 2.5, 0, Math.PI * 2); ctx.fill();
+        // Eye highlight
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x + 42, y + 3, 1, 0, Math.PI * 2); ctx.fill();
+
+        // Brow ridge
+        ctx.fillStyle = dark;
+        ctx.beginPath();
+        ctx.moveTo(x + 34, y - 1);
+        ctx.lineTo(x + 44, y - 2);
+        ctx.lineTo(x + 44, y + 1);
+        ctx.lineTo(x + 34, y + 2);
+        ctx.closePath(); ctx.fill();
+
+        // Arms (tiny T-Rex arms)
+        ctx.fillStyle = color;
+        const armAngle = this.state === 'jump' ? -0.5 : 0.3;
+        ctx.save();
+        ctx.translate(x + 14, y + 20);
+        ctx.rotate(armAngle);
+        ctx.fillRect(0, 0, 4, 10);
+        // Claws
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-1, 10, 3, 3);
+        ctx.fillRect(2, 10, 3, 3);
+        ctx.restore();
 
         // Legs
         ctx.fillStyle = color;
         if (this.isGrounded && this.state !== 'dead') {
-            const legOff = this.runFrame * 5;
-            ctx.fillRect(x + 12 + legOff, y + h - 14, 7, 14);
-            ctx.fillRect(x + 26 - legOff, y + h - 14, 7, 14);
+            const legOff = this.runFrame * 6;
+            // Left leg
+            ctx.fillRect(x + 10 + legOff, y + 32, 8, 14);
+            ctx.fillStyle = dark;
+            ctx.fillRect(x + 8 + legOff, y + 42, 10, 5);
+            // Right leg
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 24 - legOff, y + 32, 8, 14);
+            ctx.fillStyle = dark;
+            ctx.fillRect(x + 22 - legOff, y + 42, 10, 5);
         } else {
-            ctx.fillRect(x + 12, y + h - 14, 7, 14);
-            ctx.fillRect(x + 26, y + h - 14, 7, 14);
+            // Airborne legs
+            ctx.fillRect(x + 10, y + 32, 8, 12);
+            ctx.fillStyle = dark;
+            ctx.fillRect(x + 8, y + 40, 10, 5);
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 24, y + 32, 8, 12);
+            ctx.fillStyle = dark;
+            ctx.fillRect(x + 22, y + 40, 10, 5);
         }
 
         // Weapon visual
         if (this.hasWeapon) {
             ctx.fillStyle = '#ffcc00';
-            ctx.fillRect(x + w - 4, y + 10, 10, 4);
+            ctx.fillRect(x + w - 2, y + 12, 12, 4);
             ctx.fillStyle = '#ff6600';
-            ctx.fillRect(x + w + 4, y + 9, 4, 6);
+            ctx.fillRect(x + w + 8, y + 11, 5, 6);
+            // Glow
+            ctx.fillStyle = 'rgba(255,100,0,0.3)';
+            ctx.beginPath(); ctx.arc(x + w + 12, y + 14, 6, 0, Math.PI * 2); ctx.fill();
         }
+
+        ctx.restore();
     }
 }
