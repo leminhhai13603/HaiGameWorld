@@ -92,6 +92,16 @@ const Hub = {
             thumbClass: 'tetris-thumb',
             path: 'games/tetris-ultimate/index.html',
             featured: false
+        },
+        {
+            id: 'zuma-deluxe-remastered',
+            name: 'Zuma Deluxe Remastered',
+            desc: 'Bắn bi cổ điển — ngắm, bắn, ghép 3+ viên bi cùng màu, phá chuỗi, combo, vượt 20 màn!',
+            tag: 'Arcade',
+            thumb: '🐸',
+            thumbClass: 'zuma-thumb',
+            path: 'games/zuma-deluxe-remastered/index.html',
+            featured: false
         }
     ],
 
@@ -263,6 +273,13 @@ const Hub = {
             const tu = JSON.parse(localStorage.getItem('tetrisUltimate') || '{}');
             if (tu.bestScore) highScores.push({ game: 'Tetris Ultimate', score: tu.bestScore });
             if (tu.gamesPlayed) totalPlays += tu.gamesPlayed;
+        } catch(e) {}
+
+        // Zuma Deluxe Remastered stats
+        try {
+            const zuma = JSON.parse(localStorage.getItem('zumaDeluxeRemastered') || '{}');
+            if (zuma.bestScore) highScores.push({ game: 'Zuma Deluxe Remastered', score: zuma.bestScore });
+            if (zuma.gamesPlayed) totalPlays += zuma.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
