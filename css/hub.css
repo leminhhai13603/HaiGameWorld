@@ -374,6 +374,10 @@ body {
     background: linear-gradient(135deg, #1a1a3a, #2a2a5a, #4488ff);
 }
 
+.card-thumb.tetris-thumb {
+    background: linear-gradient(135deg, #0a1628, #162040, #00b8d4);
+}
+
 .card-thumb::after {
     content: '';
     position: absolute;

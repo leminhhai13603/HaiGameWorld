@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #0a0a1a;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    position: fixed;
+    -webkit-overflow-scrolling: none;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+}
+
+#back-btn {
+    position: fixed;
+    top: 10px; left: 14px;
+    color: #888;
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    z-index: 10;
+    transition: color 0.2s;
+}
+#back-btn:hover { color: #00e5ff; }
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+#gameCanvas {
+    display: block;
+    border-radius: 6px;
+    image-rendering: pixelated;
+}
+
+#controls-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 360px;
+}
+
+.ctrl-btn {
+    width: 50px; height: 44px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background: #1a1a2e;
+    color: #ccc;
+    font-size: 18px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+}
+.ctrl-btn:active { background: #2a2a4e; }
+
+.ctrl-btn.wide { width: 70px; font-size: 12px; letter-spacing: 0.5px; }
+
+.game-hint {
+    color: #555;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+@media (min-width: 769px) {
+    #controls-bar { display: none; }
+    .game-hint { display: block; }
+}
+
+@media (max-width: 768px) {
+    .game-hint { display: none; }
+    #controls-bar { display: flex; }
+}
+
+@media (max-width: 400px) {
+    .ctrl-btn { width: 44px; height: 40px; font-size: 16px; }
+    .ctrl-btn.wide { width: 60px; font-size: 11px; }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tetris Ultimate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="../../index.html" id="back-btn">&#8592; Hub</a>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="controls-bar">
+            <button class="ctrl-btn" id="btn-hold">Hold</button>
+            <button class="ctrl-btn" id="btn-left">◀</button>
+            <button class="ctrl-btn" id="btn-down">▼</button>
+            <button class="ctrl-btn" id="btn-right">▶</button>
+            <button class="ctrl-btn" id="btn-rotate">↻</button>
+            <button class="ctrl-btn wide" id="btn-drop">DROP</button>
+            <button class="ctrl-btn" id="btn-pause">⏸</button>
+        </div>
+        <div class="game-hint">← → Di chuyển &nbsp;|&nbsp; ↑ Xoay &nbsp;|&nbsp; ↓ Mềm &nbsp;|&nbsp; Space Thả nhanh &nbsp;|&nbsp; C Giữ &nbsp;|&nbsp; P Tạm dừng</div>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

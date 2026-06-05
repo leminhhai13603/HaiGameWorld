@@ -82,6 +82,16 @@ const Hub = {
             thumbClass: 'dxbal-thumb',
             path: 'games/dx-ball-remastered/index.html',
             featured: false
+        },
+        {
+            id: 'tetris-ultimate',
+            name: 'Tetris Ultimate',
+            desc: 'Xếp gạch cổ điển — sắp xếp tetromino, xoá dòng, combo, sống sót càng lâu càng tốt!',
+            tag: 'Puzzle',
+            thumb: '🟦',
+            thumbClass: 'tetris-thumb',
+            path: 'games/tetris-ultimate/index.html',
+            featured: false
         }
     ],
 
@@ -246,6 +256,13 @@ const Hub = {
             const dx = JSON.parse(localStorage.getItem('dxBallRemastered') || '{}');
             if (dx.bestScore) highScores.push({ game: 'DX-Ball', score: dx.bestScore });
             if (dx.gamesPlayed) totalPlays += dx.gamesPlayed;
+        } catch(e) {}
+
+        // Tetris Ultimate stats
+        try {
+            const tu = JSON.parse(localStorage.getItem('tetrisUltimate') || '{}');
+            if (tu.bestScore) highScores.push({ game: 'Tetris Ultimate', score: tu.bestScore });
+            if (tu.gamesPlayed) totalPlays += tu.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
