@@ -110,7 +110,11 @@ class FruitNinjaGame {
                         this.state = GameState.PAUSED;
                         AudioManager.play('pause');
                     } else if (this.state === GameState.PAUSED) {
-                        this.state = GameState.PLAYING;
+                        // Save stats before going to menu (important for Zen mode)
+                        SaveManager.updateBestScore(this.mode, this.score);
+                        SaveManager.addFruitsSliced(this.fruitsSliced);
+                        SaveManager.updateHighestCombo(this.highestCombo);
+                        this.state = GameState.MENU;
                     } else if (this.state !== GameState.MENU) {
                         this.state = GameState.MENU;
                     }
@@ -382,17 +386,16 @@ class FruitNinjaGame {
         if (this.comboCount > this.highestCombo) {
             this.highestCombo = this.comboCount;
         }
-
-        // Save stats
-        SaveManager.addFruitsSliced(1);
-        SaveManager.updateHighestCombo(this.highestCombo);
     }
 
     _onGameOver() {
         this.state = GameState.GAME_OVER;
         AudioManager.play('gameOver');
 
+        // Save all stats at once (not per-slice)
         SaveManager.updateBestScore(this.mode, this.score);
+        SaveManager.addFruitsSliced(this.fruitsSliced);
+        SaveManager.updateHighestCombo(this.highestCombo);
 
         const accuracy = this.fruitsThrown > 0 ? Math.round((this.fruitsSliced / this.fruitsThrown) * 100) : 0;
         this._finalStats = {
