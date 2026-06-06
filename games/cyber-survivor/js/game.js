@@ -1086,6 +1086,9 @@ class CyberSurvivor {
     }
 
     _drawGrid(ctx) {
+        // Background
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(this.camX - 10, this.camY - 10, W + 20, H + 20);
         const gs = 80, sx = Math.floor(this.camX/gs)*gs, sy = Math.floor(this.camY/gs)*gs;
         const t = this.player?.time || 0;
         const pulse = 0.03 + Math.sin(t*0.5)*0.01;
