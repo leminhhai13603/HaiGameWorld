@@ -262,14 +262,13 @@ class CyberSurvivor {
         p.critChance = PLAYER_BASE.critChance + (p.passives.critChance||0)*0.05 + SaveManager.getMetaBonus('critChance')*0.03 + CHARACTERS[p.charKey].critAdd;
         p.pickupRange = 80 + (p.passives.magnet||0)*20 + SaveManager.getMetaBonus('pickup')*12;
         p.maxHp = (PLAYER_BASE.hp + (p.passives.maxHp||0)*20 + SaveManager.getMetaBonus('health')*10) * CHARACTERS[p.charKey].hpMul;
+        p.xpMul = 1 + (p.passives.xpGain||0)*0.15 + SaveManager.getMetaBonus('xpGain')*0.10;
+        p.projCount = PLAYER_BASE.projCount + (p.passives.projCount||0);
     }
 
     _trackDamage(weaponKey, damage) {
         this.damageStats[weaponKey] = (this.damageStats[weaponKey] || 0) + damage;
         this.totalDamage += damage;
-    }
-        p.xpMul = 1 + (p.passives.xpGain||0)*0.15 + SaveManager.getMetaBonus('xpGain')*0.10;
-        p.projCount = PLAYER_BASE.projCount + (p.passives.projCount||0);
     }
 
     _showLevelUp() {
