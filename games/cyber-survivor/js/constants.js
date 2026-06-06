@@ -1,6 +1,6 @@
 /**
- * Cyber Survivor Phase 3 - Complete Constants
- * Characters, Pets, Ultimates, Relics, Endgame, Advanced Enemies
+ * Cyber Survivor Phase 4 - Balanced Constants
+ * Weapon roles, tags, synergies, rarity
  */
 const W = 800, H = 600;
 const MAX_WEAPONS = 6, MAX_PASSIVES = 6, MAX_PETS = 3;
@@ -18,46 +18,68 @@ const CHARACTERS = {
 };
 const CHAR_ORDER = ['vanguard','assassin','engineer','heavy','monk','pilot','hacker'];
 
-// ─── WEAPONS ───
+// ─── WEAPONS (Rebalanced) ───
 const WEAPONS = {
-    blaster:   { name:'Energy Blaster',   icon:'🔫', dmg:10,  cd:0.5, maxLv:8, type:'proj',   projSpd:350, evolve:'atkSpeed',  evoTo:'hyperBlaster' },
-    laser:     { name:'Laser Beam',       icon:'🔴', dmg:8,   cd:0.1, maxLv:8, type:'beam',   range:200,   evolve:'critChance',evoTo:'quantumBeam' },
-    rocket:    { name:'Rocket Launcher',  icon:'🚀', dmg:35,  cd:1.2, maxLv:8, type:'rocket', projSpd:200, explodeR:80, evolve:'damage', evoTo:'nuke' },
-    lightning: { name:'Lightning Strike',  icon:'⚡', dmg:20,  cd:0.8, maxLv:8, type:'chain',  chainCount:3, chainR:120, evolve:'cooldown', evoTo:'stormCall' },
-    orbit:     { name:'Orbit Drones',     icon:'🛸', dmg:6,   cd:0.05,maxLv:8, type:'orbit',  orbitR:80,  orbitCount:2, evolve:'moveSpeed', evoTo:'vortex' },
-    saw:       { name:'Energy Saw',       icon:'⚙️', dmg:12,  cd:0.03,maxLv:8, type:'saw',    sawR:60, evolve:'projCount', evoTo:'sawStorm' },
-    plasma:    { name:'Plasma Cannon',    icon:'💜', dmg:80,  cd:2.0, maxLv:8, type:'proj',   projSpd:200, evolve:'damage', evoTo:'megaPlasma' },
-    ice:       { name:'Ice Launcher',     icon:'❄️', dmg:12,  cd:0.6, maxLv:8, type:'proj',   projSpd:300, slow:0.5, slowDur:2, evolve:'cooldown', evoTo:'absoluteZero' },
-    missiles:  { name:'Nano Missiles',    icon:'🎯', dmg:15,  cd:0.7, maxLv:8, type:'homing', projSpd:250, evolve:'atkSpeed', evoTo:'swarm' }
+    blaster:   { name:'Energy Blaster',   icon:'🔫', dmg:10,  cd:0.5, maxLv:8, type:'proj',   projSpd:350, evolve:'atkSpeed',  evoTo:'hyperBlaster',
+        tags:['Balanced','Reliable'], role:'Starter', strong:'Mọi tình huống', weak:'Không chuyên', bestVs:'Nhóm nhỏ', worstVs:'—' },
+    laser:     { name:'Laser Beam',       icon:'🔴', dmg:6,   cd:0.08,maxLv:8, type:'beam',   range:200,   evolve:'critChance',evoTo:'quantumBeam',
+        tags:['Piercing','Crowd Control'], role:'CC', strong:'Địch xếp hàng', weak:'Sát thương đơn thấp', bestVs:'Nhóm lớn', worstVs:'Boss' },
+    rocket:    { name:'Rocket Launcher',  icon:'🚀', dmg:30,  cd:1.0, maxLv:8, type:'rocket', projSpd:220, explodeR:80, evolve:'damage', evoTo:'nuke',
+        tags:['AOE','Explosion','Burst'], role:'AOE Burst', strong:'Diệt nhóm lớn', weak:'Chậm, có thể miss', bestVs:'Nhóm lớn', worstVs:'Địch nhanh' },
+    lightning: { name:'Lightning Strike',  icon:'⚡', dmg:18,  cd:0.7, maxLv:8, type:'chain',  chainCount:3, chainR:120, evolve:'cooldown', evoTo:'stormCall',
+        tags:['Chain','Multi-Target'], role:'Chain DPS', strong:'Phủ diện rộng', weak:'Kém vs boss', bestVs:'Địch phân tán', worstVs:'Boss đơn' },
+    orbit:     { name:'Orbit Drones',     icon:'🛸', dmg:5,   cd:0.04,maxLv:8, type:'orbit',  orbitR:80,  orbitCount:2, evolve:'moveSpeed', evoTo:'vortex',
+        tags:['Defensive','Zone','Passive'], role:'Phòng thủ', strong:'Bảo vệ liên tục', weak:'Tầm ngắn', bestVs:'Địch áp sát', worstVs:'Địch xa' },
+    saw:       { name:'Energy Saw',       icon:'⚙️', dmg:10,  cd:0.03,maxLv:8, type:'saw',    sawR:60, evolve:'projCount', evoTo:'sawStorm',
+        tags:['AOE','Zone','Melee'], role:'Vùng sát thương', strong:'Diệt địch áp sát', weak:'Phải đứng gần', bestVs:'Địch đông', worstVs:'Địch ranged' },
+    plasma:    { name:'Plasma Cannon',    icon:'💜', dmg:70,  cd:1.8, maxLv:8, type:'proj',   projSpd:200, evolve:'damage', evoTo:'megaPlasma',
+        tags:['Boss Killer','Single Target','Heavy'], role:'Diệt Boss', strong:'Sát thương cực mạnh', weak:'Rất chậm', bestVs:'Boss', worstVs:'Địch đông nhanh' },
+    ice:       { name:'Ice Launcher',     icon:'❄️', dmg:10,  cd:0.5, maxLv:8, type:'proj',   projSpd:300, slow:0.5, slowDur:2, evolve:'cooldown', evoTo:'absoluteZero',
+        tags:['Crowd Control','Slow','Utility'], role:'CC', strong:'Làm chậm diện rộng', weak:'DPS thấp', bestVs:'Địch nhanh', worstVs:'Boss' },
+    missiles:  { name:'Nano Missiles',    icon:'🎯', dmg:12,  cd:0.6, maxLv:8, type:'homing', projSpd:250, evolve:'atkSpeed', evoTo:'swarm',
+        tags:['Auto-Track','Reliable','Easy'], role:'Tự dẫn', strong:'Dễ dùng, không miss', weak:'DPS trung bình', bestVs:'Địch di chuyển', worstVs:'—' }
 };
 const WEAPON_ORDER = ['blaster','laser','rocket','lightning','orbit','saw','plasma','ice','missiles'];
 
 // ─── PASSIVES ───
 const PASSIVES = {
-    damage:     { name:'Damage Module',     icon:'⚔️', maxLv:5 },
-    atkSpeed:   { name:'Speed Chip',        icon:'⚡', maxLv:5 },
-    moveSpeed:  { name:'Move Booster',      icon:'🏃', maxLv:5 },
-    critChance: { name:'Critical Core',     icon:'💥', maxLv:5 },
-    shield:     { name:'Shield Generator',  icon:'🛡️', maxLv:5 },
-    magnet:     { name:'Magnet Core',       icon:'🧲', maxLv:5 },
-    cooldown:   { name:'Cooldown Reducer',  icon:'⏱️', maxLv:5 },
-    maxHp:      { name:'Health Booster',    icon:'❤️', maxLv:5 },
-    xpGain:     { name:'XP Amplifier',      icon:'📈', maxLv:5 },
-    projCount:  { name:'Proj Amplifier',    icon:'🔫', maxLv:3 }
+    damage:     { name:'Damage Module',     icon:'⚔️', maxLv:5, tags:['Damage'], desc:'+15% sát thương mỗi cấp' },
+    atkSpeed:   { name:'Speed Chip',        icon:'⚡', maxLv:5, tags:['Speed'], desc:'+12% tốc đánh mỗi cấp' },
+    moveSpeed:  { name:'Move Booster',      icon:'🏃', maxLv:5, tags:['Mobility'], desc:'+8% tốc chạy mỗi cấp' },
+    critChance: { name:'Critical Core',     icon:'💥', maxLv:5, tags:['Crit'], desc:'+5% chí mạng mỗi cấp' },
+    shield:     { name:'Shield Generator',  icon:'🛡️', maxLv:5, tags:['Defense'], desc:'+10% giảm sát thương mỗi cấp' },
+    magnet:     { name:'Magnet Core',       icon:'🧲', maxLv:5, tags:['Utility'], desc:'+25% phạm vi thu mỗi cấp' },
+    cooldown:   { name:'Cooldown Reducer',  icon:'⏱️', maxLv:5, tags:['Speed'], desc:'-8% hồi chiêu mỗi cấp' },
+    maxHp:      { name:'Health Booster',    icon:'❤️', maxLv:5, tags:['Defense'], desc:'+20 máu mỗi cấp' },
+    xpGain:     { name:'XP Amplifier',      icon:'📈', maxLv:5, tags:['Progression'], desc:'+15% XP mỗi cấp' },
+    projCount:  { name:'Proj Amplifier',    icon:'🔫', maxLv:3, tags:['Damage','Scale'], desc:'+1 đạn mỗi cấp' }
 };
 const PASSIVE_ORDER = ['damage','atkSpeed','moveSpeed','critChance','shield','magnet','cooldown','maxHp','xpGain','projCount'];
 
+// ─── SYNERGIES ───
+const SYNERGIES = {
+    blaster:  ['atkSpeed','damage','projCount'],
+    laser:    ['critChance','cooldown','damage'],
+    rocket:   ['damage','projCount','atkSpeed'],
+    lightning:['cooldown','damage','atkSpeed'],
+    orbit:    ['moveSpeed','damage','shield'],
+    saw:      ['moveSpeed','damage','shield'],
+    plasma:   ['damage','critChance','maxHp'],
+    ice:      ['cooldown','atkSpeed','magnet'],
+    missiles: ['atkSpeed','damage','projCount']
+};
+
 // ─── EVOLUTIONS ───
 const EVOLUTIONS = {
-    hyperBlaster:  { name:'Hyper Blaster',   icon:'⚡', dmg:18, cd:0.15 },
-    quantumBeam:   { name:'Quantum Beam',     icon:'🌟', dmg:15, cd:0.05, critMul:3 },
-    nuke:          { name:'Nuclear Launcher',  icon:'☢️', dmg:120, cd:1.5, explodeR:140 },
-    stormCall:     { name:'Storm Caller',      icon:'🌩️', dmg:35, cd:0.5, chainCount:6 },
-    vortex:        { name:'Vortex Drones',     icon:'🌀', dmg:12, orbitR:120, orbitCount:5 },
-    sawStorm:      { name:'Saw Storm',         icon:'💀', dmg:20, sawR:100 },
-    megaPlasma:    { name:'Mega Cannon',       icon:'💜', dmg:200, cd:2.5 },
-    absoluteZero:  { name:'Absolute Zero',     icon:'🧊', dmg:20, cd:0.4, slow:0.8, slowDur:4 },
-    swarm:         { name:'Nano Swarm',        icon:'🐝', dmg:20, cd:0.3, projCount:4 }
+    hyperBlaster:  { name:'Hyper Blaster',   icon:'⚡', dmg:16, cd:0.18, tags:['Rapid Fire','Speed'] },
+    quantumBeam:   { name:'Quantum Beam',     icon:'🌟', dmg:12, cd:0.05, critMul:3, tags:['Piercing','Crit','AOE'] },
+    nuke:          { name:'Nuclear Launcher',  icon:'☢️', dmg:100, cd:1.3, explodeR:130, tags:['AOE','Nuke','Burst'] },
+    stormCall:     { name:'Storm Caller',      icon:'🌩️', dmg:30, cd:0.4, chainCount:5, tags:['Chain','AOE','Crowd Control'] },
+    vortex:        { name:'Vortex Drones',     icon:'🌀', dmg:10, orbitR:110, orbitCount:4, tags:['Zone','Defensive','AOE'] },
+    sawStorm:      { name:'Saw Storm',         icon:'💀', dmg:16, sawR:90, tags:['Zone','AOE','Melee'] },
+    megaPlasma:    { name:'Mega Cannon',       icon:'💜', dmg:180, cd:2.2, tags:['Boss Killer','Heavy','Nuke'] },
+    absoluteZero:  { name:'Absolute Zero',     icon:'🧊', dmg:18, cd:0.35, slow:0.8, slowDur:3.5, tags:['CC','Slow','Freeze'] },
+    swarm:         { name:'Nano Swarm',        icon:'🐝', dmg:18, cd:0.25, projCount:4, tags:['Homing','Mass','Auto'] }
 };
 
 // ─── PETS ───
@@ -91,6 +113,24 @@ const RELICS = {
 };
 const RELIC_ORDER = ['ancientCore','quantumChip','dragonBattery','neuralMatrix','voidEngine'];
 
+// ─── RARITY ───
+const RARITY = {
+    common:    { name:'Common',    color:'#AAAAAA', glow:'none',      weight:50 },
+    rare:      { name:'Rare',      color:'#4488FF', glow:'#4488FF',   weight:25 },
+    epic:      { name:'Epic',      color:'#AA44FF', glow:'#AA44FF',   weight:15 },
+    legendary: { name:'Legendary', color:'#FF8800', glow:'#FF8800',   weight:8 },
+    mythic:    { name:'Mythic',    color:'#FF4444', glow:'#FF0000',   weight:2 }
+};
+
+function getRarity() {
+    const r = Math.random() * 100;
+    if (r < 2) return 'mythic';
+    if (r < 10) return 'legendary';
+    if (r < 25) return 'epic';
+    if (r < 50) return 'rare';
+    return 'common';
+}
+
 // ─── ENEMIES ───
 const ENEMY_TYPES = {
     drone:     { name:'Drone',          hp:30,   speed:60,  dmg:5,  xp:10,  size:12, color:'#FF4444' },
@@ -111,7 +151,6 @@ const ENEMY_TYPES = {
     voidWalk:  { name:'Void Walker',    hp:70,   speed:70,  dmg:10, xp:22,  size:14, color:'#440088', phase:true }
 };
 
-// ─── ELITES ───
 const ELITE_TYPES = {
     elite_drone:   { base:'drone',   hpMul:3, spdMul:1.3, xpMul:3, color:'#FF0000', glow:'#FF4444' },
     elite_heavy:   { base:'heavy',   hpMul:3, spdMul:1.0, xpMul:3, color:'#FF2200', glow:'#FF6644', shoots:true },
@@ -119,7 +158,6 @@ const ELITE_TYPES = {
     elite_warMech: { base:'warMech', hpMul:4, spdMul:1.0, xpMul:4, color:'#FF0044', glow:'#FF4488', shoots:true }
 };
 
-// ─── BOSSES ───
 const BOSS_TYPES = {
     mechCrusher:  { name:'Mecha Crusher',  hp:2500,  speed:45, dmg:25, xp:500,  size:45, color:'#FF6600', time:180 },
     plasmaTitan:  { name:'Plasma Titan',   hp:4000,  speed:30, dmg:20, xp:800,  size:55, color:'#8800FF', time:360, shoots:true },
@@ -129,7 +167,6 @@ const BOSS_TYPES = {
     voidEmperor:  { name:'Void Emperor',   hp:20000, speed:45, dmg:45, xp:5000, size:75, color:'#8800FF', time:1500, shoots:true, phases:4 }
 };
 
-// ─── EVENTS ───
 const EVENTS = [
     { id:'rush',       name:'Enemy Rush',      desc:'Địch tràn ngập!',  icon:'🏃', dur:15, effect:'rush' },
     { id:'doubleXp',   name:'Double XP',       desc:'XP x2!',           icon:'📈', dur:20, effect:'doubleXp' },
@@ -138,7 +175,6 @@ const EVENTS = [
     { id:'powerSurge', name:'Power Surge',      desc:'Sát thương x2!',  icon:'💪', dur:10, effect:'powerSurge' }
 ];
 
-// ─── ENDGAME MODES ───
 const ENDGAME_MODES = {
     normal:    { name:'Normal',    desc:'Chơi thường',       icon:'🎮' },
     bossRush:  { name:'Boss Rush', desc:'Đánh tất cả boss',  icon:'👑' },
@@ -148,7 +184,6 @@ const ENDGAME_MODES = {
 };
 const MODE_ORDER = ['normal','bossRush','endless','nightmare','chaos'];
 
-// ─── DAILY MODIFIERS ───
 const DAILY_MODIFIERS = [
     { name:'Double Enemies', desc:'Gấp đôi kẻ thù', icon:'👥', effect:'doubleEnemies' },
     { name:'Half HP',        desc:'Máu giảm một nửa',icon:'💔', effect:'halfHp' },
@@ -157,7 +192,6 @@ const DAILY_MODIFIERS = [
     { name:'Speed Run',      desc:'Mọi thứ nhanh x2',icon:'⚡', effect:'speedRun' }
 ];
 
-// ─── META PROGRESSION ───
 const META_UPGRADES = {
     damage:    { name:'Sát Thương',    icon:'⚔️', maxLv:5, cost:[10,25,50,100,200] },
     health:    { name:'Máu',           icon:'❤️', maxLv:5, cost:[10,25,50,100,200] },
@@ -167,7 +201,6 @@ const META_UPGRADES = {
 };
 const META_ORDER = ['damage','health','xpGain','pickup','critChance'];
 
-// ─── FUNCTIONS ───
 function xpForLevel(lv) { return Math.floor(80 * Math.pow(1.15, lv - 1)); }
 
 function getSpawnConfig(time, mode) {

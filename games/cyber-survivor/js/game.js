@@ -74,6 +74,9 @@ class CyberSurvivor {
         this.activeEvent = null; this.eventTimerLeft = 0;
         this.beamTargets = []; this.orbitAngle = 0; this.sawAngle = 0;
         this.nightmareMult = this.selectedMode === 'nightmare' ? 2 : 1;
+        // Damage tracking
+        this.damageStats = {};
+        this.totalDamage = 0;
         this.state = GS.PLAYING;
     }
 
@@ -244,6 +247,12 @@ class CyberSurvivor {
         p.critChance = PLAYER_BASE.critChance + (p.passives.critChance||0)*0.05 + SaveManager.getMetaBonus('critChance')*0.03 + CHARACTERS[p.charKey].critAdd;
         p.pickupRange = 80 + (p.passives.magnet||0)*20 + SaveManager.getMetaBonus('pickup')*12;
         p.maxHp = (PLAYER_BASE.hp + (p.passives.maxHp||0)*20 + SaveManager.getMetaBonus('health')*10) * CHARACTERS[p.charKey].hpMul;
+    }
+
+    _trackDamage(weaponKey, damage) {
+        this.damageStats[weaponKey] = (this.damageStats[weaponKey] || 0) + damage;
+        this.totalDamage += damage;
+    }
         p.xpMul = 1 + (p.passives.xpGain||0)*0.15 + SaveManager.getMetaBonus('xpGain')*0.10;
         p.projCount = PLAYER_BASE.projCount + (p.passives.projCount||0);
     }
@@ -252,22 +261,81 @@ class CyberSurvivor {
         this.state = GS.LEVELUP;
         const p = this.player;
         const choices = [];
+
+        // Existing weapon upgrades
         for (const [wk, wv] of Object.entries(p.weapons)) {
             const def = WEAPONS[wk] || EVOLUTIONS[wk];
-            if (def && wv.lv < (def.maxLv||8)) choices.push({ type:'weapon', id:wk, name:def.name+' Lv'+(wv.lv+1), icon:def.icon, desc:'Tăng sức mạnh' });
+            if (def && wv.lv < (def.maxLv||8)) {
+                const rarity = getRarity();
+                const syn = SYNERGIES[wk] || [];
+                choices.push({
+                    type:'weapon', id:wk, rarity,
+                    name:def.name, curLv:wv.lv, nextLv:wv.lv+1,
+                    icon:def.icon, role:def.role||'',
+                    tags:def.tags||[], strong:def.strong||'', weak:def.weak||'',
+                    synergies:syn.map(s => PASSIVES[s]?.icon||s).join(' '),
+                    desc:'+'+Math.floor((def.dmg||10)*0.15)+' DMG mỗi cấp'
+                });
+            }
         }
+
+        // New weapons
         for (const wk of WEAPON_ORDER) {
-            if (!p.weapons[wk] && Object.keys(p.weapons).length < MAX_WEAPONS) choices.push({ type:'weapon', id:wk, name:WEAPONS[wk].name, icon:WEAPONS[wk].icon, desc:'Vũ khí mới' });
+            if (!p.weapons[wk] && Object.keys(p.weapons).length < MAX_WEAPONS) {
+                const def = WEAPONS[wk];
+                const rarity = getRarity();
+                const syn = SYNERGIES[wk] || [];
+                choices.push({
+                    type:'weapon', id:wk, rarity,
+                    name:def.name, curLv:0, nextLv:1,
+                    icon:def.icon, role:def.role||'',
+                    tags:def.tags||[], strong:def.strong||'', weak:def.weak||'',
+                    synergies:syn.map(s => PASSIVES[s]?.icon||s).join(' '),
+                    desc:'Vũ khí mới'
+                });
+            }
         }
+
+        // Passive upgrades
         for (const [pk, pv] of Object.entries(p.passives)) {
-            if (pv < PASSIVES[pk].maxLv) choices.push({ type:'passive', id:pk, name:PASSIVES[pk].name+' Lv'+(pv+1), icon:PASSIVES[pk].icon, desc:'Nâng cấp bị động' });
+            if (pv < PASSIVES[pk].maxLv) {
+                choices.push({
+                    type:'passive', id:pk, rarity:'common',
+                    name:PASSIVES[pk].name, curLv:pv, nextLv:pv+1,
+                    icon:PASSIVES[pk].icon, role:'Passive',
+                    tags:PASSIVES[pk].tags||[], strong:'', weak:'',
+                    synergies:'', desc:PASSIVES[pk].desc
+                });
+            }
         }
+
+        // New passives
         for (const pk of PASSIVE_ORDER) {
-            if (!p.passives[pk] && Object.keys(p.passives).length < MAX_PASSIVES) choices.push({ type:'passive', id:pk, name:PASSIVES[pk].name, icon:PASSIVES[pk].icon, desc:'Bị động mới' });
+            if (!p.passives[pk] && Object.keys(p.passives).length < MAX_PASSIVES) {
+                choices.push({
+                    type:'passive', id:pk, rarity:'common',
+                    name:PASSIVES[pk].name, curLv:0, nextLv:1,
+                    icon:PASSIVES[pk].icon, role:'Passive',
+                    tags:PASSIVES[pk].tags||[], strong:'', weak:'',
+                    synergies:'', desc:PASSIVES[pk].desc
+                });
+            }
         }
+
+        // Pets
         for (const pk of PET_ORDER) {
-            if (!this.pets.find(pt => pt.type === pk) && this.pets.length < MAX_PETS) choices.push({ type:'pet', id:pk, name:PETS[pk].name, icon:PETS[pk].icon, desc:PETS[pk].desc });
+            if (!this.pets.find(pt => pt.type === pk) && this.pets.length < MAX_PETS) {
+                choices.push({
+                    type:'pet', id:pk, rarity:'rare',
+                    name:PETS[pk].name, curLv:0, nextLv:1,
+                    icon:PETS[pk].icon, role:'Pet',
+                    tags:['Companion'], strong:PETS[pk].desc, weak:'',
+                    synergies:'', desc:PETS[pk].desc
+                });
+            }
         }
+
+        // Shuffle
         for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [choices[i],choices[j]] = [choices[j],choices[i]]; }
         this.upgradeChoices = choices.slice(0, 3);
         if (!this.upgradeChoices.length) this.state = GS.PLAYING;
@@ -453,6 +521,7 @@ class CyberSurvivor {
                     if (e.reflect && Math.random() < 0.3) { proj.vx *= -1; proj.vy *= -1; proj.isEnemy = true; hit = true; break; }
                     const dmg = proj.crit ? proj.damage*2 : proj.damage;
                     e.hp -= dmg; e.hitFlash = 1;
+                    if (proj.weaponKey) this._trackDamage(proj.weaponKey, dmg);
                     if (proj.slow) e.slowTimer = proj.slowDur||2;
                     if (proj.crit) AudioManager.play('crit'); else AudioManager.play('hit');
                     const pn = this._getParticle();
@@ -570,7 +639,7 @@ class CyberSurvivor {
                         const dx = t.x-p.x, dy = t.y-p.y, d = Math.sqrt(dx*dx+dy*dy)||1;
                         const proj = this._getProj();
                         Object.assign(proj, { x:p.x, y:p.y, vx:(dx/d)*(def.projSpd||350), vy:(dy/d)*(def.projSpd||350),
-                            damage:dmg, crit, life:1.5, slow:def.slow, slowDur:def.slowDur, explodeR:def.explodeR, homing:false, trailColor:'#00E5FF' });
+                            damage:dmg, crit, life:1.5, slow:def.slow, slowDur:def.slowDur, explodeR:def.explodeR, homing:false, trailColor:'#00E5FF', weaponKey:wk });
                     }
                     AudioManager.play('shoot');
                     break;
@@ -580,7 +649,7 @@ class CyberSurvivor {
                         const angle = Math.random()*Math.PI*2;
                         const proj = this._getProj();
                         Object.assign(proj, { x:p.x, y:p.y, vx:Math.cos(angle)*50, vy:Math.sin(angle)*50,
-                            damage:dmg, crit, life:3, speed:def.projSpd||250, homing:true, trailColor:'#FF44FF' });
+                            damage:dmg, crit, life:3, speed:def.projSpd||250, homing:true, trailColor:'#FF44FF', weaponKey:wk });
                     }
                     AudioManager.play('missiles');
                     break;
@@ -591,7 +660,7 @@ class CyberSurvivor {
                         const dx = t.x-p.x, dy = t.y-p.y, d = Math.sqrt(dx*dx+dy*dy)||1;
                         const proj = this._getProj();
                         Object.assign(proj, { x:p.x, y:p.y, vx:(dx/d)*(def.projSpd||200), vy:(dy/d)*(def.projSpd||200),
-                            damage:dmg, crit, life:2, explodeR:def.explodeR||80, homing:false, trailColor:'#FF6600' });
+                            damage:dmg, crit, life:2, explodeR:def.explodeR||80, homing:false, trailColor:'#FF6600', weaponKey:wk });
                     }
                     AudioManager.play('rocket');
                     break;
@@ -602,7 +671,9 @@ class CyberSurvivor {
                     for (const e of sorted) {
                         if (Math.sqrt((e.x-p.x)**2+(e.y-p.y)**2) < (def.range||200)) {
                             this.beamTargets.push({ x:e.x, y:e.y });
-                            e.hp -= dmg * dt * 10; e.hitFlash = 1;
+                            const beamDmg = dmg * dt * 10;
+                            e.hp -= beamDmg; e.hitFlash = 1;
+                            this._trackDamage(wk, beamDmg);
                             if (e.hp <= 0) this._killEnemy(e);
                         }
                     }
@@ -615,6 +686,7 @@ class CyberSurvivor {
                         let current = targets[0];
                         const hit = new Set([current]);
                         current.hp -= dmg; current.hitFlash = 1; current.stunTimer = 0.3;
+                        this._trackDamage(wk, dmg);
                         if (current.hp <= 0) this._killEnemy(current);
                         for (let c = 0; c < (def.chainCount||3); c++) {
                             let closest = null, closestD = Infinity;
@@ -625,7 +697,9 @@ class CyberSurvivor {
                             }
                             if (!closest) break;
                             hit.add(closest);
-                            closest.hp -= dmg*0.7; closest.hitFlash = 1; closest.stunTimer = 0.3;
+                            const chainDmg = dmg*0.7;
+                            closest.hp -= chainDmg; closest.hitFlash = 1; closest.stunTimer = 0.3;
+                            this._trackDamage(wk, chainDmg);
                             if (closest.hp <= 0) this._killEnemy(closest);
                             current = closest;
                         }
@@ -941,6 +1015,12 @@ class CyberSurvivor {
             const def = WEAPONS[wk] || EVOLUTIONS[wk];
             if (def) { ctx.fillStyle = '#AAA'; ctx.fillText(def.icon, wx, H-30); wx += 18; }
         }
+        // DPS
+        if (p.time > 2 && this.totalDamage > 0) {
+            const dps = Math.floor(this.totalDamage / p.time);
+            ctx.fillStyle = '#FF8800'; ctx.font = '9px Rajdhani,sans-serif'; ctx.textAlign = 'left';
+            ctx.fillText('DPS: '+dps, 10, H-40);
+        }
         // Mode/Char
         ctx.fillStyle = '#555'; ctx.font = '9px Rajdhani,sans-serif'; ctx.textAlign = 'right';
         ctx.fillText(CHARACTERS[p.charKey].icon+' '+CHARACTERS[p.charKey].name+' | '+ENDGAME_MODES[p.mode].icon+' '+ENDGAME_MODES[p.mode].name, W-10, 48);
@@ -956,21 +1036,65 @@ class CyberSurvivor {
     }
 
     _drawLevelUp(ctx) {
-        ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, W, H);
-        ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700'; ctx.font = 'bold 24px Orbitron,monospace';
-        ctx.fillText('LEVEL UP!', W/2, 130);
+        ctx.fillStyle = 'rgba(0,0,0,0.88)'; ctx.fillRect(0, 0, W, H);
+        ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700'; ctx.font = 'bold 22px Orbitron,monospace';
+        ctx.fillText('LEVEL UP!', W/2, 110);
+        ctx.fillStyle = '#888'; ctx.font = '12px Rajdhani,sans-serif';
+        ctx.fillText('Chọn 1 nâng cấp (phím 1-3)', W/2, 132);
+
         for (let i = 0; i < this.upgradeChoices.length; i++) {
             const c = this.upgradeChoices[i];
-            const bx = W/2-130, by = 170+i*80;
-            ctx.fillStyle = c.type==='weapon' ? 'rgba(0,229,255,0.1)' : c.type==='pet' ? 'rgba(255,165,0,0.1)' : 'rgba(255,200,0,0.1)';
-            ctx.fillRect(bx, by, 260, 65);
-            ctx.strokeStyle = c.type==='weapon' ? '#00E5FF' : c.type==='pet' ? '#FFA500' : '#FFD700';
-            ctx.lineWidth = 1; ctx.strokeRect(bx, by, 260, 65);
-            ctx.font = '22px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#FFF';
-            ctx.fillText(c.icon, bx+12, by+30);
-            ctx.font = 'bold 13px Rajdhani,sans-serif'; ctx.fillText(c.name, bx+45, by+25);
-            ctx.fillStyle = '#AAA'; ctx.font = '11px Rajdhani,sans-serif'; ctx.fillText(c.desc, bx+45, by+45);
-            ctx.fillStyle = '#555'; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'right'; ctx.fillText('['+(i+1)+']', bx+250, by+58);
+            const bx = W/2-155, by = 150+i*125, bw = 310, bh = 115;
+            const rarityCol = RARITY[c.rarity]?.color || '#AAA';
+
+            // Card bg
+            ctx.fillStyle = c.type==='weapon' ? 'rgba(0,229,255,0.06)' : c.type==='pet' ? 'rgba(255,165,0,0.06)' : 'rgba(255,200,0,0.06)';
+            ctx.fillRect(bx, by, bw, bh);
+            ctx.strokeStyle = rarityCol; ctx.lineWidth = 2; ctx.strokeRect(bx, by, bw, bh);
+
+            // Rarity label
+            ctx.fillStyle = rarityCol; ctx.font = 'bold 9px Orbitron,monospace'; ctx.textAlign = 'right';
+            ctx.fillText((RARITY[c.rarity]?.name||'Common').toUpperCase(), bx+bw-8, by+12);
+
+            // Icon + Name + Level
+            ctx.font = '24px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#FFF';
+            ctx.fillText(c.icon, bx+10, by+32);
+            ctx.font = 'bold 14px Rajdhani,sans-serif';
+            ctx.fillText(c.name, bx+42, by+24);
+            ctx.fillStyle = '#FFD700'; ctx.font = '11px Rajdhani,sans-serif';
+            ctx.fillText(c.curLv > 0 ? 'Lv'+c.curLv+' → Lv'+c.nextLv : 'MỚI', bx+42, by+38);
+
+            // Role
+            if (c.role) {
+                ctx.fillStyle = '#00E5FF'; ctx.font = '10px Rajdhani,sans-serif';
+                ctx.fillText('Role: '+c.role, bx+42, by+52);
+            }
+
+            // Tags
+            if (c.tags && c.tags.length) {
+                ctx.fillStyle = '#888'; ctx.font = '9px Rajdhani,sans-serif';
+                ctx.fillText('['+c.tags.join('] [')+']', bx+42, by+65);
+            }
+
+            // Strong/Weak
+            if (c.strong) {
+                ctx.fillStyle = '#4CAF50'; ctx.font = '9px Rajdhani,sans-serif';
+                ctx.fillText('✓ '+c.strong, bx+42, by+80);
+            }
+            if (c.weak) {
+                ctx.fillStyle = '#F44336'; ctx.font = '9px Rajdhani,sans-serif';
+                ctx.fillText('✗ '+c.weak, bx+42, by+92);
+            }
+
+            // Synergies
+            if (c.synergies) {
+                ctx.fillStyle = '#FFA500'; ctx.font = '9px Rajdhani,sans-serif'; ctx.textAlign = 'right';
+                ctx.fillText('Synergy: '+c.synergies, bx+bw-8, by+80);
+            }
+
+            // Key hint
+            ctx.fillStyle = '#555'; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'right';
+            ctx.fillText('['+(i+1)+']', bx+bw-8, by+105);
         }
     }
 
@@ -989,9 +1113,26 @@ class CyberSurvivor {
         ctx.fillText('+'+Math.floor(p.time/30+p.kills/10+p.level)+' Tech Credits', W/2, 290);
         ctx.fillStyle = '#666'; ctx.font = '11px Rajdhani,sans-serif';
         ctx.fillText('Kỷ lục: '+Math.floor(best.bestTime/60)+':'+String(best.bestTime%60).padStart(2,'0')+' | '+best.bestKills+' kills | Lv.'+best.bestLevel, W/2, 330);
-        ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(W/2-80, 380, 160, 32);
-        ctx.strokeStyle = '#00E5FF'; ctx.strokeRect(W/2-80, 380, 160, 32);
-        ctx.fillStyle = '#FFF'; ctx.font = 'bold 14px Rajdhani,sans-serif'; ctx.fillText('🏠 MENU', W/2, 401);
+
+        // Damage breakdown
+        if (this.totalDamage > 0) {
+            ctx.fillStyle = '#888'; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'left';
+            const dx = W/2-120, dy = 345;
+            ctx.fillText('Sát thương:', dx, dy);
+            const entries = Object.entries(this.damageStats).sort((a,b) => b[1]-a[1]).slice(0, 4);
+            for (let i = 0; i < entries.length; i++) {
+                const [wk, dmg] = entries[i];
+                const def = WEAPONS[wk] || EVOLUTIONS[wk];
+                const pct = Math.floor(dmg / this.totalDamage * 100);
+                ctx.fillStyle = '#AAA';
+                ctx.fillText((def?.icon||'?')+' '+(def?.name||wk)+': '+Math.floor(dmg)+' ('+pct+'%)', dx, dy+14+i*13);
+            }
+        }
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(W/2-80, 440, 160, 32);
+        ctx.strokeStyle = '#00E5FF'; ctx.strokeRect(W/2-80, 440, 160, 32);
+        ctx.fillStyle = '#FFF'; ctx.font = 'bold 14px Rajdhani,sans-serif'; ctx.fillText('🏠 MENU', W/2, 461);
     }
 
     _renderMenu(ctx) {
