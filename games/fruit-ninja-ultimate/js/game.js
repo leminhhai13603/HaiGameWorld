@@ -237,10 +237,7 @@ class FruitNinjaGame {
         try {
             this._update(dt);
             this._render();
-        } catch (e) {
-            // Prevent freeze on error
-            console.error('Game error:', e);
-        }
+        } catch (e) {}
     }
 
     _update(dt) {
