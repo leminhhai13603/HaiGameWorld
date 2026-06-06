@@ -139,6 +139,7 @@ class FruitNinjaGame {
                 break;
             case GameState.MODE_START:
                 this.state = GameState.PLAYING;
+                SliceSystem.startSlice(x, y);
                 break;
             case GameState.PLAYING:
                 SliceSystem.startSlice(x, y);
@@ -219,7 +220,7 @@ class FruitNinjaGame {
         PowerupManager.clear();
         AchievementManager.clearTracking();
 
-        this.state = GameState.MODE_START;
+        this.state = GameState.PLAYING;
         SaveManager.addGamePlayed();
     }
 
