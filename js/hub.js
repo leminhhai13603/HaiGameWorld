@@ -112,6 +112,16 @@ const Hub = {
             thumbClass: 'fruit-thumb',
             path: 'games/fruit-ninja-ultimate/index.html',
             featured: false
+        },
+        {
+            id: 'sudoku-master',
+            name: 'Sudoku Master',
+            desc: 'Sudoku cổ điển — điền số 1-9 vào lưới, 5 độ khó, gợi ý, hoàn tác!',
+            tag: 'Puzzle',
+            thumb: '🔢',
+            thumbClass: 'sudoku-thumb',
+            path: 'games/sudoku-master/index.html',
+            featured: false
         }
     ],
 
@@ -298,6 +308,12 @@ const Hub = {
             const fnBest = Math.max(fn.bestScoreClassic || 0, fn.bestScoreArcade || 0, fn.bestScoreZen || 0);
             if (fnBest) highScores.push({ game: 'Fruit Ninja Ultimate', score: fnBest });
             if (fn.gamesPlayed) totalPlays += fn.gamesPlayed;
+        } catch(e) {}
+
+        // Sudoku Master stats
+        try {
+            const sudoku = JSON.parse(localStorage.getItem('sudokuMaster') || '{}');
+            if (sudoku.stats && sudoku.stats.gamesCompleted) totalPlays += sudoku.stats.gamesCompleted;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
