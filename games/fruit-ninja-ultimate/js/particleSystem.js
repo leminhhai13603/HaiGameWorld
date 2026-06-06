@@ -5,7 +5,10 @@
 const ParticleSystem = (() => {
     let particles = [];
 
+    const MAX_PARTICLES = 300;
+
     function emitJuice(x, y, color, count) {
+        if (particles.length > MAX_PARTICLES) return; // hard limit
         count = count || 12;
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
