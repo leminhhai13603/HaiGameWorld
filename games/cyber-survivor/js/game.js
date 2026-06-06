@@ -1112,7 +1112,7 @@ class CyberSurvivor {
             heavy:    { body:'#455A64', accent:'#78909C', visor:'#B0BEC5' },
             monk:     { body:'#6A1B9A', accent:'#AB47BC', visor:'#CE93D8' },
             pilot:    { body:'#1565C0', accent:'#42A5F5', visor:'#90CAF9' },
-            hacker:   { body:'#00897B', accent:'#26A69A', visor='#80CBC4' }
+            hacker:   { body:'#00897B', accent:'#26A69A', visor:'#80CBC4' }
         };
         const col = colors[p.charKey] || colors.vanguard;
 
