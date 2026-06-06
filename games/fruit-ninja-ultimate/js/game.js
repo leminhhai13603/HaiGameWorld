@@ -263,12 +263,13 @@ class FruitNinjaGame {
             }
         }
 
-        // Spawn fruits
+        // Spawn fruits (limit to 15 on screen)
         this._spawnTimer -= dt;
-        if (this._spawnTimer <= 0) {
+        if (this._spawnTimer <= 0 && FruitManager.fruits.length < 15) {
             this._spawnTimer = this._spawnInterval;
-            const count = 1 + Math.floor(Math.random() * 3);
+            const count = 1 + Math.floor(Math.random() * 2);
             for (let i = 0; i < count; i++) {
+                if (FruitManager.fruits.length >= 15) break;
                 if (this.mode !== 'zen' && Math.random() < this._bombChance) {
                     FruitManager.spawnBomb(this.W, this.H);
                 } else {

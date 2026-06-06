@@ -17,23 +17,8 @@ const Renderer = (() => {
     }
 
     function drawBackground(ctx, W, H, theme) {
-        const grad = ctx.createLinearGradient(0, 0, 0, H);
-        grad.addColorStop(0, theme.bg1);
-        grad.addColorStop(1, theme.bg2);
-        ctx.fillStyle = grad;
+        ctx.fillStyle = theme.bg1;
         ctx.fillRect(0, 0, W, H);
-
-        // Subtle pattern
-        ctx.globalAlpha = 0.04;
-        ctx.fillStyle = theme.accent;
-        for (let i = 0; i < 20; i++) {
-            const x = ((i * 137 + 50) % W);
-            const y = ((i * 211 + 30) % H);
-            ctx.beginPath();
-            ctx.arc(x, y, 1 + (i % 3), 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
     }
 
     function drawFruit(ctx, fruit) {
@@ -50,154 +35,54 @@ const Renderer = (() => {
         }
 
         const type = fruit.type;
+        if (!type || !type.colors) return;
         const col = type.colors;
         const r = type.radius;
 
-        ctx.save();
-        ctx.translate(fruit.x, fruit.y);
-        ctx.rotate(fruit.rotation);
-
-        // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        // Simple circle with solid color (fast, no gradient)
+        ctx.fillStyle = col.base;
         ctx.beginPath();
-        ctx.ellipse(2, 3, r, r * 0.8, 0, 0, Math.PI * 2);
+        ctx.arc(fruit.x, fruit.y, r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Main body
-        const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
-        grad.addColorStop(0, col.light);
-        grad.addColorStop(0.6, col.base);
-        grad.addColorStop(1, col.dark);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Highlight
+        // Highlight dot
         ctx.fillStyle = 'rgba(255,255,255,0.3)';
         ctx.beginPath();
-        ctx.arc(-r * 0.25, -r * 0.25, r * 0.35, 0, Math.PI * 2);
+        ctx.arc(fruit.x - r * 0.25, fruit.y - r * 0.25, r * 0.3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Fruit-specific features
-        if (type.name === 'apple') {
-            // Leaf
+        // Stem/leaf for apple
+        if (type.name === 'apple' && col.leaf) {
             ctx.fillStyle = col.leaf;
             ctx.beginPath();
-            ctx.ellipse(0, -r - 4, 6, 3, 0.3, 0, Math.PI * 2);
+            ctx.arc(fruit.x, fruit.y - r - 3, 5, 0, Math.PI * 2);
             ctx.fill();
-            // Stem
-            ctx.strokeStyle = '#664422';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, -r + 2);
-            ctx.lineTo(0, -r - 4);
-            ctx.stroke();
-        } else if (type.name === 'orange') {
-            // Texture dots
-            ctx.fillStyle = 'rgba(255,255,255,0.15)';
-            for (let i = 0; i < 6; i++) {
-                const a = (i / 6) * Math.PI * 2;
-                ctx.beginPath();
-                ctx.arc(Math.cos(a) * r * 0.5, Math.sin(a) * r * 0.5, 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        } else if (type.name === 'watermelon') {
-            // Stripes
-            ctx.strokeStyle = 'rgba(0,80,0,0.3)';
-            ctx.lineWidth = 3;
-            for (let i = -2; i <= 2; i++) {
-                ctx.beginPath();
-                ctx.arc(i * r * 0.3, 0, r * 0.9, -0.5, 0.5);
-                ctx.stroke();
-            }
-        } else if (type.name === 'strawberry') {
-            // Seeds
-            ctx.fillStyle = '#ffdd00';
-            for (let i = 0; i < 5; i++) {
-                const a = (i / 5) * Math.PI * 2;
-                ctx.beginPath();
-                ctx.arc(Math.cos(a) * r * 0.4, Math.sin(a) * r * 0.4, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        } else if (type.name === 'pineapple') {
-            // Crown
-            ctx.fillStyle = '#33aa33';
-            for (let i = -2; i <= 2; i++) {
-                ctx.beginPath();
-                ctx.moveTo(i * 4, -r + 2);
-                ctx.lineTo(i * 4 - 2, -r - 8);
-                ctx.lineTo(i * 4 + 2, -r - 8);
-                ctx.closePath();
-                ctx.fill();
-            }
-        } else if (type.name === 'dragonfruit') {
-            // Scales
-            ctx.fillStyle = 'rgba(0,180,80,0.4)';
-            for (let i = 0; i < 5; i++) {
-                const a = (i / 5) * Math.PI * 2 + fruit.rotation;
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(a) * r * 0.3, Math.sin(a) * r * 0.3);
-                ctx.lineTo(Math.cos(a) * r * 0.9, Math.sin(a) * r * 0.9);
-                ctx.lineTo(Math.cos(a + 0.3) * r * 0.7, Math.sin(a + 0.3) * r * 0.7);
-                ctx.closePath();
-                ctx.fill();
-            }
         }
-
-        ctx.restore();
     }
 
     function drawBomb(ctx, bomb) {
         const r = bomb.radius;
-        const pulse = 0.8 + Math.sin(bomb.pulse || 0) * 0.2;
 
-        ctx.save();
-        ctx.translate(bomb.x, bomb.y);
-
-        // Warning glow
-        ctx.fillStyle = `rgba(255,0,0,${0.1 + Math.sin(bomb.pulse || 0) * 0.05})`;
+        // Simple bomb - no gradient
+        ctx.fillStyle = '#444';
         ctx.beginPath();
-        ctx.arc(0, 0, r * 1.4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Body
-        const grad = ctx.createRadialGradient(-r * 0.2, -r * 0.2, r * 0.1, 0, 0, r);
-        grad.addColorStop(0, '#666');
-        grad.addColorStop(0.5, '#444');
-        grad.addColorStop(1, '#222');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.arc(bomb.x, bomb.y, r, 0, Math.PI * 2);
         ctx.fill();
 
         // Fuse
         ctx.strokeStyle = '#8B4513';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(0, -r);
-        ctx.quadraticCurveTo(r * 0.5, -r - 10, r * 0.3, -r - 16);
+        ctx.moveTo(bomb.x, bomb.y - r);
+        ctx.lineTo(bomb.x + 5, bomb.y - r - 12);
         ctx.stroke();
 
-        // Spark
-        const sparkAlpha = 0.5 + Math.sin((bomb.pulse || 0) * 3) * 0.5;
-        ctx.fillStyle = `rgba(255,255,0,${sparkAlpha})`;
-        ctx.beginPath();
-        ctx.arc(r * 0.3, -r - 16, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = `rgba(255,128,0,${sparkAlpha * 0.6})`;
-        ctx.beginPath();
-        ctx.arc(r * 0.3, -r - 16, 7, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Skull
+        // Icon
         ctx.fillStyle = '#fff';
         ctx.font = `${r * 0.8}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('💣', 0, 2);
-
-        ctx.restore();
+        ctx.fillText('💣', bomb.x, bomb.y + 2);
     }
 
     function drawPowerupItem(ctx, item) {
@@ -235,6 +120,42 @@ const Renderer = (() => {
     }
 
     function drawHalf(ctx, half) {
+        const type = half.type;
+        if (!type || !type.colors) return;
+        const col = type.colors;
+        const r = half.radius;
+        const alpha = Math.max(0, half.life);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        // Simple half circle - no clipping, no gradient (fast)
+        ctx.fillStyle = col.base;
+        ctx.beginPath();
+        if (half.side === 'left') {
+            ctx.arc(half.x, half.y, r, Math.PI * 0.5, Math.PI * 1.5);
+        } else {
+            ctx.arc(half.x, half.y, r, -Math.PI * 0.5, Math.PI * 0.5);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // Inner face
+        ctx.fillStyle = col.inner || col.light;
+        ctx.beginPath();
+        if (half.side === 'left') {
+            ctx.arc(half.x, half.y, r * 0.7, Math.PI * 0.5, Math.PI * 1.5);
+        } else {
+            ctx.arc(half.x, half.y, r * 0.7, -Math.PI * 0.5, Math.PI * 0.5);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Old drawHalf with clipping (kept as reference)
+    function drawHalfOld(ctx, half) {
         const type = half.type;
         const col = type.colors;
         const r = half.radius;
