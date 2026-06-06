@@ -777,6 +777,7 @@ class CyberSurvivor {
     // ─── Rendering ───
     _render() {
         const ctx = this.ctx;
+        ctx.clearRect(0, 0, W, H);
         if (this.state === GS.MENU) { this._renderMenu(ctx); return; }
         if (this.state === GS.CHARSELECT) { this._renderCharSelect(ctx); return; }
         if (this.state === GS.META) { this._renderMeta(ctx); return; }
