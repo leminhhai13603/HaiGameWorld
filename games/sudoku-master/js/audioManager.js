@@ -51,5 +51,6 @@ const AudioManager = (() => {
         if (sounds[type]) sounds[type]();
     }
 
-    return { init, resume, play, toggle, setVolume, get enabled() { return enabled; } };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { init, resume, play, toggle, setVolume, close, get enabled() { return enabled; } };
 })();

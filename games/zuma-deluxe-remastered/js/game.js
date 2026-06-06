@@ -47,6 +47,7 @@ class ZumaGame {
 
         this._loadSettings();
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -310,8 +311,13 @@ class ZumaGame {
     }
 
     // ─── Game Loop ───
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);

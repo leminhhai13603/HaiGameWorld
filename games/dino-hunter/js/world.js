@@ -488,7 +488,7 @@ class WorldManager {
     }
 
     addExplosion(x, y, color, count) {
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < count && this.particles.length < 100; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = 1 + Math.random() * 3;
             this.particles.push(new Particle(x, y,

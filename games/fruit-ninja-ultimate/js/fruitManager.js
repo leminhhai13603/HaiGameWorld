@@ -124,14 +124,11 @@ const FruitManager = (() => {
     function update(dt, H, freezeFactor) {
         const ff = freezeFactor || 1;
         let missed = null;
+        let fWrite = 0;
 
-        for (let i = fruits.length - 1; i >= 0; i--) {
+        for (let i = 0; i < fruits.length; i++) {
             const f = fruits[i];
-            if (!f.active) {
-                // Clean up inactive fruits immediately
-                fruits.splice(i, 1);
-                continue;
-            }
+            if (!f.active) continue;
 
             f.x += f.vx * dt * ff;
             f.vy += 480 * dt * ff; // gravity (reduced for higher arcs)
@@ -148,23 +145,27 @@ const FruitManager = (() => {
             // Check if fell off screen
             if (f.y > H + 60 && f.vy > 0) {
                 f.active = false;
-                fruits.splice(i, 1);
                 if (!f.sliced && !f.isBomb && !f.isPowerup) {
                     missed = 'miss';
                 }
+            } else {
+                fruits[fWrite++] = f;
             }
         }
+        fruits.length = fWrite;
 
         // Update halves
-        for (let i = halves.length - 1; i >= 0; i--) {
+        let hWrite = 0;
+        for (let i = 0; i < halves.length; i++) {
             const h = halves[i];
             h.x += h.vx * dt;
             h.vy += 500 * dt;
             h.y += h.vy * dt;
             h.rotation += h.rotSpeed * dt;
             h.life -= dt;
-            if (h.life <= 0) halves.splice(i, 1);
+            if (h.life > 0) halves[hWrite++] = h;
         }
+        halves.length = hWrite;
 
         return missed;
     }

@@ -93,10 +93,12 @@ const SliceSystem = (() => {
     }
 
     function update(dt) {
-        for (let i = trail.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < trail.length; i++) {
             trail[i].time -= dt;
-            if (trail[i].time <= 0) trail.splice(i, 1);
+            if (trail[i].time > 0) trail[write++] = trail[i];
         }
+        trail.length = write;
     }
 
     function draw(ctx) {

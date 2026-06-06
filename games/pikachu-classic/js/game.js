@@ -59,6 +59,7 @@ class PikachuGame {
 
         this._loadSave();
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -447,8 +448,13 @@ class PikachuGame {
         AudioManager.play('shuffle');
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);

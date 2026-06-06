@@ -75,6 +75,7 @@ class FlappyGame {
         this.deadBounced = false;
 
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -168,8 +169,13 @@ class FlappyGame {
         });
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
@@ -190,11 +196,13 @@ class FlappyGame {
         }
 
         // Score popups
-        for (let i = this.scorePopups.length - 1; i >= 0; i--) {
+        let spWrite = 0;
+        for (let i = 0; i < this.scorePopups.length; i++) {
             this.scorePopups[i].y -= 1;
             this.scorePopups[i].timer--;
-            if (this.scorePopups[i].timer <= 0) this.scorePopups.splice(i, 1);
+            if (this.scorePopups[i].timer > 0) this.scorePopups[spWrite++] = this.scorePopups[i];
         }
+        this.scorePopups.length = spWrite;
 
         if (this.state === GameState.READY) {
             // Bob bird
@@ -233,7 +241,8 @@ class FlappyGame {
         }
 
         // Update pipes
-        for (let i = this.pipes.length - 1; i >= 0; i--) {
+        let pipeWrite = 0;
+        for (let i = 0; i < this.pipes.length; i++) {
             const p = this.pipes[i];
             p.x -= this.pipeSpeed;
 
@@ -250,11 +259,12 @@ class FlappyGame {
                 });
             }
 
-            // Remove offscreen
-            if (p.x + this.pipeWidth < -10) {
-                this.pipes.splice(i, 1);
+            // Keep if still on screen
+            if (p.x + this.pipeWidth >= -10) {
+                this.pipes[pipeWrite++] = p;
             }
         }
+        this.pipes.length = pipeWrite;
 
         // Collision detection
         if (this._checkCollision()) {

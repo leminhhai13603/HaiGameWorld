@@ -2,6 +2,7 @@
  * Plants vs Zombies Lite - Main Game Controller
  */
 const GS = { MENU:'menu', PLAYING:'playing', PAUSED:'paused', GAME_OVER:'gameOver', VICTORY:'victory' };
+const MAX_PARTICLES = 100;
 
 class PvZGame {
     constructor() {
@@ -11,6 +12,7 @@ class PvZGame {
         this.state = GS.MENU;
         this.lastTime = 0;
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -77,7 +79,8 @@ class PvZGame {
             const s = this.suns[i];
             if (Math.abs(x - s.x) < 18 && Math.abs(y - s.y) < 18) {
                 this.sun += SUN_VALUE;
-                this.suns.splice(i, 1);
+                this.suns[i] = this.suns[this.suns.length - 1];
+                this.suns.length--;
                 AudioManager.play('sunCollect');
                 return;
             }
@@ -164,18 +167,24 @@ class PvZGame {
             const j = Math.floor(Math.random() * (i + 1));
             [this.zombiesToSpawn[i], this.zombiesToSpawn[j]] = [this.zombiesToSpawn[j], this.zombiesToSpawn[i]];
         }
-        this.spawnTimer = 1;
+        // Early waves: longer delay before first spawn
+        this.spawnTimer = num <= 3 ? 5 : 1;
         AudioManager.play('waveStart');
     }
 
     // ─── Game Loop ───
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < 16) return;
         this.lastTime = now - (elapsed % 16);
         const dt = Math.min(elapsed / 1000, 0.05);
-        try { this._update(dt); this._render(); } catch(e) {}
+        try { this._update(dt); this._render(); } catch(e) { console.error('Animal Kingdom error:', e); }
     }
 
     _update(dt) {
@@ -187,10 +196,11 @@ class PvZGame {
             if (this.plantCooldowns[key] > 0) this.plantCooldowns[key] -= dt;
         }
 
-        // Falling sun
+        // Falling sun (faster in early waves)
         this.fallingSunTimer -= dt;
         if (this.fallingSunTimer <= 0) {
-            this.fallingSunTimer = FALLING_SUN_INTERVAL;
+            const sunInterval = this.wave <= 3 ? FALLING_SUN_INTERVAL * 0.7 : FALLING_SUN_INTERVAL;
+            this.fallingSunTimer = sunInterval;
             this.suns.push({
                 x: GRID_X + Math.random() * COLS * CELL_W,
                 y: -20, vy: FALLING_SUN_SPEED, targetY: GRID_Y + Math.random() * ROWS * CELL_H,
@@ -199,13 +209,15 @@ class PvZGame {
         }
 
         // Update suns
-        for (let i = this.suns.length - 1; i >= 0; i--) {
+        let sunWrite = 0;
+        for (let i = 0; i < this.suns.length; i++) {
             const s = this.suns[i];
             if (s.y < s.targetY) s.y += s.vy * dt;
             s.life -= dt;
             if (s.life < 2) s.alpha = s.life / 2;
-            if (s.life <= 0) this.suns.splice(i, 1);
+            if (s.life > 0) this.suns[sunWrite++] = s;
         }
+        this.suns.length = sunWrite;
 
         // Sunflower sun generation
         for (const p of this.plants) {
@@ -224,7 +236,9 @@ class PvZGame {
         if (this.zombiesToSpawn.length > 0) {
             this.spawnTimer -= dt;
             if (this.spawnTimer <= 0) {
-                this.spawnTimer = 2 + Math.random() * 3;
+                // Early waves spawn slower to give player time to build
+                const baseInterval = this.wave <= 3 ? 4 + Math.random() * 3 : 2 + Math.random() * 3;
+                this.spawnTimer = baseInterval;
                 const type = this.zombiesToSpawn.pop();
                 const row = Math.floor(Math.random() * ROWS);
                 const def = ZOMBIE_DEFS[type];
@@ -282,7 +296,8 @@ class PvZGame {
         }
 
         // Update projectiles
-        for (let i = this.projectiles.length - 1; i >= 0; i--) {
+        let projWrite = 0;
+        for (let i = 0; i < this.projectiles.length; i++) {
             const p = this.projectiles[i];
             p.x += p.speed * dt;
             // Check collision with zombies
@@ -290,21 +305,34 @@ class PvZGame {
             for (const z of this.zombies) {
                 if (z.row === p.row && Math.abs(z.x - p.x) < 15) {
                     z.hp -= p.damage;
-                    if (p.slow) z.speed = ZOMBIE_DEFS[z.type].speed * (1 - p.slow);
+                    if (p.slow) {
+                        z.speed = ZOMBIE_DEFS[z.type].speed * (1 - p.slow);
+                        z.slowTimer = 3;
+                    }
                     if (z.hp <= 0) this._killZombie(z);
                     hit = true;
                     AudioManager.play('hit');
                     break;
                 }
             }
-            if (hit || p.x > W + 20) {
-                this.projectiles.splice(i, 1);
+            if (!hit && p.x <= W + 20) {
+                this.projectiles[projWrite++] = p;
             }
         }
+        this.projectiles.length = projWrite;
 
         // Update zombies
         for (let i = this.zombies.length - 1; i >= 0; i--) {
             const z = this.zombies[i];
+
+            // Slow debuff recovery
+            if (z.slowTimer > 0) {
+                z.slowTimer -= dt;
+                if (z.slowTimer <= 0) {
+                    z.speed = ZOMBIE_DEFS[z.type].speed;
+                    z.slowTimer = 0;
+                }
+            }
 
             if (z.eating) {
                 // Eating a plant
@@ -378,7 +406,7 @@ class PvZGame {
                     }
                 }
                 // Explosion particles
-                for (let j = 0; j < 20; j++) {
+                for (let j = 0; j < 20 && this.particles.length < MAX_PARTICLES; j++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = 50 + Math.random() * 150;
                     this.particles.push({
@@ -395,13 +423,15 @@ class PvZGame {
         }
 
         // Update particles
-        for (let i = this.particles.length - 1; i >= 0; i--) {
+        let partWrite = 0;
+        for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
             p.x += p.vx * dt; p.y += p.vy * dt;
             p.vy += 200 * dt;
             p.life -= dt;
-            if (p.life <= 0) this.particles.splice(i, 1);
+            if (p.life > 0) this.particles[partWrite++] = p;
         }
+        this.particles.length = partWrite;
 
         // Check wave completion
         if (this.waveActive && this.zombiesToSpawn.length === 0 && this.zombies.length === 0) {
@@ -430,7 +460,7 @@ class PvZGame {
             this.zombies.splice(idx, 1);
             SaveManager.addZombiesKilled(1);
             // Death particles
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 8 && this.particles.length < MAX_PARTICLES; i++) {
                 this.particles.push({
                     x: z.x, y: z.y,
                     vx: (Math.random()-0.5)*100, vy: -50-Math.random()*80,

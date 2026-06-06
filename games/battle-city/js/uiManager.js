@@ -37,15 +37,20 @@ class UIManager {
         }
         if (this.flashTimer > 0) this.flashTimer--;
 
-        for (let i = this.explosions.length - 1; i >= 0; i--) {
+        let exWrite = 0;
+        for (let i = 0; i < this.explosions.length; i++) {
             this.explosions[i].timer--;
-            if (this.explosions[i].timer <= 0) this.explosions.splice(i, 1);
+            if (this.explosions[i].timer > 0) this.explosions[exWrite++] = this.explosions[i];
         }
-        for (let i = this.scorePopups.length - 1; i >= 0; i--) {
+        this.explosions.length = exWrite;
+
+        let spWrite = 0;
+        for (let i = 0; i < this.scorePopups.length; i++) {
             this.scorePopups[i].timer--;
             this.scorePopups[i].y -= 0.8;
-            if (this.scorePopups[i].timer <= 0) this.scorePopups.splice(i, 1);
+            if (this.scorePopups[i].timer > 0) this.scorePopups[spWrite++] = this.scorePopups[i];
         }
+        this.scorePopups.length = spWrite;
     }
 
     drawHUD(ctx, lives, score, level, enemiesLeft, isCoop, p2Lives) {

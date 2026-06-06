@@ -1,6 +1,7 @@
 /**
  * DX-Ball Remastered - Main Game Controller
  */
+const MAX_PARTICLES = 150;
 // roundRect polyfill
 if (!CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
@@ -116,6 +117,7 @@ class DXBallGame {
 
         this._setupInput();
         this._loadLevel(this.level);
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -254,8 +256,13 @@ class DXBallGame {
         Storage.setHighestLevel(this.level);
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
@@ -267,7 +274,7 @@ class DXBallGame {
         if (this.state !== GameState.PLAYING) return;
 
         // Paddle movement
-        if (this.touchActive || !this.keys['ArrowLeft'] && !this.keys['a']) {
+        if (this.touchActive || (!this.keys['ArrowLeft'] && !this.keys['a'] && !this.keys['ArrowRight'] && !this.keys['d'])) {
             // Mouse/touch follow
             const target = this.mouseX - this.paddle.w / 2;
             this.paddle.x += (target - this.paddle.x) * 0.3;
@@ -403,18 +410,30 @@ class DXBallGame {
                 AudioManager.play('powerup');
             }
         }
-        this.powerups = this.powerups.filter(p => p.active);
-
-        // Update particles
-        for (const p of this.particles) {
-            p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--;
-            if (p.life <= 0) p.active = false;
+        // Powerups - write-index filter
+        let pwWrite = 0;
+        for (let i = 0; i < this.powerups.length; i++) {
+            if (this.powerups[i].active) this.powerups[pwWrite++] = this.powerups[i];
         }
-        this.particles = this.particles.filter(p => p.active);
+        this.powerups.length = pwWrite;
 
-        // Score popups
-        for (const s of this.scorePopups) { s.y -= 1; s.timer--; if (s.timer <= 0) s.active = false; }
-        this.scorePopups = this.scorePopups.filter(s => s.active);
+        // Update particles - write-index filter
+        let partWrite = 0;
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
+            p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--;
+            if (p.life > 0) this.particles[partWrite++] = p;
+        }
+        this.particles.length = partWrite;
+
+        // Score popups - write-index filter
+        let popWrite = 0;
+        for (let i = 0; i < this.scorePopups.length; i++) {
+            const s = this.scorePopups[i];
+            s.y -= 1; s.timer--;
+            if (s.timer > 0) this.scorePopups[popWrite++] = s;
+        }
+        this.scorePopups.length = popWrite;
 
         // Shake
         if (this.shakeTimer > 0) {
@@ -436,8 +455,11 @@ class DXBallGame {
         }
 
         // Check level complete
-        const destructible = this.bricks.filter(b => b.active && b.type !== 3);
-        if (destructible.length === 0) {
+        let destructibleCount = 0;
+        for (let i = 0; i < this.bricks.length; i++) {
+            if (this.bricks[i].active && this.bricks[i].type !== 3) destructibleCount++;
+        }
+        if (destructibleCount === 0) {
             this.state = GameState.LEVEL_COMPLETE;
             Storage.setHighestLevel(this.level);
             AudioManager.play('levelComplete');
@@ -483,7 +505,7 @@ class DXBallGame {
 
             // Particles
             const color = BRICK_COLORS[brick.type]?.fill || '#fff';
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 8 && this.particles.length < MAX_PARTICLES; i++) {
                 this.particles.push({
                     x: brick.x + brick.w / 2, y: brick.y + brick.h / 2,
                     vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4 - 2,

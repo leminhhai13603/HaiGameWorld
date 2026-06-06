@@ -20,6 +20,7 @@ class CyberSurvivor {
         this.selectedMode = 'normal';
         this.dailyMods = getDailyModifiers();
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -388,13 +389,18 @@ class CyberSurvivor {
     _getParticle() { const p = this.particlePool.pop() || {}; this.activeParticles.push(p); return p; }
     _releaseParticle(p) { const i = this.activeParticles.indexOf(p); if (i>=0) { this.activeParticles.splice(i,1); this.particlePool.push(p); } }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame(t => this._gameLoop(t));
+        this._rafId = requestAnimationFrame(t => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < 16) return;
         this.lastTime = now - (elapsed % 16);
         const dt = Math.min(elapsed / 1000, 0.05);
-        try { this._update(dt); this._render(); } catch(e) {}
+        try { this._update(dt); this._render(); } catch(e) { console.error('Cyber Survivor error:', e); }
     }
 
     _update(dt) {
@@ -402,6 +408,14 @@ class CyberSurvivor {
         const p = this.player;
         p.time += dt;
         if (p.invTimer > 0) p.invTimer -= dt;
+        // EMP recovery timer
+        if (p.empRecoveryTimer > 0) {
+            p.empRecoveryTimer -= dt;
+            if (p.empRecoveryTimer <= 0) {
+                p.atkSpeedMul = Math.max(1, p.atkSpeedMul * 2);
+                p.empRecoveryTimer = 0;
+            }
+        }
 
         // Screen shake decay
         if (this.shakeIntensity > 0) {
@@ -738,8 +752,14 @@ class CyberSurvivor {
 
     _getNearestEnemies(count) {
         const p = this.player;
-        return [...this.activeEnemies].filter(e => !e.phase || Math.random() > 0.3)
-            .sort((a,b) => ((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2)).slice(0, count);
+        const filtered = [];
+        for (let i = 0; i < this.activeEnemies.length; i++) {
+            const e = this.activeEnemies[i];
+            if (!e.phase || Math.random() > 0.3) filtered.push(e);
+        }
+        filtered.sort((a,b) => ((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2));
+        filtered.length = Math.min(filtered.length, count);
+        return filtered;
     }
 
     _spawnEnemy(type) {
@@ -860,7 +880,7 @@ class CyberSurvivor {
         // EMP effect
         if (e.emp) {
             this.player.atkSpeedMul *= 0.5;
-            setTimeout(() => { if (this.player) this.player.atkSpeedMul = Math.max(1, this.player.atkSpeedMul * 2); }, 3000);
+            this.player.empRecoveryTimer = (this.player.empRecoveryTimer || 0) + 3;
         }
         this.player.kills++;
         this.player.ultimateCharge = Math.min(100, this.player.ultimateCharge + 2);

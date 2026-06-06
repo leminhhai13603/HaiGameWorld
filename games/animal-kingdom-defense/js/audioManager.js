@@ -22,5 +22,6 @@ const AudioManager = (() => {
         gameOver() { _osc(300,'sawtooth',0.3,0.1); setTimeout(() => _osc(200,'sawtooth',0.4,0.12), 200); }
     };
     function play(type) { if (!enabled||!ctx) return; resume(); if (sounds[type]) sounds[type](); }
-    return { init, resume, play, toggle, setVolume, get enabled(){return enabled;} };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { init, resume, play, toggle, setVolume, close, get enabled(){return enabled;} };
 })();

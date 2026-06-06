@@ -65,6 +65,8 @@ class Game2048 {
         // Frame rate
         this.lastTime = 0;
         this.frameInterval = 1000 / 60;
+        this._rafId = null;
+        this._handlers = {};
 
         this._setupInput();
         this._initGrid();
@@ -73,6 +75,7 @@ class Game2048 {
         this.state = 'playing';
         Storage.addGamePlayed();
 
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -116,7 +119,7 @@ class Game2048 {
     }
 
     _setupInput() {
-        document.addEventListener('keydown', (e) => {
+        this._handlers.keydown = (e) => {
             AudioManager.resume();
             switch (e.key) {
                 case 'ArrowUp': case 'w': case 'W':
@@ -130,22 +133,25 @@ class Game2048 {
                 case 'r': case 'R':
                     this._restart(); break;
             }
-        });
+        };
+        document.addEventListener('keydown', this._handlers.keydown);
 
         // Touch / Swipe
-        this.canvas.addEventListener('touchstart', (e) => {
+        this._handlers.touchstart = (e) => {
             e.preventDefault();
             AudioManager.resume();
             const t = e.touches[0];
             this.touchStartX = t.clientX;
             this.touchStartY = t.clientY;
-        }, { passive: false });
+        };
+        this.canvas.addEventListener('touchstart', this._handlers.touchstart, { passive: false });
 
-        this.canvas.addEventListener('touchmove', (e) => {
+        this._handlers.touchmove = (e) => {
             e.preventDefault(); // Prevent page scroll while swiping
-        }, { passive: false });
+        };
+        this.canvas.addEventListener('touchmove', this._handlers.touchmove, { passive: false });
 
-        this.canvas.addEventListener('touchend', (e) => {
+        this._handlers.touchend = (e) => {
             e.preventDefault();
             if (e.changedTouches.length === 0) return;
             const t = e.changedTouches[0];
@@ -408,8 +414,13 @@ class Game2048 {
         return this.TILE_SIZE * 0.25;
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
@@ -419,12 +430,12 @@ class Game2048 {
 
     _update() {
         // Update animations
-        for (let i = this.animations.length - 1; i >= 0; i--) {
+        let animWrite = 0;
+        for (let i = 0; i < this.animations.length; i++) {
             this.animations[i].progress += 0.12;
-            if (this.animations[i].progress >= 1) {
-                this.animations.splice(i, 1);
-            }
+            if (this.animations[i].progress < 1) this.animations[animWrite++] = this.animations[i];
         }
+        this.animations.length = animWrite;
 
         // Update score popup
         if (this.scorePopup) {
@@ -434,13 +445,15 @@ class Game2048 {
         }
 
         // Update particles
-        for (let i = this.mergeParticles.length - 1; i >= 0; i--) {
+        let partWrite = 0;
+        for (let i = 0; i < this.mergeParticles.length; i++) {
             const p = this.mergeParticles[i];
             p.x += p.vx;
             p.y += p.vy;
             p.life--;
-            if (p.life <= 0) this.mergeParticles.splice(i, 1);
+            if (p.life > 0) this.mergeParticles[partWrite++] = p;
         }
+        this.mergeParticles.length = partWrite;
 
         // Achievement popup
         if (this.currentAchievement) {

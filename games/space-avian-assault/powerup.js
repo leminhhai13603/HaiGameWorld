@@ -200,12 +200,12 @@ class PowerUpManager {
 
     // Update all power-ups
     update(canvasHeight, dt = 1) {
-        for (let i = this.powerups.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < this.powerups.length; i++) {
             this.powerups[i].update(canvasHeight, dt);
-            if (!this.powerups[i].active) {
-                this.powerups.splice(i, 1);
-            }
+            if (this.powerups[i].active) this.powerups[write++] = this.powerups[i];
         }
+        this.powerups.length = write;
     }
 
     // Draw all power-ups
@@ -218,8 +218,9 @@ class PowerUpManager {
     // Check collection by player
     checkCollection(playerBounds, player) {
         const collected = [];
+        let write = 0;
 
-        for (let i = this.powerups.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.powerups.length; i++) {
             const pu = this.powerups[i];
             const puBounds = pu.getBounds();
 
@@ -227,9 +228,11 @@ class PowerUpManager {
                 pu.apply(player);
                 collected.push(pu.type);
                 pu.active = false;
-                this.powerups.splice(i, 1);
+            } else {
+                this.powerups[write++] = pu;
             }
         }
+        this.powerups.length = write;
 
         return collected;
     }

@@ -45,6 +45,7 @@ class FruitNinjaGame {
 
         this._loadSettings();
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -228,8 +229,13 @@ class FruitNinjaGame {
         SaveManager.addGamePlayed();
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
@@ -237,7 +243,7 @@ class FruitNinjaGame {
         try {
             this._update(dt);
             this._render();
-        } catch (e) {}
+        } catch (e) { console.error('Fruit Ninja error:', e); }
     }
 
     _update(dt) {

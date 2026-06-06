@@ -111,5 +111,6 @@ const AudioManager = (() => {
     function setSfx(v) { sfxVol = Math.max(0, Math.min(1, v)); }
     function setMusic(v) { musicVol = Math.max(0, Math.min(1, v)); }
 
-    return { play, toggle, setSfx, setMusic, resume, get enabled() { return enabled; }, get sfxVol() { return sfxVol; }, get musicVol() { return musicVol; } };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { play, toggle, setSfx, setMusic, resume, close, get enabled() { return enabled; }, get sfxVol() { return sfxVol; }, get musicVol() { return musicVol; } };
 })();

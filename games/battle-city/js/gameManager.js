@@ -41,6 +41,7 @@ class BattleCityGame {
 
         this._loadSave();
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -190,8 +191,13 @@ class BattleCityGame {
         this.enemies.push(new EnemyTank(def.type, sp.x, sp.y, ai, def.hasPowerup));
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
@@ -214,6 +220,13 @@ class BattleCityGame {
             if (this.boss && this.boss.active) this.boss.update(this.map, this.bullets, this.players);
         }
         this._spawnEnemy();
+
+        // Cleanup dead enemies to prevent array bloat
+        let enWrite = 0;
+        for (let i = 0; i < this.enemies.length; i++) {
+            if (this.enemies[i].active) this.enemies[enWrite++] = this.enemies[i];
+        }
+        this.enemies.length = enWrite;
 
         // Update bullets (handles tile collision internally)
         this.bullets.update(this.map);

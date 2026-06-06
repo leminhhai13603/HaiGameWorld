@@ -83,5 +83,6 @@ const AudioManager = (() => {
     function toggle() { enabled = !enabled; return enabled; }
     function setVolume(v) { volume = Math.max(0, Math.min(1, v)); }
 
-    return { play, toggle, setVolume, resume, get enabled() { return enabled; }, get volume() { return volume; } };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { play, toggle, setVolume, resume, close, get enabled() { return enabled; }, get volume() { return volume; } };
 })();

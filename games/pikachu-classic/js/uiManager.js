@@ -111,24 +111,25 @@ class UIManager {
         }
 
         // Draw pop animations
-        for (let i = this.popAnimations.length - 1; i >= 0; i--) {
+        let animWrite = 0;
+        for (let i = 0; i < this.popAnimations.length; i++) {
             const anim = this.popAnimations[i];
             anim.timer--;
-            if (anim.timer <= 0) {
-                this.popAnimations.splice(i, 1);
-            } else {
+            if (anim.timer > 0) {
+                this.popAnimations[animWrite++] = anim;
                 this._drawPopAnim(anim);
             }
         }
+        this.popAnimations.length = animWrite;
 
         // Draw score popups
-        for (let i = this.scorePopups.length - 1; i >= 0; i--) {
+        let spWrite = 0;
+        for (let i = 0; i < this.scorePopups.length; i++) {
             const p = this.scorePopups[i];
             p.timer--;
             p.y -= 1;
-            if (p.timer <= 0) {
-                this.scorePopups.splice(i, 1);
-            } else {
+            if (p.timer > 0) {
+                this.scorePopups[spWrite++] = p;
                 ctx.globalAlpha = p.timer / 40;
                 ctx.fillStyle = p.color || '#fff';
                 ctx.font = 'bold 18px Rajdhani, sans-serif';

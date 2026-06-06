@@ -65,15 +65,17 @@ const MarbleManager = (() => {
         }
 
         // Update remove animations
-        for (let i = marbles.length - 1; i >= 0; i--) {
+        let mWrite = 0;
+        for (let i = 0; i < marbles.length; i++) {
             if (marbles[i].removing) {
                 marbles[i].removeTimer -= dt;
                 marbles[i].scale = Math.max(0, marbles[i].removeTimer / 0.3);
-                if (marbles[i].removeTimer <= 0) {
-                    marbles.splice(i, 1);
-                }
+                if (marbles[i].removeTimer > 0) marbles[mWrite++] = marbles[i];
+            } else {
+                marbles[mWrite++] = marbles[i];
             }
         }
+        marbles.length = mWrite;
 
         // Update flash effects
         for (const m of marbles) {

@@ -233,20 +233,20 @@ class DropManager {
     // Update all drops
     update(dt) {
         // Update gifts
-        for (let i = this.gifts.length - 1; i >= 0; i--) {
+        let gWrite = 0;
+        for (let i = 0; i < this.gifts.length; i++) {
             this.gifts[i].update(this.canvasHeight, dt);
-            if (!this.gifts[i].active) {
-                this.gifts.splice(i, 1);
-            }
+            if (this.gifts[i].active) this.gifts[gWrite++] = this.gifts[i];
         }
+        this.gifts.length = gWrite;
 
         // Update poop
-        for (let i = this.poops.length - 1; i >= 0; i--) {
+        let pWrite = 0;
+        for (let i = 0; i < this.poops.length; i++) {
             this.poops[i].update(this.canvasHeight, dt);
-            if (!this.poops[i].active) {
-                this.poops.splice(i, 1);
-            }
+            if (this.poops[i].active) this.poops[pWrite++] = this.poops[i];
         }
+        this.poops.length = pWrite;
     }
 
     // Draw all drops
@@ -262,26 +262,30 @@ class DropManager {
     // Check gift collection
     checkGiftCollection(playerBounds) {
         const collected = [];
+        let write = 0;
 
-        for (let i = this.gifts.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.gifts.length; i++) {
             const gift = this.gifts[i];
             if (this._collides(playerBounds, gift.getBounds())) {
                 collected.push(gift.type);
                 gift.active = false;
-                this.gifts.splice(i, 1);
+            } else {
+                this.gifts[write++] = gift;
             }
         }
+        this.gifts.length = write;
 
         return collected;
     }
 
     // Check poop collision
     checkPoopCollision(playerBounds) {
-        for (let i = this.poops.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.poops.length; i++) {
             const poop = this.poops[i];
             if (this._collides(playerBounds, poop.getBounds())) {
                 poop.active = false;
-                this.poops.splice(i, 1);
+                this.poops[i] = this.poops[this.poops.length - 1];
+                this.poops.length--;
                 return true;
             }
         }

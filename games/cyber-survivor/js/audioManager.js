@@ -34,5 +34,6 @@ const AudioManager = (() => {
         metaUpgrade() { _osc(500,'sine',0.08,0.08); setTimeout(() => _osc(700,'sine',0.1,0.1), 80); }
     };
     function play(type) { if (!enabled||!ctx) return; resume(); if (sounds[type]) sounds[type](); }
-    return { init, resume, play, toggle, setVolume, get enabled(){return enabled;} };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { init, resume, play, toggle, setVolume, close, get enabled(){return enabled;} };
 })();

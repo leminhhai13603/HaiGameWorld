@@ -55,6 +55,7 @@ class GameManager {
         this.frameInterval = 1000 / 60;
 
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -139,7 +140,26 @@ class GameManager {
         this.time = data.timer;
         this.objects = data.objects.map(d => new MineObject(d.x, d.y, d.type));
 
+        // Preserve buffs from old hook before creating new one
+        const oldBuffs = this.hook ? {
+            strengthBuff: this.hook.strengthBuff,
+            _luckyClover: this.hook._luckyClover,
+            _rockBook: this.hook._rockBook,
+            _diamondPolish: this.hook._diamondPolish,
+            _boneBook: this.hook._boneBook
+        } : null;
+
         this.hook = new HookSystem(this.minerX, this.minerY);
+
+        // Transfer buffs to new hook
+        if (oldBuffs) {
+            this.hook.strengthBuff = oldBuffs.strengthBuff;
+            this.hook._luckyClover = oldBuffs._luckyClover;
+            this.hook._rockBook = oldBuffs._rockBook;
+            this.hook._diamondPolish = oldBuffs._diamondPolish;
+            this.hook._boneBook = oldBuffs._boneBook;
+        }
+
         this.particles.clear();
         this.state = GameState.LEVEL_START;
         this.levelStartTimer = 100;
@@ -186,8 +206,13 @@ class GameManager {
         this.flash = { active: true, color, alpha: 0.3, duration };
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);

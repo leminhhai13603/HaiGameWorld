@@ -112,5 +112,6 @@ const AudioManager = (() => {
     function setEnabled(v) { enabled = !!v; }
     function isEnabled() { return enabled; }
 
-    return { play, toggle, setEnabled, isEnabled, resume };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { play, toggle, setEnabled, isEnabled, resume, close };
 })();

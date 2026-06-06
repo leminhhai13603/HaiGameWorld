@@ -2,6 +2,7 @@
  * Age of War: Ultimate Edition - Main Game Controller
  */
 const GS = { MENU:'menu', PLAYING:'playing', PAUSED:'paused', VICTORY:'victory', DEFEAT:'defeat', STATS:'stats', SETTINGS:'settings' };
+const MAX_PARTICLES = 150;
 
 class AgeOfWar {
     constructor() {
@@ -15,6 +16,7 @@ class AgeOfWar {
         this._initGame();
         this.lastTime = 0;
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -187,7 +189,8 @@ class AgeOfWar {
         const baseX = isPlayer ? BASE_X_PLAYER + BASE_W : BASE_X_ENEMY;
         const baseY = 280;
 
-        this.pProjectiles.push({
+        const projArr = isPlayer ? this.pProjectiles : this.eProjectiles;
+        projArr.push({
             x: baseX, y: baseY, tx: targetX, ty: targetY,
             speed: 400, dmg: Math.floor(turretDmg), splash: 0, isPlayer,
             vx: 0, vy: 0, life: 2
@@ -195,7 +198,7 @@ class AgeOfWar {
         // Calculate velocity
         const dx = targetX - baseX, dy = targetY - baseY;
         const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-        const proj = this.pProjectiles[this.pProjectiles.length - 1];
+        const proj = projArr[projArr.length - 1];
         proj.vx = (dx/dist) * 400; proj.vy = (dy/dist) * 400;
 
         if (isPlayer) this.pTurretCooldown = ageDef.turretCooldown;
@@ -279,9 +282,7 @@ class AgeOfWar {
     }
 
     _updateUnits(dt) {
-        const allUnits = [...this.pUnits, ...this.eUnits];
-
-        for (const unit of allUnits) {
+        const processUnit = (unit) => {
             unit.atkCooldown -= dt;
             unit.animTimer += dt;
             if (unit.hitFlash > 0) unit.hitFlash -= dt * 5;
@@ -348,7 +349,9 @@ class AgeOfWar {
                 // Clamp to battlefield
                 unit.x = Math.max(BATTLE_LEFT + 10, Math.min(BATTLE_RIGHT - 10, unit.x));
             }
-        }
+        };
+        for (const unit of this.pUnits) processUnit(unit);
+        for (const unit of this.eUnits) processUnit(unit);
     }
 
     _killUnit(unit) {
@@ -368,7 +371,7 @@ class AgeOfWar {
         }
 
         // Death particles
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 6 && this.particles.length < MAX_PARTICLES; i++) {
             this.particles.push({
                 x: unit.x, y: unit.y, vx: (Math.random()-0.5)*100, vy: -50 - Math.random()*80,
                 life: 0.5, maxLife: 0.5, color: unit.isPlayer ? '#4488ff' : '#ff4444', size: 3
@@ -433,7 +436,7 @@ class AgeOfWar {
     }
 
     _spawnExplosion(x, y, radius) {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 10 && this.particles.length < MAX_PARTICLES; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = 50 + Math.random() * 100;
             this.particles.push({
@@ -445,13 +448,15 @@ class AgeOfWar {
     }
 
     _updateParticles(dt) {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
             p.x += p.vx * dt; p.y += p.vy * dt;
             if (p.type !== 'text') p.vy += 150 * dt;
             p.life -= dt;
-            if (p.life <= 0) this.particles.splice(i, 1);
+            if (p.life > 0) this.particles[write++] = p;
         }
+        this.particles.length = write;
     }
 
     _checkWinLose() {
@@ -479,13 +484,18 @@ class AgeOfWar {
     }
 
     // ─── Game Loop ───
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < 16) return;
         this.lastTime = now - (elapsed % 16);
         const dt = Math.min(elapsed / 1000, 0.05);
-        try { this._update(dt); this._render(); } catch(e) {}
+        try { this._update(dt); this._render(); } catch(e) { console.error('Age of War error:', e); }
     }
 
     _update(dt) {

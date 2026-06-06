@@ -4,9 +4,11 @@
 const ParticleSystem = (() => {
     let particles = [];
 
+    const MAX_PARTICLES = 200;
+
     function emit(type, x, y, color, count) {
         count = count || 10;
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < count && particles.length < MAX_PARTICLES; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = type === 'explosion' ? 80 + Math.random() * 180 : 40 + Math.random() * 100;
             particles.push({
@@ -55,7 +57,8 @@ const ParticleSystem = (() => {
     }
 
     function update(dt) {
-        for (let i = particles.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < particles.length; i++) {
             const p = particles[i];
             p.x += p.vx * dt;
             p.y += p.vy * dt;
@@ -65,8 +68,9 @@ const ParticleSystem = (() => {
                 p.vy *= 0.96;
                 p.vy += 120 * dt;
             }
-            if (p.life <= 0) particles.splice(i, 1);
+            if (p.life > 0) particles[write++] = p;
         }
+        particles.length = write;
     }
 
     function draw(ctx) {
@@ -82,10 +86,7 @@ const ParticleSystem = (() => {
                 ctx.fillStyle = p.color;
                 ctx.font = 'bold 22px Orbitron, monospace';
                 ctx.textAlign = 'center';
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 10;
                 ctx.fillText(p.text, p.x, p.y);
-                ctx.shadowBlur = 0;
             } else {
                 ctx.fillStyle = p.color;
                 ctx.beginPath();

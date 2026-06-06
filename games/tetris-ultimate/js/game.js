@@ -117,6 +117,7 @@ class TetrisUltimate {
         window.addEventListener('resize', () => this._resize());
 
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -396,13 +397,16 @@ class TetrisUltimate {
     }
 
     _updateParticles() {
-        for (const p of this.particles) {
+        let write = 0;
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
             p.x += p.vx;
             p.y += p.vy;
             p.vy += 0.15;
             p.life--;
+            if (p.life > 0) this.particles[write++] = p;
         }
-        this.particles = this.particles.filter(p => p.life > 0);
+        this.particles.length = write;
     }
 
     // ===== ACHIEVEMENTS =====
@@ -892,8 +896,13 @@ class TetrisUltimate {
     }
 
     // ===== GAME LOOP =====
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         const elapsed = now - this.lastTime;
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);

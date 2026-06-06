@@ -27,6 +27,7 @@ const ParticleSystem = (() => {
     }
 
     function emitFragments(x, y, color1, color2, count) {
+        if (particles.length > MAX_PARTICLES) return;
         count = count || 6;
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
@@ -65,6 +66,7 @@ const ParticleSystem = (() => {
     }
 
     function emitExplosion(x, y, count) {
+        if (particles.length > MAX_PARTICLES) return;
         count = count || 30;
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
@@ -83,6 +85,7 @@ const ParticleSystem = (() => {
     }
 
     function emitSparkle(x, y, color) {
+        if (particles.length > MAX_PARTICLES) return;
         for (let i = 0; i < 8; i++) {
             const angle = (i / 8) * Math.PI * 2;
             particles.push({
@@ -97,7 +100,8 @@ const ParticleSystem = (() => {
     }
 
     function update(dt) {
-        for (let i = particles.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < particles.length; i++) {
             const p = particles[i];
             p.x += p.vx * dt;
             p.y += p.vy * dt;
@@ -111,8 +115,9 @@ const ParticleSystem = (() => {
                 p.rot += p.rotSpeed * dt;
             }
 
-            if (p.life <= 0) particles.splice(i, 1);
+            if (p.life > 0) particles[write++] = p;
         }
+        particles.length = write;
     }
 
     function draw(ctx) {
@@ -147,7 +152,6 @@ const ParticleSystem = (() => {
                     ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                ctx.restore();
             }
         }
         ctx.globalAlpha = 1;

@@ -22,5 +22,6 @@ const AudioManager = (() => {
         click() { _osc(600, 'sine', 0.04, 0.08); }
     };
     function play(type) { if (!enabled || !ctx) return; resume(); if (sounds[type]) sounds[type](); }
-    return { init, resume, play, toggle, setVolume, get enabled() { return enabled; } };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { init, resume, play, toggle, setVolume, close, get enabled() { return enabled; } };
 })();

@@ -2,10 +2,10 @@
  * Gold Miner - Particle Effects System
  */
 class ParticleSystem {
-    constructor() { this.particles = []; }
+    constructor() { this.particles = []; this.maxParticles = 150; }
 
     emit(x, y, count, color, opts = {}) {
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < count && this.particles.length < this.maxParticles; i++) {
             const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
             const speed = (opts.speed || 2) + Math.random() * 2;
             this.particles.push({
@@ -61,7 +61,8 @@ class ParticleSystem {
     }
 
     update() {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
             p.vx *= p.friction;
             p.vy *= p.friction;
@@ -69,8 +70,9 @@ class ParticleSystem {
             p.x += p.vx;
             p.y += p.vy;
             p.life--;
-            if (p.life <= 0) this.particles.splice(i, 1);
+            if (p.life > 0) this.particles[write++] = p;
         }
+        this.particles.length = write;
     }
 
     draw(ctx) {

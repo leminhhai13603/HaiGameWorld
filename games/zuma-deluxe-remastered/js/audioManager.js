@@ -113,8 +113,9 @@ const AudioManager = (() => {
         if (sounds[type]) sounds[type]();
     }
 
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
     return {
-        init, resume, play, toggle, setVolume,
+        init, resume, play, toggle, setVolume, close,
         get enabled() { return enabled; },
         get volume() { return volume; }
     };

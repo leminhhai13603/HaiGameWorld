@@ -47,7 +47,10 @@ class BulletSystem {
     constructor() { this.bullets = []; }
 
     fire(x, y, dir, speed, owner, strong) {
-        const active = this.bullets.filter(b => b.active && b.owner === owner).length;
+        let active = 0;
+        for (let i = 0; i < this.bullets.length; i++) {
+            if (this.bullets[i].active && this.bullets[i].owner === owner) active++;
+        }
         if (owner.startsWith('player') && active >= (strong ? 2 : 1)) return null;
         if (owner === 'enemy' && active >= 1) return null;
         const b = new Bullet(x, y, dir, speed, owner, strong);
@@ -56,10 +59,12 @@ class BulletSystem {
     }
 
     update(map) {
-        for (let i = this.bullets.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < this.bullets.length; i++) {
             this.bullets[i].update(map);
-            if (!this.bullets[i].active) this.bullets.splice(i, 1);
+            if (this.bullets[i].active) this.bullets[write++] = this.bullets[i];
         }
+        this.bullets.length = write;
     }
 
     draw(ctx) {

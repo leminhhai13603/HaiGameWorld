@@ -193,5 +193,10 @@ const AudioManager = {
     toggle() {
         this.enabled = !this.enabled;
         return this.enabled;
+    },
+
+    // Close audio context
+    close() {
+        if (this.ctx) { this.ctx.close().catch(()=>{}); this.ctx = null; }
     }
 };

@@ -46,10 +46,12 @@ class PowerupSystem {
     }
 
     update() {
-        for (let i = this.powerups.length - 1; i >= 0; i--) {
+        let write = 0;
+        for (let i = 0; i < this.powerups.length; i++) {
             this.powerups[i].update();
-            if (!this.powerups[i].active) this.powerups.splice(i, 1);
+            if (this.powerups[i].active) this.powerups[write++] = this.powerups[i];
         }
+        this.powerups.length = write;
     }
 
     draw(ctx) {
@@ -57,12 +59,13 @@ class PowerupSystem {
     }
 
     checkCollision(player) {
-        for (let i = this.powerups.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.powerups.length; i++) {
             const p = this.powerups[i];
             if (!p.active) continue;
             if (this._collides(player.getBounds(), p.getBounds())) {
                 p.active = false;
-                this.powerups.splice(i, 1);
+                this.powerups[i] = this.powerups[this.powerups.length - 1];
+                this.powerups.length--;
                 return p.type;
             }
         }

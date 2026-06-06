@@ -64,6 +64,7 @@ class Game {
 
         AudioManager.init();
         this._setupInput();
+        window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
@@ -268,8 +269,13 @@ class Game {
         this.floatingTexts.push({ x, y, text, color, size, vy: -1.5, life: 35, maxLife: 35 });
     }
 
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        AudioManager.close();
+    }
+
     _gameLoop(now) {
-        requestAnimationFrame((t) => this._gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
 
         const elapsed = now - this.lastFrameTime;
         if (elapsed < this.frameInterval) return;
@@ -297,11 +303,13 @@ class Game {
             if (this.flash.alpha <= 0) this.flash.active = false;
         }
 
-        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+        let ftWrite = 0;
+        for (let i = 0; i < this.floatingTexts.length; i++) {
             this.floatingTexts[i].y += this.floatingTexts[i].vy;
             this.floatingTexts[i].life--;
-            if (this.floatingTexts[i].life <= 0) this.floatingTexts.splice(i, 1);
+            if (this.floatingTexts[i].life > 0) this.floatingTexts[ftWrite++] = this.floatingTexts[i];
         }
+        this.floatingTexts.length = ftWrite;
 
         if (this.state !== GameState.PLAYING) return;
 
@@ -691,13 +699,15 @@ class Background {
             this.meteorTimer = 0;
         }
 
-        for (let i = this.meteors.length - 1; i >= 0; i--) {
+        let metWrite = 0;
+        for (let i = 0; i < this.meteors.length; i++) {
             const m = this.meteors[i];
             m.x += m.vx;
             m.y += m.vy;
             m.life--;
-            if (m.life <= 0 || m.y > this.height + 30) this.meteors.splice(i, 1);
+            if (m.life > 0 && m.y <= this.height + 30) this.meteors[metWrite++] = m;
         }
+        this.meteors.length = metWrite;
     }
 
     draw(ctx) {

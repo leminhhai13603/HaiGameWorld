@@ -227,5 +227,6 @@ const AudioSystem = (() => {
 
     function toggle() { enabled = !enabled; return enabled; }
 
-    return { play, toggle, resume, get enabled() { return enabled; } };
+    function close() { if (ctx) { ctx.close().catch(()=>{}); ctx = null; } }
+    return { play, toggle, resume, close, get enabled() { return enabled; } };
 })();
