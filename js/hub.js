@@ -140,7 +140,7 @@ const Hub = {
             tag: 'Strategy',
             thumb: '🐻',
             thumbClass: 'pvz-thumb',
-            path: 'games/pvz-lite/index.html',
+            path: 'games/animal-kingdom-defense/index.html',
             featured: false
         }
     ],
