@@ -234,8 +234,13 @@ class FruitNinjaGame {
         if (elapsed < this.frameInterval) return;
         this.lastTime = now - (elapsed % this.frameInterval);
         const dt = Math.min(elapsed / 1000, 0.05);
-        this._update(dt);
-        this._render();
+        try {
+            this._update(dt);
+            this._render();
+        } catch (e) {
+            // Prevent freeze on error
+            console.error('Game error:', e);
+        }
     }
 
     _update(dt) {
@@ -317,8 +322,8 @@ class FruitNinjaGame {
         // Check collisions
         const shieldActive = PowerupManager.isShieldActive();
         const hits = SliceSystem.checkCollisions(FruitManager.fruits, shieldActive);
-        for (const hit of hits) {
-            this._processHit(hit);
+        for (let i = 0; i < hits.length; i++) {
+            this._processHit(hits[i]);
         }
 
         // Update powerups
@@ -442,11 +447,13 @@ class FruitNinjaGame {
                 Renderer.drawBackground(ctx, this.W, this.H, this.theme);
 
                 // Fruits and halves
-                for (const fruit of FruitManager.fruits) {
-                    Renderer.drawFruit(ctx, fruit);
+                const fruits = FruitManager.fruits;
+                const halves = FruitManager.halves;
+                for (let i = 0; i < fruits.length; i++) {
+                    Renderer.drawFruit(ctx, fruits[i]);
                 }
-                for (const half of FruitManager.halves) {
-                    Renderer.drawHalf(ctx, half);
+                for (let i = 0; i < halves.length; i++) {
+                    Renderer.drawHalf(ctx, halves[i]);
                 }
 
                 // Slice trail

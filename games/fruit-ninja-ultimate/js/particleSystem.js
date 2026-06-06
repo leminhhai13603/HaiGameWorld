@@ -116,7 +116,8 @@ const ParticleSystem = (() => {
     }
 
     function draw(ctx) {
-        for (const p of particles) {
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
             const alpha = Math.max(0, p.life / p.maxLife);
             ctx.globalAlpha = alpha;
 
@@ -135,11 +136,12 @@ const ParticleSystem = (() => {
                 ctx.shadowBlur = 0;
             } else {
                 ctx.fillStyle = p.color;
-                ctx.save();
                 if (p.type === 'fragment') {
+                    ctx.save();
                     ctx.translate(p.x, p.y);
                     ctx.rotate(p.rot || 0);
                     ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
                 } else {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);

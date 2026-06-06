@@ -45,7 +45,8 @@ const SliceSystem = (() => {
         const p1 = trail[trail.length - 2];
         const p2 = trail[trail.length - 1];
 
-        for (const fruit of fruits) {
+        for (let i = 0; i < fruits.length; i++) {
+            const fruit = fruits[i];
             if (!fruit.active || fruit.sliced) continue;
 
             const hit = lineCircleIntersect(
@@ -56,7 +57,6 @@ const SliceSystem = (() => {
             if (hit) {
                 if (fruit.isBomb) {
                     if (shieldActive) {
-                        // Shield absorbs the bomb
                         results.push({ type: 'shield_block', fruit });
                     } else {
                         results.push({ type: 'bomb', fruit });
