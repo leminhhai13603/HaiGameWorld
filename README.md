@@ -2,7 +2,7 @@
 
 > A collection of 15 classic browser games — pure HTML5/Canvas/JS, no frameworks, no dependencies.
 
-### 🚀 [PLAY NOW](https://leminhhai13603.github.io/HaiGameWorld/index.html)
+### 🚀 [PLAY NOW](https://leminhhai13603.github.io/HaiGameWorld/)
 
 ---
 
@@ -86,7 +86,7 @@ HaiGameWorld/
 
 ## 🎯 How to Play
 
-1. Visit **[Hải Game World](https://leminhhai13603.github.io/HaiGameWorld/index.html)**
+1. Visit **[Hải Game World](https://leminhhai13603.github.io/HaiGameWorld/)**
 2. Pick a game from the grid
 3. Play and have fun!
 
@@ -115,4 +115,4 @@ Created with ❤️ by **Lê Minh Hải**
 
 ---
 
-> 🎮 **[Play Now →](https://leminhhai13603.github.io/HaiGameWorld/index.html)**
+> 🎮 **[Play Now →](https://leminhhai13603.github.io/HaiGameWorld/)**
