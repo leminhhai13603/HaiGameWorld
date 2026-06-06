@@ -132,6 +132,16 @@ const Hub = {
             thumbClass: 'ageofwar-thumb',
             path: 'games/age-of-war/index.html',
             featured: false
+        },
+        {
+            id: 'pvz-lite',
+            name: 'Plants vs Zombies Lite',
+            desc: 'Tháp phòng thủ — trồng cây, bảo vệ nhà, tiêu diệt zombie qua 20 wave!',
+            tag: 'Strategy',
+            thumb: '🌻',
+            thumbClass: 'pvz-thumb',
+            path: 'games/pvz-lite/index.html',
+            featured: false
         }
     ],
 
@@ -330,6 +340,12 @@ const Hub = {
         try {
             const aow = JSON.parse(localStorage.getItem('ageOfWar') || '{}');
             if (aow.stats && aow.stats.gamesPlayed) totalPlays += aow.stats.gamesPlayed;
+        } catch(e) {}
+
+        // PvZ Lite stats
+        try {
+            const pvz = JSON.parse(localStorage.getItem('pvzLite') || '{}');
+            if (pvz.gamesPlayed) totalPlays += pvz.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
