@@ -142,6 +142,16 @@ const Hub = {
             thumbClass: 'pvz-thumb',
             path: 'games/animal-kingdom-defense/index.html',
             featured: false
+        },
+        {
+            id: 'cyber-survivor',
+            name: 'Cyber Survivor',
+            desc: 'Sinh tồn cyber — di chuyển, tự động bắn, thu XP, lên cấp, đánh boss!',
+            tag: 'Arcade',
+            thumb: '🤖',
+            thumbClass: 'cyber-thumb',
+            path: 'games/cyber-survivor/index.html',
+            featured: false
         }
     ],
 
@@ -346,6 +356,12 @@ const Hub = {
         try {
             const pvz = JSON.parse(localStorage.getItem('pvzLite') || '{}');
             if (pvz.gamesPlayed) totalPlays += pvz.gamesPlayed;
+        } catch(e) {}
+
+        // Cyber Survivor stats
+        try {
+            const cs = JSON.parse(localStorage.getItem('cyberSurvivor') || '{}');
+            if (cs.gamesPlayed) totalPlays += cs.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
