@@ -135,10 +135,10 @@ const Hub = {
         },
         {
             id: 'pvz-lite',
-            name: 'Plants vs Zombies Lite',
-            desc: 'Tháp phòng thủ — trồng cây, bảo vệ nhà, tiêu diệt zombie qua 20 wave!',
+            name: 'Animal Kingdom Defense',
+            desc: 'Tháp phòng thủ — bảo vệ Vương Quốc Động Vật khỏi Robot xâm lược qua 20 wave!',
             tag: 'Strategy',
-            thumb: '🌻',
+            thumb: '🐻',
             thumbClass: 'pvz-thumb',
             path: 'games/pvz-lite/index.html',
             featured: false

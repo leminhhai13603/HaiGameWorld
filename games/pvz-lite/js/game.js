@@ -510,16 +510,18 @@ class PvZGame {
 
         // Title
         ctx.textAlign = 'center';
+        ctx.fillStyle = '#8B6914';
+        ctx.font = 'bold 32px Orbitron, monospace';
+        ctx.fillText('ANIMAL KINGDOM', W/2, 70);
         ctx.fillStyle = '#4CAF50';
-        ctx.font = 'bold 36px Orbitron, monospace';
-        ctx.fillText('PLANTS vs ZOMBIES', W/2, 80);
-        ctx.fillStyle = '#8BC34A';
-        ctx.font = 'bold 18px Orbitron, monospace';
-        ctx.fillText('LITE', W/2, 110);
+        ctx.font = 'bold 20px Orbitron, monospace';
+        ctx.fillText('DEFENSE', W/2, 100);
 
-        // Decorative plants
-        ctx.font = '40px sans-serif';
-        ctx.fillText('🌻 🌿 🧟', W/2, 165);
+        // Decorative animals
+        ctx.font = '36px sans-serif';
+        ctx.fillText('🐔 🐵 🐻 🐧 🐡', W/2, 150);
+        ctx.font = '14px sans-serif';
+        ctx.fillText('⚔️ vs 🤖', W/2, 180);
 
         // Play button
         ctx.fillStyle = 'rgba(76,175,80,0.3)';
