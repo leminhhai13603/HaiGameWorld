@@ -88,35 +88,19 @@ const Renderer = (() => {
     function drawPowerupItem(ctx, item) {
         const r = item.radius;
         const def = POWERUP_DEFS[item.powerupType];
-        const glow = item.glow || 0;
+        if (!def) return;
 
-        ctx.save();
-        ctx.translate(item.x, item.y);
-
-        // Glow
-        ctx.fillStyle = `rgba(${hexToRgb(def.color)}, ${0.2 + Math.sin(glow) * 0.1})`;
+        // Simple circle, no gradient
+        ctx.fillStyle = def.color;
         ctx.beginPath();
-        ctx.arc(0, 0, r * 1.5, 0, Math.PI * 2);
+        ctx.arc(item.x, item.y, r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Body
-        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-        grad.addColorStop(0, '#fff');
-        grad.addColorStop(0.5, def.color);
-        grad.addColorStop(1, darkenColor(def.color, 0.5));
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Icon
         ctx.fillStyle = '#fff';
-        ctx.font = `${r}px sans-serif`;
+        ctx.font = r + 'px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(def.icon, 0, 1);
-
-        ctx.restore();
+        ctx.fillText(def.icon, item.x, item.y + 1);
     }
 
     function drawHalf(ctx, half) {
