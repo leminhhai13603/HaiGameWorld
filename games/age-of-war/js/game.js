@@ -516,119 +516,31 @@ class AgeOfWar {
         if (this.state === GS.SETTINGS) { this._renderSettings(ctx); return; }
 
         // Background
-        const ageColor = AGE_DEFS[this.pAge].color;
-        ctx.fillStyle = '#1a1a2e';
-        ctx.fillRect(0, 0, W, H);
-        // Ground
-        ctx.fillStyle = '#2a2a3e';
-        ctx.fillRect(0, 380, W, 120);
-        ctx.fillStyle = '#333348';
-        ctx.fillRect(0, 370, W, 10);
-        // Sky gradient
-        const grad = ctx.createLinearGradient(0, 30, 0, 370);
-        grad.addColorStop(0, '#0a0a1a');
-        grad.addColorStop(1, ageColor + '33');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 30, W, 340);
+        Renderer.drawBackground(ctx, this.pAge, this.gameTime);
 
-        this._renderBases(ctx);
-        this._renderUnits(ctx);
-        this._renderProjectiles(ctx);
-        this._renderParticles(ctx);
+        // Bases
+        Renderer.drawBase(ctx, BASE_X_PLAYER, true, this.pAge, this.pBaseHp, this.pBaseMaxHp, this.pTurretCooldown, AGE_DEFS[this.pAge].turretCooldown);
+        Renderer.drawBase(ctx, BASE_X_ENEMY, false, this.eAge, this.eBaseHp, this.eBaseMaxHp, this.eTurretCooldown, AGE_DEFS[this.eAge].turretCooldown);
+
+        // Units
+        const allUnits = [...this.pUnits, ...this.eUnits];
+        allUnits.sort((a, b) => a.y - b.y);
+        for (const u of allUnits) {
+            Renderer.drawUnit(ctx, u, this.gameTime);
+        }
+
+        // Projectiles
+        for (const p of this.pProjectiles) Renderer.drawProjectile(ctx, p, this.pAge);
+        for (const p of this.eProjectiles) Renderer.drawProjectile(ctx, p, this.eAge);
+
+        // Particles
+        for (const p of this.particles) Renderer.drawParticle(ctx, p);
+
         this._renderUI(ctx);
 
         if (this.state === GS.PAUSED) this._renderPause(ctx);
         if (this.state === GS.VICTORY) this._renderEndScreen(ctx, true);
         if (this.state === GS.DEFEAT) this._renderEndScreen(ctx, false);
-    }
-
-    _renderBases(ctx) {
-        // Player base
-        ctx.fillStyle = '#1a3a6a';
-        ctx.fillRect(BASE_X_PLAYER, 200, BASE_W, 170);
-        ctx.strokeStyle = '#4488cc';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(BASE_X_PLAYER, 200, BASE_W, 170);
-        // Player HP bar
-        ctx.fillStyle = '#333';
-        ctx.fillRect(BASE_X_PLAYER, 185, BASE_W, 8);
-        ctx.fillStyle = this.pBaseHp > this.pBaseMaxHp * 0.3 ? '#44cc44' : '#ff3333';
-        ctx.fillRect(BASE_X_PLAYER, 185, BASE_W * Math.max(0, this.pBaseHp / this.pBaseMaxHp), 8);
-
-        // Enemy base
-        ctx.fillStyle = '#6a1a1a';
-        ctx.fillRect(BASE_X_ENEMY, 200, BASE_W, 170);
-        ctx.strokeStyle = '#cc4444';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(BASE_X_ENEMY, 200, BASE_W, 170);
-        // Enemy HP bar
-        ctx.fillStyle = '#333';
-        ctx.fillRect(BASE_X_ENEMY, 185, BASE_W, 8);
-        ctx.fillStyle = this.eBaseHp > this.eBaseMaxHp * 0.3 ? '#44cc44' : '#ff3333';
-        ctx.fillRect(BASE_X_ENEMY, 185, BASE_W * Math.max(0, this.eBaseHp / this.eBaseMaxHp), 8);
-
-        // Age icons
-        ctx.font = '20px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(AGE_DEFS[this.pAge].icon, BASE_X_PLAYER + 25, 260);
-        ctx.fillText(AGE_DEFS[this.eAge].icon, BASE_X_ENEMY + 25, 260);
-    }
-
-    _renderUnits(ctx) {
-        const allUnits = [...this.pUnits, ...this.eUnits];
-        for (const u of allUnits) {
-            const col = u.isPlayer ? '#4488ff' : '#ff4444';
-            const flashCol = '#fff';
-
-            ctx.fillStyle = u.hitFlash > 0 ? flashCol : col;
-            ctx.fillRect(u.x - u.size/2, u.y - u.size, u.size, u.size);
-
-            // Unit type indicator
-            if (u.type === 'ranged') {
-                ctx.fillStyle = u.isPlayer ? '#88bbff' : '#ff8888';
-                ctx.beginPath();
-                ctx.arc(u.x, u.y - u.size - 3, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // HP bar
-            if (u.hp < u.maxHp) {
-                ctx.fillStyle = '#333';
-                ctx.fillRect(u.x - u.size/2, u.y - u.size - 6, u.size, 3);
-                ctx.fillStyle = '#44cc44';
-                ctx.fillRect(u.x - u.size/2, u.y - u.size - 6, u.size * (u.hp / u.maxHp), 3);
-            }
-        }
-    }
-
-    _renderProjectiles(ctx) {
-        for (const arr of [this.pProjectiles, this.eProjectiles]) {
-            for (const p of arr) {
-                ctx.fillStyle = p.isPlayer ? '#88ccff' : '#ff8888';
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    }
-
-    _renderParticles(ctx) {
-        for (const p of this.particles) {
-            const alpha = Math.max(0, p.life / p.maxLife);
-            ctx.globalAlpha = alpha;
-            if (p.type === 'text') {
-                ctx.fillStyle = p.color;
-                ctx.font = 'bold 14px Orbitron, monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(p.text, p.x, p.y);
-            } else {
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-        ctx.globalAlpha = 1;
     }
 
     _renderUI(ctx) {
