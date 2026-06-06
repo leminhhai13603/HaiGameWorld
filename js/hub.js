@@ -122,6 +122,16 @@ const Hub = {
             thumbClass: 'sudoku-thumb',
             path: 'games/sudoku-master/index.html',
             featured: false
+        },
+        {
+            id: 'age-of-war',
+            name: 'Age of War: Ultimate Edition',
+            desc: 'Chiến thuật — tiến hóa qua 5 thời đại, huấn luyện quân đội, bảo vệ căn cứ, tiêu diệt kẻ thù!',
+            tag: 'Strategy',
+            thumb: '⚔️',
+            thumbClass: 'ageofwar-thumb',
+            path: 'games/age-of-war/index.html',
+            featured: false
         }
     ],
 
@@ -314,6 +324,12 @@ const Hub = {
         try {
             const sudoku = JSON.parse(localStorage.getItem('sudokuMaster') || '{}');
             if (sudoku.stats && sudoku.stats.gamesCompleted) totalPlays += sudoku.stats.gamesCompleted;
+        } catch(e) {}
+
+        // Age of War stats
+        try {
+            const aow = JSON.parse(localStorage.getItem('ageOfWar') || '{}');
+            if (aow.stats && aow.stats.gamesPlayed) totalPlays += aow.stats.gamesPlayed;
         } catch(e) {}
 
         document.getElementById('stat-games').textContent = this.games.length;
