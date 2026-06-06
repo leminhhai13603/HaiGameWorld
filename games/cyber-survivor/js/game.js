@@ -1,6 +1,6 @@
 /**
- * Cyber Survivor Phase 3 - Complete Game
- * Characters, Pets, Ultimates, Relics, Endgame Modes, Daily Challenges
+ * Cyber Survivor Phase 5 - Visual Overhaul
+ * Characters, Pets, Ultimates, Relics, Endgame Modes, Visual Polish
  */
 const GS = { MENU:'menu', CHARSELECT:'charselect', PLAYING:'playing', LEVELUP:'levelup', PAUSED:'paused', GAMEOVER:'gameover', META:'meta' };
 
@@ -77,6 +77,21 @@ class CyberSurvivor {
         // Damage tracking
         this.damageStats = {};
         this.totalDamage = 0;
+        // Screen shake
+        this.shakeX = 0; this.shakeY = 0; this.shakeIntensity = 0;
+        // Boss intro
+        this.bossIntroTimer = 0; this.bossIntroName = '';
+        // Environment particles
+        this.envParticles = [];
+        for (let i = 0; i < 30; i++) {
+            this.envParticles.push({
+                x: Math.random() * 2000 - 500,
+                y: Math.random() * 2000 - 500,
+                size: 1 + Math.random() * 2,
+                speed: 10 + Math.random() * 20,
+                alpha: 0.1 + Math.random() * 0.3
+            });
+        }
         this.state = GS.PLAYING;
     }
 
@@ -389,6 +404,16 @@ class CyberSurvivor {
         p.time += dt;
         if (p.invTimer > 0) p.invTimer -= dt;
 
+        // Screen shake decay
+        if (this.shakeIntensity > 0) {
+            this.shakeIntensity *= 0.9;
+            this.shakeX = (Math.random() - 0.5) * this.shakeIntensity;
+            this.shakeY = (Math.random() - 0.5) * this.shakeIntensity;
+            if (this.shakeIntensity < 0.5) { this.shakeIntensity = 0; this.shakeX = 0; this.shakeY = 0; }
+        }
+        // Boss intro timer
+        if (this.bossIntroTimer > 0) this.bossIntroTimer -= dt;
+
         // Ultimate timer
         if (p.ultimateActive) {
             p.ultimateTimer -= dt;
@@ -470,6 +495,7 @@ class CyberSurvivor {
                 if (this.pets.find(pt => pt.type === 'shield') && Math.random() < 0.08) dmg = 0;
                 if (dmg > 0) {
                     p.hp -= dmg; p.invTimer = 0.5;
+                    this.shakeIntensity = 8;
                     AudioManager.play('playerHit');
                     if (p.hp <= 0) { this.state = GS.GAMEOVER; SaveManager.updateBest(Math.floor(p.time), p.kills, p.level, p.mode); AudioManager.play('gameOver'); return; }
                 }
@@ -764,6 +790,9 @@ class CyberSurvivor {
             bossPhase:1, bossAtkTimer:2, shoots:def.shoots, flies:def.flies, phases:def.phases||1
         });
         AudioManager.play('bossSpawn');
+        this.shakeIntensity = 15;
+        this.bossIntroTimer = 2;
+        this.bossIntroName = def.name;
     }
 
     _updateBoss(e, dt) {
@@ -841,11 +870,20 @@ class CyberSurvivor {
     }
 
     _spawnExplosion(x, y, color, radius) {
-        for (let i = 0; i < 12; i++) {
+        // Core particles
+        for (let i = 0; i < 16; i++) {
             const angle = Math.random()*Math.PI*2, spd = 50+Math.random()*radius;
             const pt = this._getParticle();
             Object.assign(pt, { x, y, vx:Math.cos(angle)*spd, vy:Math.sin(angle)*spd, life:0.5, maxLife:0.5, type:'circle', color, size:3+Math.random()*3 });
         }
+        // Sparks
+        for (let i = 0; i < 8; i++) {
+            const angle = Math.random()*Math.PI*2, spd = 100+Math.random()*radius*1.5;
+            const pt = this._getParticle();
+            Object.assign(pt, { x, y, vx:Math.cos(angle)*spd, vy:Math.sin(angle)*spd, life:0.3, maxLife:0.3, type:'circle', color:'#FFF', size:2 });
+        }
+        // Screen shake for big explosions
+        if (radius > 50) this.shakeIntensity = Math.min(15, radius * 0.15);
     }
 
     // ─── Rendering ───
@@ -856,32 +894,92 @@ class CyberSurvivor {
         if (this.state === GS.CHARSELECT) { this._renderCharSelect(ctx); return; }
         if (this.state === GS.META) { this._renderMeta(ctx); return; }
 
-        ctx.save(); ctx.translate(-this.camX, -this.camY);
+        ctx.save(); ctx.translate(-this.camX + this.shakeX, -this.camY + this.shakeY);
         this._drawGrid(ctx);
+
+        // Environment particles
+        for (const ep of this.envParticles) {
+            ep.y -= ep.speed * 0.016;
+            if (ep.y < this.camY - 100) ep.y = this.camY + H + 100;
+            ctx.fillStyle = '#00E5FF';
+            ctx.globalAlpha = ep.alpha;
+            ctx.beginPath(); ctx.arc(ep.x, ep.y, ep.size, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+        }
 
         // XP orbs
         for (const o of this.activeXp) {
-            ctx.fillStyle = '#4CAF50'; ctx.globalAlpha = 0.5+Math.sin(o.life*5)*0.3;
-            ctx.beginPath(); ctx.arc(o.x, o.y, 6, 0, Math.PI*2); ctx.fill();
-            ctx.globalAlpha = 1; ctx.fillStyle = '#8BC34A';
-            ctx.beginPath(); ctx.arc(o.x, o.y, 4, 0, Math.PI*2); ctx.fill();
+            const pulse = Math.sin(o.life*5)*0.3;
+            // Outer glow
+            ctx.fillStyle = '#4CAF50'; ctx.globalAlpha = 0.3+pulse;
+            ctx.beginPath(); ctx.arc(o.x, o.y, 8, 0, Math.PI*2); ctx.fill();
+            // Core
+            ctx.fillStyle = '#8BC34A'; ctx.globalAlpha = 0.8;
+            ctx.beginPath(); ctx.arc(o.x, o.y, 5, 0, Math.PI*2); ctx.fill();
+            // Highlight
+            ctx.fillStyle = '#C8E6C9'; ctx.globalAlpha = 0.6;
+            ctx.beginPath(); ctx.arc(o.x-1, o.y-1, 2, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
         }
 
         for (const e of this.activeEnemies) this._drawEnemy(ctx, e);
         for (const proj of this.activeProjs) {
-            ctx.fillStyle = proj.isEnemy ? '#FF4444' : (proj.trailColor||'#00E5FF');
-            ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 6;
-            ctx.beginPath(); ctx.arc(proj.x, proj.y, proj.explodeR ? 5 : 3, 0, Math.PI*2); ctx.fill();
+            const color = proj.isEnemy ? '#FF4444' : (proj.trailColor||'#00E5FF');
+            ctx.fillStyle = color;
+            ctx.shadowColor = color; ctx.shadowBlur = 6;
+
+            if (proj.explodeR) {
+                // Rocket - elongated with fins
+                const angle = Math.atan2(proj.vy, proj.vx);
+                ctx.save(); ctx.translate(proj.x, proj.y); ctx.rotate(angle);
+                ctx.fillStyle = '#666';
+                ctx.fillRect(-6, -3, 12, 6);
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(10, -4); ctx.lineTo(10, 4); ctx.closePath(); ctx.fill();
+                // Exhaust
+                ctx.fillStyle = '#FF8800'; ctx.globalAlpha = 0.7;
+                ctx.beginPath(); ctx.arc(-8, 0, 3, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.restore();
+            } else if (proj.homing) {
+                // Homing missile - small with smoke
+                const angle = Math.atan2(proj.vy, proj.vx);
+                ctx.save(); ctx.translate(proj.x, proj.y); ctx.rotate(angle);
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.moveTo(5, 0); ctx.lineTo(-3, -3); ctx.lineTo(-3, 3); ctx.closePath(); ctx.fill();
+                ctx.restore();
+            } else if (proj.slow) {
+                // Ice projectile - crystal shape
+                ctx.fillStyle = '#88DDFF';
+                ctx.beginPath();
+                ctx.moveTo(proj.x, proj.y-5); ctx.lineTo(proj.x+3, proj.y);
+                ctx.lineTo(proj.x, proj.y+5); ctx.lineTo(proj.x-3, proj.y);
+                ctx.closePath(); ctx.fill();
+            } else {
+                // Energy bolt - glowing circle
+                ctx.beginPath(); ctx.arc(proj.x, proj.y, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#FFF'; ctx.globalAlpha = 0.5;
+                ctx.beginPath(); ctx.arc(proj.x, proj.y, 2, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
             ctx.shadowBlur = 0;
         }
 
         const p = this.player;
-        // Beam
+        // Beam (Laser)
         if (this.beamTargets.length) {
             for (const bt of this.beamTargets) {
-                ctx.strokeStyle = '#FF0000'; ctx.lineWidth = 3; ctx.globalAlpha = 0.7;
+                // Outer glow
+                ctx.strokeStyle = '#FF0000'; ctx.lineWidth = 12; ctx.globalAlpha = 0.15;
                 ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(bt.x, bt.y); ctx.stroke();
-                ctx.globalAlpha = 0.3; ctx.lineWidth = 8;
+                // Mid glow
+                ctx.lineWidth = 6; ctx.globalAlpha = 0.3;
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(bt.x, bt.y); ctx.stroke();
+                // Core beam
+                ctx.strokeStyle = '#FF4444'; ctx.lineWidth = 2; ctx.globalAlpha = 0.9;
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(bt.x, bt.y); ctx.stroke();
+                // White core
+                ctx.strokeStyle = '#FFAAAA'; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
                 ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(bt.x, bt.y); ctx.stroke();
                 ctx.globalAlpha = 1;
             }
@@ -894,15 +992,35 @@ class CyberSurvivor {
             if (!def) continue;
             if (def.type === 'orbit') {
                 const count = def.orbitCount || 3;
+                const r = def.orbitR || 80;
+                // Orbit trail
+                ctx.strokeStyle = '#00E5FF'; ctx.lineWidth = 1; ctx.globalAlpha = 0.1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.stroke();
+                ctx.globalAlpha = 1;
                 for (let i = 0; i < count; i++) {
                     const angle = this.orbitAngle + (i/count)*Math.PI*2;
+                    const ox = p.x+Math.cos(angle)*r, oy = p.y+Math.sin(angle)*r;
+                    // Drone glow
+                    ctx.fillStyle = '#00E5FF'; ctx.globalAlpha = 0.3;
+                    ctx.beginPath(); ctx.arc(ox, oy, 10, 0, Math.PI*2); ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Drone body
+                    ctx.fillStyle = '#00B8D4';
+                    ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = '#00E5FF';
-                    ctx.beginPath(); ctx.arc(p.x+Math.cos(angle)*(def.orbitR||80), p.y+Math.sin(angle)*(def.orbitR||80), 6, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(ox, oy, 3, 0, Math.PI*2); ctx.fill();
                 }
             }
             if (def.type === 'saw') {
-                ctx.strokeStyle = '#FF6600'; ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
-                ctx.beginPath(); ctx.arc(p.x, p.y, def.sawR||60, this.sawAngle, this.sawAngle+Math.PI*1.5); ctx.stroke();
+                const r = def.sawR || 60;
+                // Saw blade
+                ctx.strokeStyle = '#FF6600'; ctx.lineWidth = 3; ctx.globalAlpha = 0.5;
+                ctx.beginPath(); ctx.arc(p.x, p.y, r, this.sawAngle, this.sawAngle+Math.PI*1.5); ctx.stroke();
+                // Second blade
+                ctx.beginPath(); ctx.arc(p.x, p.y, r, this.sawAngle+Math.PI, this.sawAngle+Math.PI*2.5); ctx.stroke();
+                // Center glow
+                ctx.fillStyle = '#FF6600'; ctx.globalAlpha = 0.1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
                 ctx.globalAlpha = 1;
             }
         }
@@ -913,23 +1031,54 @@ class CyberSurvivor {
             const pr = 50 + pet.lv * 5;
             const px = p.x + Math.cos(pet.angle) * pr;
             const py = p.y + Math.sin(pet.angle) * pr;
+            const hover = Math.sin(this.player.time * 4 + pet.angle) * 2;
+            // Glow
+            ctx.fillStyle = '#FFA500'; ctx.globalAlpha = 0.2;
+            ctx.beginPath(); ctx.arc(px, py+hover, 10, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Body
+            ctx.fillStyle = '#455A64';
+            ctx.beginPath(); ctx.arc(px, py+hover, 6, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#FFA500';
-            ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(px, py+hover, 4, 0, Math.PI*2); ctx.fill();
+            // Icon
             ctx.fillStyle = '#FFF'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText(petDef.icon, px, py + 3);
+            ctx.fillText(petDef.icon, px, py+hover+3);
+            // Connection line to player
+            ctx.strokeStyle = 'rgba(255,165,0,0.15)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(px, py+hover); ctx.stroke();
         }
 
         this._drawPlayer(ctx);
         for (const pt of this.activeParticles) {
             const alpha = Math.max(0, pt.life/pt.maxLife);
             ctx.globalAlpha = alpha;
-            if (pt.type === 'text') { ctx.fillStyle = pt.color; ctx.font = 'bold 11px Orbitron,monospace'; ctx.textAlign = 'center'; ctx.fillText(pt.text, pt.x, pt.y); }
+            if (pt.type === 'text') {
+                const isCrit = pt.text.includes('💥');
+                ctx.fillStyle = pt.color;
+                ctx.font = isCrit ? 'bold 16px Orbitron,monospace' : 'bold 11px Orbitron,monospace';
+                ctx.textAlign = 'center';
+                if (isCrit) { ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 8; }
+                ctx.fillText(pt.text, pt.x, pt.y);
+                ctx.shadowBlur = 0;
+            }
             else { ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size*alpha, 0, Math.PI*2); ctx.fill(); }
             ctx.globalAlpha = 1;
         }
         ctx.restore();
 
         this._drawHUD(ctx);
+        // Boss intro overlay
+        if (this.bossIntroTimer > 0) {
+            const alpha = Math.min(1, this.bossIntroTimer);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, H/2-40, W, 80);
+            ctx.fillStyle = '#FF4444'; ctx.font = 'bold 28px Orbitron,monospace'; ctx.textAlign = 'center';
+            ctx.fillText('⚠️ ' + this.bossIntroName + ' ⚠️', W/2, H/2+5);
+            ctx.fillStyle = '#FF8888'; ctx.font = '14px Rajdhani,sans-serif';
+            ctx.fillText('Incoming!', W/2, H/2+25);
+            ctx.globalAlpha = 1;
+        }
         if (this.joystick.active) this._drawJoystick(ctx);
         if (this.state === GS.LEVELUP) this._drawLevelUp(ctx);
         if (this.state === GS.PAUSED) { ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#FFF'; ctx.font='bold 28px Orbitron,monospace'; ctx.textAlign='center'; ctx.fillText('TẠM DỪNG',W/2,H/2); }
@@ -938,50 +1087,266 @@ class CyberSurvivor {
 
     _drawGrid(ctx) {
         const gs = 80, sx = Math.floor(this.camX/gs)*gs, sy = Math.floor(this.camY/gs)*gs;
-        ctx.strokeStyle = 'rgba(0,229,255,0.04)'; ctx.lineWidth = 1;
+        const t = this.player?.time || 0;
+        const pulse = 0.03 + Math.sin(t*0.5)*0.01;
+        ctx.strokeStyle = `rgba(0,229,255,${pulse})`; ctx.lineWidth = 1;
         for (let x=sx; x<this.camX+W+gs; x+=gs) { ctx.beginPath(); ctx.moveTo(x,this.camY); ctx.lineTo(x,this.camY+H); ctx.stroke(); }
         for (let y=sy; y<this.camY+H+gs; y+=gs) { ctx.beginPath(); ctx.moveTo(this.camX,y); ctx.lineTo(this.camX+W,y); ctx.stroke(); }
+        // Center crosshair
+        ctx.strokeStyle = 'rgba(0,229,255,0.08)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(this.camX+W/2-20, this.camY+H/2); ctx.lineTo(this.camX+W/2+20, this.camY+H/2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(this.camX+W/2, this.camY+H/2-20); ctx.lineTo(this.camX+W/2, this.camY+H/2+20); ctx.stroke();
     }
 
     _drawPlayer(ctx) {
         const p = this.player;
         if (p.invTimer > 0 && Math.floor(p.invTimer*10)%2===0) return;
-        const ult = ULTIMATES[p.charKey];
+        const t = p.time;
+        const walk = (this.keys['w']||this.keys['s']||this.keys['a']||this.keys['d']||this.joystick.active) ? Math.sin(t*12)*3 : 0;
+
+        // Character colors by type
+        const colors = {
+            vanguard: { body:'#00B8D4', accent:'#00E5FF', visor:'#00E5FF' },
+            assassin: { body:'#D32F2F', accent:'#FF5252', visor:'#FF1744' },
+            engineer: { body:'#E65100', accent:'#FF9100', visor:'#FFAB00' },
+            heavy:    { body:'#455A64', accent:'#78909C', visor:'#B0BEC5' },
+            monk:     { body:'#6A1B9A', accent:'#AB47BC', visor:'#CE93D8' },
+            pilot:    { body:'#1565C0', accent:'#42A5F5', visor:'#90CAF9' },
+            hacker:   { body:'#00897B', accent:'#26A69A', visor='#80CBC4' }
+        };
+        const col = colors[p.charKey] || colors.vanguard;
+
         // Ultimate aura
         if (p.ultimateActive) {
             ctx.fillStyle = 'rgba(255,200,0,0.15)';
             ctx.beginPath(); ctx.arc(p.x, p.y, 35, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = 'rgba(255,200,0,0.4)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 32, 0, Math.PI*2); ctx.stroke();
         }
-        if (p.passives.shield) { ctx.strokeStyle = 'rgba(0,150,255,0.3)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.stroke(); }
-        ctx.fillStyle = 'rgba(0,229,255,0.12)';
-        ctx.beginPath(); ctx.arc(p.x, p.y, 24, 0, Math.PI*2); ctx.fill();
-        const charColor = p.charKey === 'assassin' ? '#FF4444' : p.charKey === 'engineer' ? '#FFA500' : p.charKey === 'heavy' ? '#888888' : p.charKey === 'monk' ? '#AA44FF' : p.charKey === 'pilot' ? '#4488FF' : p.charKey === 'hacker' ? '#00FF88' : '#00E5FF';
-        ctx.fillStyle = charColor;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 14, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.arc(p.x-4, p.y-3, 3, 0, Math.PI*2); ctx.arc(p.x+4, p.y-3, 3, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.arc(p.x-4, p.y-3, 1.5, 0, Math.PI*2); ctx.arc(p.x+4, p.y-3, 1.5, 0, Math.PI*2); ctx.fill();
+
+        // Shield
+        if (p.passives.shield) {
+            ctx.strokeStyle = 'rgba(0,150,255,0.3)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 22, 0, Math.PI*2); ctx.stroke();
+        }
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath(); ctx.ellipse(p.x, p.y+18, 14, 5, 0, 0, Math.PI*2); ctx.fill();
+
+        // Legs
+        ctx.fillStyle = '#263238';
+        ctx.fillRect(p.x-7, p.y+6+walk, 5, 12);
+        ctx.fillRect(p.x+2, p.y+6-walk, 5, 12);
+        // Boots
+        ctx.fillStyle = col.accent;
+        ctx.fillRect(p.x-8, p.y+16+walk, 6, 3);
+        ctx.fillRect(p.x+2, p.y+16-walk, 6, 3);
+
+        // Body armor
+        ctx.fillStyle = col.body;
+        ctx.beginPath();
+        ctx.moveTo(p.x-10, p.y-8);
+        ctx.lineTo(p.x+10, p.y-8);
+        ctx.lineTo(p.x+12, p.y+8);
+        ctx.lineTo(p.x-12, p.y+8);
+        ctx.closePath();
+        ctx.fill();
+
+        // Armor highlight
+        ctx.fillStyle = col.accent;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(p.x-8, p.y-6, 16, 4);
+        ctx.globalAlpha = 1;
+
+        // Armor details
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(p.x-4, p.y-2, 8, 6);
+
+        // Head/Helmet
+        ctx.fillStyle = col.body;
+        ctx.beginPath(); ctx.arc(p.x, p.y-16, 10, 0, Math.PI*2); ctx.fill();
+
+        // Visor
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath(); ctx.arc(p.x, p.y-16, 8, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = col.visor;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath(); ctx.arc(p.x, p.y-16, 6, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Visor glow
+        ctx.fillStyle = col.visor;
+        ctx.globalAlpha = 0.2 + Math.sin(t*3)*0.1;
+        ctx.beginPath(); ctx.arc(p.x, p.y-16, 12, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Weapon arm (right side)
+        ctx.fillStyle = col.body;
+        ctx.save();
+        ctx.translate(p.x+12, p.y-4);
+        ctx.rotate(Math.sin(t*2)*0.1);
+        ctx.fillRect(0, -3, 10, 6);
+        // Weapon tip
+        ctx.fillStyle = col.accent;
+        ctx.fillRect(10, -2, 4, 4);
+        ctx.restore();
+
+        // Left arm
+        ctx.fillStyle = col.body;
+        ctx.fillRect(p.x-16, p.y-2, 6, 5);
     }
 
     _drawEnemy(ctx, e) {
-        if (e.cloak) ctx.globalAlpha = 0.3;
-        if (e.hitFlash > 0) ctx.fillStyle = '#FFF'; else ctx.fillStyle = e.color;
-        if (e.isElite && e.eliteGlow) { ctx.shadowColor = e.eliteGlow; ctx.shadowBlur = 12; }
-        ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI*2); ctx.fill();
-        ctx.shadowBlur = 0;
-        if (e.isBoss) {
-            ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size*0.7, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(e.x, e.y, e.size*0.5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#FFF'; ctx.beginPath(); ctx.arc(e.x-8, e.y-5, 5, 0, Math.PI*2); ctx.arc(e.x+8, e.y-5, 5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#FF0000'; ctx.beginPath(); ctx.arc(e.x-8, e.y-5, 3, 0, Math.PI*2); ctx.arc(e.x+8, e.y-5, 3, 0, Math.PI*2); ctx.fill();
-        } else {
-            ctx.fillStyle = '#FFF'; ctx.beginPath(); ctx.arc(e.x, e.y-2, e.size*0.25, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x, e.y-2, e.size*0.12, 0, Math.PI*2); ctx.fill();
+        if (e.cloak) ctx.globalAlpha = 0.25;
+        const flash = e.hitFlash > 0;
+        const s = e.size;
+        const t = this.player.time;
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath(); ctx.ellipse(e.x, e.y+s, s*0.7, s*0.25, 0, 0, Math.PI*2); ctx.fill();
+
+        // Elite glow
+        if (e.isElite && e.eliteGlow) {
+            ctx.fillStyle = e.eliteGlow; ctx.globalAlpha = 0.15 + Math.sin(t*4)*0.05;
+            ctx.beginPath(); ctx.arc(e.x, e.y, s*1.5, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = e.cloak ? 0.25 : 1;
         }
-        if (e.isElite) { ctx.fillStyle = '#FFD700'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('★', e.x, e.y-e.size-4); }
-        if (e.hp < e.maxHp) { const bw = e.size*2; ctx.fillStyle = '#333'; ctx.fillRect(e.x-bw/2, e.y-e.size-8, bw, 3); ctx.fillStyle = e.isBoss ? '#FFD700' : '#F44336'; ctx.fillRect(e.x-bw/2, e.y-e.size-8, bw*(e.hp/e.maxHp), 3); }
+
+        const bodyColor = flash ? '#FFF' : e.color;
+        const darkColor = flash ? '#CCC' : this._darken(e.color, 0.6);
+
+        if (e.isBoss) {
+            // Boss - large mechanical entity
+            // Body
+            ctx.fillStyle = darkColor;
+            ctx.fillRect(e.x-s, e.y-s*0.8, s*2, s*1.6);
+            ctx.fillStyle = bodyColor;
+            ctx.fillRect(e.x-s*0.8, e.y-s*0.6, s*1.6, s*1.2);
+            // Core
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(e.x-s*0.4, e.y-s*0.3, s*0.8, s*0.6);
+            ctx.fillStyle = e.color;
+            ctx.globalAlpha = 0.6 + Math.sin(t*3)*0.3;
+            ctx.beginPath(); ctx.arc(e.x, e.y, s*0.3, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Eyes
+            ctx.fillStyle = '#FF0000';
+            ctx.beginPath(); ctx.arc(e.x-s*0.3, e.y-s*0.3, 4, 0, Math.PI*2); ctx.arc(e.x+s*0.3, e.y-s*0.3, 4, 0, Math.PI*2); ctx.fill();
+            // Arms
+            ctx.fillStyle = darkColor;
+            ctx.fillRect(e.x-s*1.3, e.y-s*0.2, s*0.4, s*0.8);
+            ctx.fillRect(e.x+s*0.9, e.y-s*0.2, s*0.4, s*0.8);
+            // Phase indicator
+            if (e.phases > 1) {
+                ctx.fillStyle = '#FFD700'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText('P'+e.bossPhase, e.x, e.y-s-5);
+            }
+        } else if (e.type === 'fast' || e.type === 'hunter') {
+            // Fast - sleek triangle
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.moveTo(e.x, e.y-s);
+            ctx.lineTo(e.x+s*0.8, e.y+s*0.6);
+            ctx.lineTo(e.x-s*0.8, e.y+s*0.6);
+            ctx.closePath();
+            ctx.fill();
+            // Engine glow
+            ctx.fillStyle = '#FF8800'; ctx.globalAlpha = 0.6;
+            ctx.beginPath(); ctx.arc(e.x, e.y+s*0.8, 3, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Eye
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath(); ctx.arc(e.x, e.y-s*0.2, 2, 0, Math.PI*2); ctx.fill();
+        } else if (e.type === 'flying') {
+            // Flying drone - hovering disc
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath(); ctx.ellipse(e.x, e.y, s, s*0.5, 0, 0, Math.PI*2); ctx.fill();
+            // Hover effect
+            ctx.fillStyle = '#00E5FF'; ctx.globalAlpha = 0.3;
+            ctx.beginPath(); ctx.ellipse(e.x, e.y+s*0.5, s*0.6, 2, 0, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Eye
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath(); ctx.arc(e.x, e.y-2, 3, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#F00';
+            ctx.beginPath(); ctx.arc(e.x, e.y-2, 1.5, 0, Math.PI*2); ctx.fill();
+        } else if (e.type === 'spider') {
+            // Spider bot - body with legs
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath(); ctx.arc(e.x, e.y, s*0.6, 0, Math.PI*2); ctx.fill();
+            // Legs
+            ctx.strokeStyle = darkColor; ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                const angle = (i/6)*Math.PI*2 + Math.sin(t*8)*0.2;
+                ctx.beginPath();
+                ctx.moveTo(e.x+Math.cos(angle)*s*0.4, e.y+Math.sin(angle)*s*0.4);
+                ctx.lineTo(e.x+Math.cos(angle)*s, e.y+Math.sin(angle)*s);
+                ctx.stroke();
+            }
+            // Eyes
+            ctx.fillStyle = '#F00';
+            ctx.beginPath(); ctx.arc(e.x-3, e.y-3, 2, 0, Math.PI*2); ctx.arc(e.x+3, e.y-3, 2, 0, Math.PI*2); ctx.fill();
+        } else if (e.type === 'heavy' || e.type === 'shield' || e.type === 'warMech') {
+            // Heavy - large armored box
+            ctx.fillStyle = darkColor;
+            ctx.fillRect(e.x-s, e.y-s, s*2, s*2);
+            ctx.fillStyle = bodyColor;
+            ctx.fillRect(e.x-s*0.8, e.y-s*0.8, s*1.6, s*1.6);
+            // Armor plates
+            ctx.fillStyle = darkColor;
+            ctx.fillRect(e.x-s*0.6, e.y-s*0.6, s*1.2, s*0.3);
+            ctx.fillRect(e.x-s*0.6, e.y+s*0.1, s*1.2, s*0.3);
+            // Eye slit
+            ctx.fillStyle = '#F00';
+            ctx.fillRect(e.x-s*0.4, e.y-s*0.2, s*0.8, 3);
+            // Shield bots have extra shield
+            if (e.type === 'shield') {
+                ctx.strokeStyle = '#4488FF'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+                ctx.beginPath(); ctx.arc(e.x, e.y, s*1.2, 0, Math.PI*2); ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        } else {
+            // Default drone - rounded body
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath(); ctx.arc(e.x, e.y, s, 0, Math.PI*2); ctx.fill();
+            // Inner detail
+            ctx.fillStyle = darkColor;
+            ctx.beginPath(); ctx.arc(e.x, e.y, s*0.6, 0, Math.PI*2); ctx.fill();
+            // Eye
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath(); ctx.arc(e.x, e.y-2, s*0.25, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#F00';
+            ctx.beginPath(); ctx.arc(e.x, e.y-2, s*0.12, 0, Math.PI*2); ctx.fill();
+            // Antenna
+            ctx.strokeStyle = darkColor; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(e.x, e.y-s); ctx.lineTo(e.x, e.y-s-5); ctx.stroke();
+            ctx.fillStyle = e.color;
+            ctx.beginPath(); ctx.arc(e.x, e.y-s-6, 2, 0, Math.PI*2); ctx.fill();
+        }
+
+        // Elite badge
+        if (e.isElite) {
+            ctx.fillStyle = '#FFD700'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('★', e.x, e.y-s-4);
+        }
+
+        // HP bar
+        if (e.hp < e.maxHp) {
+            const bw = s*2;
+            ctx.fillStyle = '#333'; ctx.fillRect(e.x-bw/2, e.y-s-8, bw, 3);
+            ctx.fillStyle = e.isBoss ? '#FFD700' : '#F44336';
+            ctx.fillRect(e.x-bw/2, e.y-s-8, bw*(e.hp/e.maxHp), 3);
+        }
         ctx.globalAlpha = 1;
+    }
+
+    _darken(hex, factor) {
+        const r = Math.floor(parseInt(hex.slice(1,3),16)*factor);
+        const g = Math.floor(parseInt(hex.slice(3,5),16)*factor);
+        const b = Math.floor(parseInt(hex.slice(5,7),16)*factor);
+        return '#'+r.toString(16).padStart(2,'0')+g.toString(16).padStart(2,'0')+b.toString(16).padStart(2,'0');
     }
 
     _drawHUD(ctx) {
@@ -1137,33 +1502,64 @@ class CyberSurvivor {
 
     _renderMenu(ctx) {
         ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, W, H);
-        ctx.strokeStyle = 'rgba(0,229,255,0.04)'; ctx.lineWidth = 1;
+        // Animated grid
+        const t = Date.now()/1000;
+        ctx.strokeStyle = 'rgba(0,229,255,0.03)'; ctx.lineWidth = 1;
         for (let x=0; x<W; x+=60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
         for (let y=0; y<H; y+=60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+        // Floating particles
+        ctx.fillStyle = '#00E5FF';
+        for (let i = 0; i < 20; i++) {
+            const px = (i*137+t*15)%W, py = (i*211+t*10)%H;
+            ctx.globalAlpha = 0.1+Math.sin(t+i)*0.05;
+            ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
         ctx.textAlign = 'center';
+        // Title with glow
+        ctx.shadowColor = '#00E5FF'; ctx.shadowBlur = 20;
         ctx.fillStyle = '#00E5FF'; ctx.font = 'bold 32px Orbitron,monospace'; ctx.fillText('CYBER SURVIVOR', W/2, 70);
-        ctx.fillStyle = '#FF6600'; ctx.font = 'bold 12px Orbitron,monospace'; ctx.fillText('⚡ PHASE 3 ⚡', W/2, 92);
-        ctx.font = '18px sans-serif'; ctx.fillStyle = '#FFF';
-        ctx.fillText('🛡️🗡️🔧🔫🧘🤖💻', W/2, 130);
-        ctx.fillText('🔫🔴🚀⚡🛸⚙️💜❄️🎯', W/2, 160);
-        ctx.fillText('💚🛡️📈🔫🚀', W/2, 190);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#FF6600'; ctx.font = 'bold 12px Orbitron,monospace'; ctx.fillText('⚡ PHASE 5 ⚡', W/2, 92);
+
+        // Character preview
+        ctx.fillStyle = 'rgba(0,229,255,0.08)';
+        ctx.beginPath(); ctx.arc(W/2, 160, 30, 0, Math.PI*2); ctx.fill();
+        // Draw mini character
+        ctx.fillStyle = '#00B8D4';
+        ctx.beginPath();
+        ctx.moveTo(W/2-10, 152); ctx.lineTo(W/2+10, 152);
+        ctx.lineTo(W/2+12, 168); ctx.lineTo(W/2-12, 168);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#00E5FF';
+        ctx.beginPath(); ctx.arc(W/2, 144, 8, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath(); ctx.arc(W/2, 144, 6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#00E5FF'; ctx.globalAlpha = 0.8;
+        ctx.beginPath(); ctx.arc(W/2, 144, 4, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Weapon icons
+        ctx.font = '16px sans-serif'; ctx.fillStyle = '#FFF';
+        ctx.fillText('🔫🔴🚀⚡🛸⚙️💜❄️🎯', W/2, 210);
 
         const buttons = [
-            { y:220, text:'▶ CHỌN NHÂN VẬT', color:'#00E5FF' },
-            { y:270, text:'🔧 NÂNG CẤP', color:'#FF6600' }
+            { y:240, text:'▶ CHỌN NHÂN VẬT', color:'#00E5FF' },
+            { y:285, text:'🔧 NÂNG CẤP', color:'#FF6600' }
         ];
         for (const btn of buttons) {
-            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(W/2-80, btn.y, 160, 32);
-            ctx.strokeStyle = btn.color; ctx.lineWidth = 1; ctx.strokeRect(W/2-80, btn.y, 160, 32);
-            ctx.fillStyle = '#FFF'; ctx.font = 'bold 14px Rajdhani,sans-serif'; ctx.fillText(btn.text, W/2, btn.y+21);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(W/2-90, btn.y, 180, 35);
+            ctx.strokeStyle = btn.color; ctx.lineWidth = 1; ctx.strokeRect(W/2-90, btn.y, 180, 35);
+            ctx.fillStyle = '#FFF'; ctx.font = 'bold 14px Rajdhani,sans-serif'; ctx.fillText(btn.text, W/2, btn.y+23);
         }
 
         const best = SaveManager.load();
         ctx.fillStyle = '#666'; ctx.font = '11px Rajdhani,sans-serif';
-        ctx.fillText('Kỷ lục: '+Math.floor(best.bestTime/60)+':'+String(best.bestTime%60).padStart(2,'0')+' | '+best.bestKills+' kills | Lv.'+best.bestLevel, W/2, 340);
-        ctx.fillText('Tech Credits: '+best.techCredits+' | Hoàn thành: '+SaveManager.getCompletionPercent()+'%', W/2, 360);
+        ctx.fillText('Kỷ lục: '+Math.floor(best.bestTime/60)+':'+String(best.bestTime%60).padStart(2,'0')+' | '+best.bestKills+' kills | Lv.'+best.bestLevel, W/2, 350);
+        ctx.fillText('Tech Credits: '+best.techCredits+' | Hoàn thành: '+SaveManager.getCompletionPercent()+'%', W/2, 370);
         ctx.fillStyle = '#444'; ctx.font = '10px Rajdhani,sans-serif';
-        ctx.fillText('7 nhân vật | 5 pet | 9 vũ khí | 10 kẻ thù | 6 boss | 5 chế độ', W/2, 420);
+        ctx.fillText('7 nhân vật | 5 pet | 9 vũ khí | 16 kẻ thù | 6 boss | 5 chế độ', W/2, 420);
         ctx.fillText('WASD: Di chuyển | Q: Ultimate | ESC: Tạm dừng', W/2, 440);
     }
 
