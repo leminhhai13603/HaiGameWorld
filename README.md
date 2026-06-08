@@ -37,7 +37,8 @@
 - 🏆 **Achievements** — unlock challenges across games
 - ⚡ **Zero dependencies** — pure vanilla HTML5/Canvas/JavaScript
 - 🎨 **Pixel-art style** — handcrafted procedural graphics
-- 🌐 **Offline ready** — no server required, runs entirely in-browser
+- 🌐 **PWA ready** — install as app, play offline
+- ♿ **Accessible** — ARIA labels, keyboard navigation, screen reader support
 
 ---
 

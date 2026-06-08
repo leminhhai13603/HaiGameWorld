@@ -1,0 +1,23 @@
+/* Shared styles for all games */
+#back-btn {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 1000;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+#back-btn:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.2);
+}

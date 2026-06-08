@@ -1,0 +1,20 @@
+{
+    "name": "Hải Game World - 15 Game Miễn Phí Online",
+    "short_name": "Hải Game World",
+    "description": "Chơi 15 game miễn phí online: Flappy Bird, 2048, Tetris, Pikachu, Battle City, Gold Miner và nhiều hơn nữa.",
+    "start_url": "/HaiGameWorld/",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#0a0a1a",
+    "background_color": "#0a0a1a",
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["games", "entertainment"],
+    "lang": "vi"
+}

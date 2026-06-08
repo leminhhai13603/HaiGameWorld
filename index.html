@@ -3,15 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hải Game World</title>
+    <title>Hải Game World - 15 Game Miễn Phí Online</title>
+    <meta name="description" content="Chơi 15 game miễn phí online: Flappy Bird, 2048, Tetris, Pikachu, Battle City, Gold Miner và nhiều hơn nữa. Không cần tải, chơi ngay trên trình duyệt!">
+    <meta name="keywords" content="game online, game miễn phí, flappy bird, 2048, tetris, pikachu, battle city, gold miner, chơi game">
+    <meta name="author" content="Lê Minh Hải">
+    <link rel="canonical" href="https://leminhhai13603.github.io/HaiGameWorld/">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Hải Game World - 15 Game Miễn Phí Online">
+    <meta property="og:description" content="Chơi 15 game miễn phí online: Flappy Bird, 2048, Tetris, Pikachu, Battle City, Gold Miner và nhiều hơn nữa.">
+    <meta property="og:url" content="https://leminhhai13603.github.io/HaiGameWorld/">
+    <meta property="og:site_name" content="Hải Game World">
+    <meta property="og:locale" content="vi_VN">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hải Game World - 15 Game Miễn Phí Online">
+    <meta name="twitter:description" content="Chơi 15 game miễn phí online: Flappy Bird, 2048, Tetris, Pikachu, Battle City, Gold Miner và nhiều hơn nữa.">
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/hub.css">
 </head>
 <body>
-    <div class="bg-stars"></div>
+    <a href="#main-content" class="skip-link">Chuyển đến nội dung</a>
+    <div class="bg-stars" aria-hidden="true"></div>
 
     <div class="hub-container">
         <!-- Hero -->
-        <header class="hero animate-in">
+        <header class="hero animate-in" role="banner">
             <h1 class="hero-logo">Hải Game World</h1>
             <p class="hero-sub">Đa dạng - Cổ điển - Tôn trọng</p>
         </header>
@@ -33,14 +58,16 @@
         </div>
 
         <!-- Featured Game -->
-        <div id="featured-game" class="animate-in delay-2"></div>
+        <section id="featured-game" class="animate-in delay-2" aria-label="Game nổi bật"></section>
 
         <!-- All Games -->
-        <h2 class="section-title animate-in delay-3">All Games</h2>
-        <div id="games-grid" class="games-grid"></div>
+        <main id="main-content">
+            <h2 class="section-title animate-in delay-3">All Games</h2>
+            <div id="games-grid" class="games-grid" role="list" aria-label="Danh sách game"></div>
+        </main>
 
         <!-- Footer -->
-        <footer class="hub-footer">
+        <footer class="hub-footer" role="contentinfo">
             <div class="footer-brand">
                 <span class="footer-logo">🎮</span>
                 <span class="footer-title">HẢI GAME WORLD</span>

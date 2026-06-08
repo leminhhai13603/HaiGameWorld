@@ -185,10 +185,10 @@ const Hub = {
                         </a>
                     `).join('')}
                 </div>
-                <button class="carousel-btn carousel-prev" id="carousel-prev">‹</button>
-                <button class="carousel-btn carousel-next" id="carousel-next">›</button>
-                <div class="carousel-dots" id="carousel-dots">
-                    ${games.map((_, i) => `<span class="carousel-dot${i === 0 ? ' active' : ''}" data-index="${i}"></span>`).join('')}
+                <button class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Game trước">‹</button>
+                <button class="carousel-btn carousel-next" id="carousel-next" aria-label="Game sau">›</button>
+                <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Chọn game">
+                    ${games.map((_, i) => `<span class="carousel-dot${i === 0 ? ' active' : ''}" data-index="${i}" role="tab" aria-label="Game ${i + 1}"></span>`).join('')}
                 </div>
             </div>
         `;
@@ -258,8 +258,8 @@ const Hub = {
     renderGrid() {
         const grid = document.getElementById('games-grid');
         grid.innerHTML = this.games.map(game => `
-            <a href="${game.path}" class="game-card animate-in delay-${this.games.indexOf(game) + 1}" style="text-decoration:none;color:inherit;">
-                <div class="card-thumb ${game.thumbClass}">${game.thumb}</div>
+            <a href="${game.path}" class="game-card animate-in delay-${this.games.indexOf(game) + 1}" style="text-decoration:none;color:inherit;" role="listitem" aria-label="Chơi ${game.name}">
+                <div class="card-thumb ${game.thumbClass}" aria-hidden="true">${game.thumb}</div>
                 <div class="card-body">
                     <div class="card-name">${game.name}</div>
                     <div class="card-desc">${game.desc}</div>
@@ -373,3 +373,8 @@ const Hub = {
 };
 
 document.addEventListener('DOMContentLoaded', () => Hub.init());
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/HaiGameWorld/sw.js').catch(() => {});
+}

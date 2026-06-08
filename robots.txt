@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://leminhhai13603.github.io/HaiGameWorld/sitemap.xml
