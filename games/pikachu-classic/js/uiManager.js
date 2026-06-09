@@ -308,24 +308,65 @@ class UIManager {
         ctx.fillStyle = timer <= 30 ? '#ff4444' : '#00ccff';
         ctx.fillRect(barX, 30, barW * Math.max(0, timer / maxTimer), 6);
 
-        // Hints + Shuffles
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#ffff00';
-        ctx.font = 'bold 13px Rajdhani, sans-serif';
-        ctx.fillText(`💡 ${hints}  🔀 ${shuffles}`, w - 12, 20);
+        // Hint button
+        const hBtnX = w - 118, hBtnY = 6, hBtnW = 52, hBtnH = 38;
+        this.hintButtonRect = { x: hBtnX, y: hBtnY, w: hBtnW, h: hBtnH };
+        const hDisabled = hints <= 0;
+        ctx.fillStyle = hDisabled ? '#333' : '#1a5a2a';
+        this._roundRect(hBtnX, hBtnY, hBtnW, hBtnH, 6);
+        ctx.fill();
+        ctx.strokeStyle = hDisabled ? '#555' : '#44ff88';
+        ctx.lineWidth = 1.5;
+        this._roundRect(hBtnX, hBtnY, hBtnW, hBtnH, 6);
+        ctx.stroke();
+        ctx.textAlign = 'center';
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = hDisabled ? '#555' : '#fff';
+        ctx.fillText('💡', hBtnX + hBtnW / 2, hBtnY + 18);
+        ctx.font = `bold 11px Rajdhani, sans-serif`;
+        ctx.fillStyle = hDisabled ? '#555' : '#aaffcc';
+        ctx.fillText(`${hints}`, hBtnX + hBtnW / 2, hBtnY + 33);
+
+        // Shuffle button
+        const sBtnX = w - 62, sBtnY = 6, sBtnW = 52, sBtnH = 38;
+        this.shuffleButtonRect = { x: sBtnX, y: sBtnY, w: sBtnW, h: sBtnH };
+        const sDisabled = shuffles <= 0;
+        ctx.fillStyle = sDisabled ? '#333' : '#1a2a5a';
+        this._roundRect(sBtnX, sBtnY, sBtnW, sBtnH, 6);
+        ctx.fill();
+        ctx.strokeStyle = sDisabled ? '#555' : '#4488ff';
+        ctx.lineWidth = 1.5;
+        this._roundRect(sBtnX, sBtnY, sBtnW, sBtnH, 6);
+        ctx.stroke();
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = sDisabled ? '#555' : '#fff';
+        ctx.fillText('🔀', sBtnX + sBtnW / 2, sBtnY + 18);
+        ctx.font = `bold 11px Rajdhani, sans-serif`;
+        ctx.fillStyle = sDisabled ? '#555' : '#aaccff';
+        ctx.fillText(`${shuffles}`, sBtnX + sBtnW / 2, sBtnY + 33);
 
         // Combo
         if (combo > 1) {
             ctx.fillStyle = '#ff8844';
             ctx.font = 'bold 16px Rajdhani, sans-serif';
-            ctx.fillText(`x${combo} COMBO!`, w - 12, 40);
+            ctx.textAlign = 'right';
+            ctx.fillText(`x${combo} COMBO!`, w - 130, 40);
         }
+    }
 
-        // Sound indicator
-        ctx.fillStyle = '#555';
-        ctx.font = '12px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(AudioManager.enabled ? '🔊' : '🔇', w - 50, 48);
+    _roundRect(x, y, w, h, r) {
+        const ctx = this.ctx;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
     }
 
     /**
@@ -396,24 +437,44 @@ class UIManager {
         const startX = w/2 - (cols * (cellSize + gap) - gap) / 2;
         const startY = 70;
 
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 27; i++) {
             const col = i % cols;
             const row = Math.floor(i / cols);
             const x = startX + col * (cellSize + gap);
             const y = startY + row * (cellSize + gap);
             const unlocked = (i + 1) <= maxUnlocked;
+            const isInward = (i + 1) === 26;
+            const isOutward = (i + 1) === 27;
 
-            ctx.fillStyle = unlocked ? (i + 1 === currentLevel ? '#2a7a3e' : '#1a4a28') : '#222';
+            ctx.fillStyle = unlocked
+                ? (i + 1 === currentLevel ? '#2a7a3e' : isInward ? '#1a3a5a' : isOutward ? '#4a1a5a' : '#1a4a28')
+                : '#222';
             ctx.fillRect(x, y, cellSize, cellSize);
-            ctx.strokeStyle = unlocked ? '#44ff88' : '#444';
+            ctx.strokeStyle = unlocked ? (isInward ? '#44aaff' : isOutward ? '#cc44ff' : '#44ff88') : '#444';
             ctx.lineWidth = 1;
             ctx.strokeRect(x, y, cellSize, cellSize);
 
             ctx.fillStyle = unlocked ? '#fff' : '#555';
-            ctx.font = 'bold 18px Orbitron, monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(`${i+1}`, x + cellSize/2, y + cellSize/2);
+            if (isInward && unlocked) {
+                ctx.font = '16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('⬤', x + cellSize/2, y + cellSize/2 - 8);
+                ctx.font = '9px Rajdhani, sans-serif';
+                ctx.fillText('IN', x + cellSize/2, y + cellSize/2 + 10);
+            } else if (isOutward && unlocked) {
+                ctx.font = '16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('◯', x + cellSize/2, y + cellSize/2 - 8);
+                ctx.font = '9px Rajdhani, sans-serif';
+                ctx.fillText('OUT', x + cellSize/2, y + cellSize/2 + 10);
+            } else {
+                ctx.font = 'bold 18px Orbitron, monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${i+1}`, x + cellSize/2, y + cellSize/2);
+            }
         }
 
         ctx.textBaseline = 'alphabetic';

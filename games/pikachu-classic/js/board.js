@@ -235,6 +235,30 @@ class Board {
                     for (let r = 0; r < this.rows; r++) this.grid[r][c] = filled[r];
                 }
                 break;
+            case 'inward': {
+                // Each row: left half slides right toward center, right half slides left toward center
+                const mid = Math.floor(this.cols / 2);
+                for (let r = 0; r < this.rows; r++) {
+                    const left = this.grid[r].slice(0, mid).filter(v => v !== 0);
+                    while (left.length < mid) left.unshift(0);
+                    const right = this.grid[r].slice(mid).filter(v => v !== 0);
+                    while (right.length < this.cols - mid) right.push(0);
+                    this.grid[r] = [...left, ...right];
+                }
+                break;
+            }
+            case 'outward': {
+                // Each row: left half slides left toward edge, right half slides right toward edge
+                const mid = Math.floor(this.cols / 2);
+                for (let r = 0; r < this.rows; r++) {
+                    const left = this.grid[r].slice(0, mid).filter(v => v !== 0);
+                    while (left.length < mid) left.push(0);
+                    const right = this.grid[r].slice(mid).filter(v => v !== 0);
+                    while (right.length < this.cols - mid) right.unshift(0);
+                    this.grid[r] = [...left, ...right];
+                }
+                break;
+            }
         }
 
         // Ensure valid pairs after shift

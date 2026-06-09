@@ -207,7 +207,7 @@ class PikachuGame {
         const startY = 70;
         const save = SaveManager.load();
 
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 27; i++) {
             const col = i % cols;
             const row = Math.floor(i / cols);
             const bx = startX + col * (cellSize + gap);
@@ -296,6 +296,19 @@ class PikachuGame {
     }
 
     _handleBoardClick(x, y) {
+        // Check hint button
+        const hr = this.ui.hintButtonRect;
+        if (hr && x >= hr.x && x <= hr.x + hr.w && y >= hr.y && y <= hr.y + hr.h) {
+            this._useHint();
+            return;
+        }
+        // Check shuffle button
+        const sr = this.ui.shuffleButtonRect;
+        if (sr && x >= sr.x && x <= sr.x + sr.w && y >= sr.y && y <= sr.y + sr.h) {
+            this._useShuffle();
+            return;
+        }
+
         const cell = this.ui.getCellFromPos(x, y);
         if (!cell) return;
         if (!this.board.hasTile(cell.r, cell.c)) return;

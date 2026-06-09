@@ -1,107 +1,124 @@
 /**
  * Pikachu Classic - Level Manager
- * 25 handcrafted levels with different mechanics
+ * 27 levels across 3 phases:
+ *   Phase 1 (1-7):   Introduce all 6 shift types (null/left/right/up/down/inward/outward)
+ *   Phase 2 (8-15):  Revisit all types with increasing tile variety & speed
+ *   Phase 3 (16-27): All types combined with board holes
  */
 
 const LevelDefs = [
+    // === PHASE 1: Introduction ===
     // Level 1: Classic static
-    { timer: 300, tileVariety: 18, shift: null, holes: [], desc: 'Classic Mode' },
-    // Level 2: Slide left
-    { timer: 280, tileVariety: 18, shift: 'left', holes: [], desc: 'Tiles slide LEFT' },
-    // Level 3: Slide right
-    { timer: 280, tileVariety: 18, shift: 'right', holes: [], desc: 'Tiles slide RIGHT' },
-    // Level 4: Slide up
-    { timer: 270, tileVariety: 18, shift: 'up', holes: [], desc: 'Tiles slide UP' },
-    // Level 5: Slide down
-    { timer: 270, tileVariety: 18, shift: 'down', holes: [], desc: 'Tiles slide DOWN' },
-    // Level 6: Mixed left/right
-    { timer: 260, tileVariety: 20, shift: 'left', holes: [], desc: 'Mixed movement' },
-    // Level 7: Mixed up/down
-    { timer: 260, tileVariety: 20, shift: 'up', holes: [], desc: 'Mixed movement' },
-    // Level 8: Slide left + more variety
-    { timer: 250, tileVariety: 22, shift: 'left', holes: [], desc: 'More variety' },
-    // Level 9: Slide right + faster
-    { timer: 240, tileVariety: 22, shift: 'right', holes: [], desc: 'Faster pace' },
-    // Level 10: Slide down + hard
-    { timer: 230, tileVariety: 24, shift: 'down', holes: [], desc: 'Getting harder' },
-    // Level 11: Fast timer + more variety
-    { timer: 220, tileVariety: 24, shift: null, holes: [], desc: 'Speed round' },
-    // Level 12: Slide left + high variety
-    { timer: 210, tileVariety: 26, shift: 'left', holes: [], desc: 'Many icons' },
-    // Level 13: Slide up + fast
-    { timer: 200, tileVariety: 26, shift: 'up', holes: [], desc: 'Quick thinking' },
-    // Level 14: Slide right + variety
-    { timer: 190, tileVariety: 28, shift: 'right', holes: [], desc: 'Icon overload' },
-    // Level 15: Static + max variety
-    { timer: 180, tileVariety: 30, shift: null, holes: [], desc: 'Static challenge' },
-    // Level 16: Holes in board
+    { timer: 300, tileVariety: 18, shift: null,     holes: [], desc: 'Classic Mode' },
+    // Level 2: Left
+    { timer: 280, tileVariety: 18, shift: 'left',   holes: [], desc: 'Tiles slide LEFT' },
+    // Level 3: Right
+    { timer: 280, tileVariety: 18, shift: 'right',  holes: [], desc: 'Tiles slide RIGHT' },
+    // Level 4: Up
+    { timer: 270, tileVariety: 18, shift: 'up',     holes: [], desc: 'Tiles slide UP' },
+    // Level 5: Down
+    { timer: 270, tileVariety: 18, shift: 'down',   holes: [], desc: 'Tiles slide DOWN' },
+    // Level 6: Inward — first encounter, generous timer
+    { timer: 270, tileVariety: 20, shift: 'inward', holes: [], desc: 'Tiles suck IN' },
+    // Level 7: Outward — first encounter, generous timer
+    { timer: 270, tileVariety: 20, shift: 'outward',holes: [], desc: 'Tiles burst OUT' },
+
+    // === PHASE 2: Variety & Speed ===
+    // Level 8: Left faster
+    { timer: 250, tileVariety: 22, shift: 'left',   holes: [], desc: 'Faster LEFT' },
+    // Level 9: Inward + more icons
+    { timer: 250, tileVariety: 22, shift: 'inward', holes: [], desc: 'Inward — more icons' },
+    // Level 10: Down + tighter timer
+    { timer: 230, tileVariety: 24, shift: 'down',   holes: [], desc: 'Getting harder' },
+    // Level 11: Speed round (no shift, test memory)
+    { timer: 220, tileVariety: 24, shift: null,     holes: [], desc: 'Speed round' },
+    // Level 12: Outward + high variety
+    { timer: 210, tileVariety: 26, shift: 'outward',holes: [], desc: 'Outward — many icons' },
+    // Level 13: Up fast
+    { timer: 200, tileVariety: 26, shift: 'up',     holes: [], desc: 'Quick thinking' },
+    // Level 14: Inward + high variety
+    { timer: 190, tileVariety: 28, shift: 'inward', holes: [], desc: 'Inward overload' },
+    // Level 15: Outward + max variety before holes
+    { timer: 180, tileVariety: 30, shift: 'outward',holes: [], desc: 'Outward overload' },
+
+    // === PHASE 3: Holes ===
+    // Level 16: Null + small holes
     { timer: 200, tileVariety: 24, shift: null,
-      holes: [
-        {r:4,c:7},{r:4,c:8}
-      ],
+      holes: [{r:4,c:7},{r:4,c:8}],
       desc: 'Blocked areas' },
-    // Level 17: More holes
+    // Level 17: Left + holes
     { timer: 190, tileVariety: 24, shift: 'left',
-      holes: [
-        {r:3,c:7},{r:3,c:8},{r:6,c:7},{r:6,c:8}
-      ],
-      desc: 'Obstacles' },
-    // Level 18: L-shaped holes
+      holes: [{r:3,c:7},{r:3,c:8},{r:6,c:7},{r:6,c:8}],
+      desc: 'LEFT + obstacles' },
+    // Level 18: Inward + holes
+    { timer: 185, tileVariety: 26, shift: 'inward',
+      holes: [{r:2,c:7},{r:2,c:8},{r:6,c:7},{r:6,c:8}],
+      desc: 'Inward + obstacles' },
+    // Level 19: Right + L-holes
     { timer: 180, tileVariety: 26, shift: 'right',
       holes: [
         {r:2,c:7},{r:2,c:8},{r:3,c:7},{r:3,c:8},
         {r:6,c:3},{r:6,c:4}
       ],
-      desc: 'Complex layout' },
-    // Level 19: Cross pattern
-    { timer: 170, tileVariety: 26, shift: 'up',
+      desc: 'RIGHT + complex' },
+    // Level 20: Outward + cross holes
+    { timer: 175, tileVariety: 26, shift: 'outward',
       holes: [
         {r:4,c:7},{r:4,c:8},
         {r:0,c:3},{r:0,c:12},
         {r:8,c:3},{r:8,c:12}
       ],
-      desc: 'Cross pattern' },
-    // Level 20: Many holes
-    { timer: 160, tileVariety: 28, shift: 'down',
+      desc: 'Outward + cross' },
+    // Level 21: Down + maze holes
+    { timer: 165, tileVariety: 28, shift: 'down',
       holes: [
         {r:1,c:4},{r:1,c:11},
         {r:4,c:0},{r:4,c:15},
         {r:4,c:7},{r:4,c:8},
         {r:7,c:4},{r:7,c:11}
       ],
-      desc: 'Maze' },
-    // Level 21: Chaos - left shift + holes
-    { timer: 150, tileVariety: 28, shift: 'left',
+      desc: 'Maze — DOWN' },
+    // Level 22: Inward + chaos holes
+    { timer: 155, tileVariety: 28, shift: 'inward',
       holes: [
         {r:2,c:5},{r:2,c:10},
         {r:6,c:5},{r:6,c:10}
       ],
-      desc: 'Chaos mine' },
-    // Level 22: Chaos - right shift + holes
-    { timer: 145, tileVariety: 30, shift: 'right',
+      desc: 'Inward chaos' },
+    // Level 23: Outward + chaos holes
+    { timer: 150, tileVariety: 30, shift: 'outward',
       holes: [
         {r:0,c:7},{r:0,c:8},
         {r:4,c:3},{r:4,c:12},
         {r:8,c:7},{r:8,c:8}
       ],
-      desc: 'Maximum chaos' },
-    // Level 23: Speed + variety
+      desc: 'Outward chaos' },
+    // Level 24: Up + speed holes
     { timer: 140, tileVariety: 32, shift: 'up',
       holes: [
         {r:3,c:7},{r:3,c:8},
         {r:5,c:3},{r:5,c:4},{r:5,c:11},{r:5,c:12}
       ],
       desc: 'Speed demon' },
-    // Level 24: Near final
-    { timer: 130, tileVariety: 34, shift: 'down',
+    // Level 25: Inward + heavy holes
+    { timer: 135, tileVariety: 34, shift: 'inward',
       holes: [
         {r:1,c:7},{r:1,c:8},
         {r:4,c:0},{r:4,c:15},
         {r:7,c:7},{r:7,c:8}
       ],
-      desc: 'Final stretch' },
-    // Level 25: FINAL - max everything
-    { timer: 120, tileVariety: 36, shift: 'left',
+      desc: 'Inward — final stretch' },
+    // Level 26: Outward + heavy holes
+    { timer: 130, tileVariety: 34, shift: 'outward',
+      holes: [
+        {r:0,c:7},{r:0,c:8},
+        {r:2,c:3},{r:2,c:12},
+        {r:6,c:3},{r:6,c:12},
+        {r:8,c:7},{r:8,c:8}
+      ],
+      desc: 'Outward — final stretch' },
+    // Level 27: FINAL — inward + max everything
+    { timer: 120, tileVariety: 36, shift: 'inward',
       holes: [
         {r:0,c:7},{r:0,c:8},
         {r:2,c:3},{r:2,c:12},
@@ -130,7 +147,7 @@ class LevelManager {
     }
 
     static getTotalLevels() {
-        return 25;
+        return 27;
     }
 
     static getTimerForLevel(index) {
