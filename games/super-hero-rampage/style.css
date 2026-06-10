@@ -1,0 +1,82 @@
+/* SUPER HERO RAMPAGE - Game Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: #0a0a1a;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+canvas {
+    display: block;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+#back-btn {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 1000;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+#back-btn:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.2);
+}
+/* Mobile touch controls */
+.touch-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 100;
+}
+.touch-btn {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    pointer-events: auto;
+    touch-action: none;
+}
+.touch-btn:active {
+    background: rgba(255,255,255,0.3);
+}
+#btn-left { bottom: 60px; left: 20px; }
+#btn-right { bottom: 60px; left: 100px; }
+#btn-up { bottom: 130px; left: 60px; width: 50px; height: 50px; }
+#btn-down { bottom: 10px; left: 60px; width: 50px; height: 50px; }
+#btn-jump { bottom: 60px; right: 120px; width: 70px; height: 70px; background: rgba(76,175,80,0.2); border-color: rgba(76,175,80,0.4); }
+#btn-attack { bottom: 60px; right: 30px; width: 70px; height: 70px; background: rgba(244,67,54,0.2); border-color: rgba(244,67,54,0.4); }
+#btn-special { bottom: 140px; right: 30px; width: 70px; height: 50px; background: rgba(33,150,243,0.2); border-color: rgba(33,150,243,0.4); }
+@media (max-width: 600px) {
+    #back-btn { padding: 8px 14px; font-size: 15px; }
+    .touch-btn { width: 50px; height: 50px; font-size: 20px; }
+    #btn-jump, #btn-attack { width: 60px; height: 60px; }
+}

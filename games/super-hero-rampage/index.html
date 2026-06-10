@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Super Hero Rampage - Hải Game World</title>
+    <meta name="description" content="Side-scrolling beat'em up! Fight robot armies, unlock combos and powers, defeat bosses, save Earth!">
+    <meta property="og:title" content="Super Hero Rampage - Hải Game World">
+    <meta property="og:description" content="Side-scrolling beat'em up! Fight robot armies, unlock combos and powers!">
+    <meta property="og:url" content="https://leminhhai13603.github.io/HaiGameWorld/games/super-hero-rampage/">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="../../" id="back-btn">&#8592; Hub</a>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <!-- Mobile Touch Controls -->
+        <div class="touch-controls">
+            <div class="touch-btn" id="btn-left">◀</div>
+            <div class="touch-btn" id="btn-right">▶</div>
+            <div class="touch-btn" id="btn-up">▲</div>
+            <div class="touch-btn" id="btn-down">▼</div>
+            <div class="touch-btn" id="btn-jump">🦘</div>
+            <div class="touch-btn" id="btn-attack">👊</div>
+            <div class="touch-btn" id="btn-special">⚡</div>
+        </div>
+    </div>
+    <script src="js/constants.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        const game = new SuperHeroRampage();
+    </script>
+</body>
+</html>
