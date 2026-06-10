@@ -74,8 +74,8 @@ const UPGRADE_DEFS = {
 const AI_DIFF = {
     easy:   { goldMul:1.0,  spawnDelay:2.5, upgradeChance:0.4, ageDelay:1.5 },
     normal: { goldMul:1.0,  spawnDelay:1.8, upgradeChance:0.6, ageDelay:1.0 },
-    hard:   { goldMul:1.05, spawnDelay:1.2, upgradeChance:0.8, ageDelay:0.7 },
-    insane: { goldMul:1.10, spawnDelay:0.7, upgradeChance:0.95, ageDelay:0.4 }
+    hard:   { goldMul:1.0,  spawnDelay:1.2, upgradeChance:0.8, ageDelay:0.7 },
+    insane: { goldMul:1.03, spawnDelay:0.7, upgradeChance:0.95, ageDelay:0.4 }
 };
 
 // Campaign stage definitions
