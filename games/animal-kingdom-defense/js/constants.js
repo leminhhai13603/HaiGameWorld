@@ -27,11 +27,11 @@ const PLANT_ORDER = ['chicken','monkey','bear','penguin','pufferfish','twinmonke
 
 // Robot Invader definitions
 const ZOMBIE_DEFS = {
-    normal: { name:'Basic Robot',   hp:100, speed:20,  dps:100 },
-    cone:   { name:'Scout Robot',   hp:200, speed:20,  dps:100, armor:'scout' },
-    bucket: { name:'Heavy Robot',   hp:400, speed:20,  dps:100, armor:'heavy' },
-    fast:   { name:'Speed Robot',   hp:50,  speed:40,  dps:100 },
-    tank:   { name:'Mech Robot',    hp:800, speed:12,  dps:200 }
+    normal: { name:'Basic Robot',   hp:200, speed:20,  dps:100 },
+    cone:   { name:'Scout Robot',   hp:400, speed:20,  dps:100, armor:'scout' },
+    bucket: { name:'Heavy Robot',   hp:800, speed:20,  dps:100, armor:'heavy' },
+    fast:   { name:'Speed Robot',   hp:100, speed:40,  dps:100 },
+    tank:   { name:'Mech Robot',    hp:1600, speed:12,  dps:200 }
 };
 
 // Wave generation
