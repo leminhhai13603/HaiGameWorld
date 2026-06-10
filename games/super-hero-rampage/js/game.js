@@ -948,59 +948,100 @@ class SuperHeroRampage {
 
         // Hero mode aura
         if (p.heroMode) {
-            ctx.fillStyle = 'rgba(255,215,0,0.2)';
+            ctx.fillStyle = 'rgba(255,215,0,0.3)';
             ctx.beginPath();
-            ctx.arc(0, -30, 40, 0, Math.PI*2);
+            ctx.arc(0, -30, 45, 0, Math.PI*2);
             ctx.fill();
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
 
-        // Body
+        // Cape (animated)
+        ctx.fillStyle = '#F44';
+        ctx.beginPath();
+        const capeWave = Math.sin(p.animTimer * 8) * 5;
+        ctx.moveTo(-8, -45);
+        ctx.lineTo(-25 - capeWave, -5);
+        ctx.lineTo(-10, -10);
+        ctx.fill();
+
+        // Legs (animated walk)
+        const legAnim = p.state === 'walking' ? Math.sin(p.animTimer * 12) * 8 : 0;
+        ctx.fillStyle = '#1565C0';
+        ctx.fillRect(-8, -10 + legAnim, 7, 15 - legAnim);
+        ctx.fillRect(1, -10 - legAnim, 7, 15 + legAnim);
+        // Boots
+        ctx.fillStyle = '#0D47A1';
+        ctx.fillRect(-9, 3 + legAnim, 9, 5);
+        ctx.fillRect(0, 3 - legAnim, 9, 5);
+
+        // Body (armor)
         ctx.fillStyle = p.hitTimer > 0 ? '#FF4444' : '#2196F3';
-        ctx.fillRect(-12, -50, 24, 40);
+        ctx.fillRect(-14, -50, 28, 42);
+        // Armor details
+        ctx.fillStyle = '#1976D2';
+        ctx.fillRect(-10, -45, 20, 5); // chest plate
+        ctx.fillStyle = '#FFD700';
+        ctx.fillRect(-3, -42, 6, 3); // emblem
+
+        // Arms
+        const armAngle = p.state === 'attacking' ? -1.2 : Math.sin(p.animTimer * 8) * 0.3;
+        ctx.fillStyle = '#2196F3';
+        // Right arm
+        ctx.save();
+        ctx.translate(14, -42);
+        ctx.rotate(armAngle);
+        ctx.fillRect(0, 0, 18, 7);
+        // Glove
+        ctx.fillStyle = '#F44';
+        ctx.fillRect(14, -2, 8, 11);
+        ctx.restore();
+        // Left arm
+        ctx.fillStyle = '#2196F3';
+        ctx.save();
+        ctx.translate(-14, -42);
+        ctx.rotate(-armAngle * 0.5);
+        ctx.fillRect(-18, 0, 18, 7);
+        ctx.fillStyle = '#F44';
+        ctx.fillRect(-22, -2, 8, 11);
+        ctx.restore();
 
         // Head
         ctx.fillStyle = '#FFD';
         ctx.beginPath();
-        ctx.arc(0, -58, 12, 0, Math.PI*2);
+        ctx.arc(0, -60, 13, 0, Math.PI*2);
         ctx.fill();
-
-        // Cape
+        // Helmet
         ctx.fillStyle = '#F44';
         ctx.beginPath();
-        ctx.moveTo(-10, -45);
-        ctx.lineTo(-20, -10);
-        ctx.lineTo(-10, -15);
+        ctx.arc(0, -63, 14, Math.PI, 0);
         ctx.fill();
-
-        // Arms
-        const armAngle = p.state === 'attacking' ? Math.sin(p.animTimer * 20) * 0.5 : 0;
+        // Eyes
+        ctx.fillStyle = '#FFF';
+        ctx.fillRect(-6, -62, 5, 4);
+        ctx.fillRect(1, -62, 5, 4);
         ctx.fillStyle = '#2196F3';
-        ctx.save();
-        ctx.translate(12, -40);
-        ctx.rotate(armAngle);
-        ctx.fillRect(0, 0, 15, 6);
-        ctx.restore();
-
-        // Legs
-        ctx.fillStyle = '#1565C0';
-        ctx.fillRect(-8, -10, 6, 15);
-        ctx.fillRect(2, -10, 6, 15);
+        ctx.fillRect(-5, -61, 3, 3);
+        ctx.fillRect(2, -61, 3, 3);
 
         // Weapon
         if (p.weapon) {
             ctx.fillStyle = WEAPONS[p.weapon].color;
-            ctx.fillRect(20, -45, 20, 5);
+            ctx.save();
+            ctx.translate(18, -38);
+            ctx.rotate(armAngle);
+            ctx.fillRect(0, -3, 25, 6);
+            ctx.restore();
         }
 
-        // HP bar
-        ctx.fillStyle = '#333';
-        ctx.fillRect(-15, -75, 30, 4);
-        ctx.fillStyle = '#4CAF50';
-        ctx.fillRect(-15, -75, 30 * (p.hp / p.maxHp), 4);
-    }
+        ctx.restore();
 
-    _renderPlayer(ctx, p) {
-        // Already rendered in _render
+        // HP bar (outside transform)
+        ctx.fillStyle = '#333';
+        ctx.fillRect(p.x - 18, p.y - 82, 36, 5);
+        ctx.fillStyle = '#4CAF50';
+        ctx.fillRect(p.x - 18, p.y - 82, 36 * (p.hp / p.maxHp), 5);
     }
 
     _renderEnemy(ctx, e) {
@@ -1008,35 +1049,76 @@ class SuperHeroRampage {
             ctx.globalAlpha = e.deathTimer * 2;
         }
         const color = e.hitTimer > 0 ? '#FFF' : e.color;
-        ctx.fillStyle = color;
+        const s = e.size;
+
+        ctx.save();
+        ctx.translate(e.x, e.y);
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, s*0.6, s*0.15, 0, 0, Math.PI*2);
+        ctx.fill();
 
         if (e.isBoss) {
-            // Boss
-            ctx.fillRect(e.x - e.size/2, e.y - e.size, e.size, e.size);
+            // Boss body
+            ctx.fillStyle = color;
+            ctx.fillRect(-s/2, -s, s, s);
+            // Boss details
+            ctx.fillStyle = '#FF0';
+            ctx.fillRect(-s/3, -s+10, s/3, 8); // visor
+            ctx.fillRect(0, -s+10, s/3, 8);
+            // Arms
+            ctx.fillStyle = color;
+            ctx.fillRect(-s/2-15, -s+20, 15, 25);
+            ctx.fillRect(s/2, -s+20, 15, 25);
+            // Name
             ctx.fillStyle = '#FFF';
             ctx.font = 'bold 12px Rajdhani,sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(BOSS_TYPES[e.type]?.name || 'BOSS', e.x, e.y - e.size - 10);
+            ctx.fillText(BOSS_TYPES[e.type]?.name || 'BOSS', 0, -s-15);
             // HP bar
             ctx.fillStyle = '#333';
-            ctx.fillRect(e.x - 30, e.y - e.size - 20, 60, 6);
+            ctx.fillRect(-30, -s-10, 60, 6);
             ctx.fillStyle = '#F44';
-            ctx.fillRect(e.x - 30, e.y - e.size - 20, 60 * (e.hp / e.maxHp), 6);
+            ctx.fillRect(-30, -s-10, 60 * (e.hp / e.maxHp), 6);
         } else {
-            // Regular enemy
-            ctx.fillRect(e.x - e.size/2, e.y - e.size, e.size, e.size);
+            // Robot body
+            ctx.fillStyle = color;
+            ctx.fillRect(-s/2, -s, s, s*0.7); // torso
+            ctx.fillRect(-s/3, -s*0.3, s/3, s*0.4); // left leg
+            ctx.fillRect(0, -s*0.3, s/3, s*0.4); // right leg
+            // Head
+            ctx.fillStyle = e.hitTimer > 0 ? '#FFF' : '#666';
+            ctx.fillRect(-s/3, -s, s*0.66, s*0.4);
             // Eyes
             ctx.fillStyle = '#F00';
-            ctx.fillRect(e.x - 4, e.y - e.size + 5, 3, 3);
-            ctx.fillRect(e.x + 1, e.y - e.size + 5, 3, 3);
+            ctx.fillRect(-s/4, -s*0.8, s*0.15, s*0.15);
+            ctx.fillRect(s*0.1, -s*0.8, s*0.15, s*0.15);
+            // Antenna
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -s);
+            ctx.lineTo(0, -s-8);
+            ctx.stroke();
+            ctx.fillStyle = '#F00';
+            ctx.beginPath();
+            ctx.arc(0, -s-10, 3, 0, Math.PI*2);
+            ctx.fill();
+            // Arms
+            ctx.fillStyle = color;
+            ctx.fillRect(-s/2-10, -s*0.8, 10, s*0.3);
+            ctx.fillRect(s/2, -s*0.8, 10, s*0.3);
             // HP bar
             if (e.hp < e.maxHp) {
                 ctx.fillStyle = '#333';
-                ctx.fillRect(e.x - 10, e.y - e.size - 8, 20, 3);
+                ctx.fillRect(-12, -s-15, 24, 3);
                 ctx.fillStyle = '#F44';
-                ctx.fillRect(e.x - 10, e.y - e.size - 8, 20 * (e.hp / e.maxHp), 3);
+                ctx.fillRect(-12, -s-15, 24 * (e.hp / e.maxHp), 3);
             }
         }
+        ctx.restore();
         ctx.globalAlpha = 1;
     }
 
