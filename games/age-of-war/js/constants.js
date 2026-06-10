@@ -72,10 +72,10 @@ const UPGRADE_DEFS = {
 
 // AI difficulty multipliers
 const AI_DIFF = {
-    easy:   { goldMul:0.6,  spawnDelay:2.5, upgradeChance:0.3, ageDelay:1.5 },
-    normal: { goldMul:1.0,  spawnDelay:1.8, upgradeChance:0.5, ageDelay:1.0 },
-    hard:   { goldMul:1.4,  spawnDelay:1.2, upgradeChance:0.7, ageDelay:0.7 },
-    insane: { goldMul:2.0,  spawnDelay:0.7, upgradeChance:0.9, ageDelay:0.4 }
+    easy:   { goldMul:0.90, spawnDelay:2.5, upgradeChance:0.3, ageDelay:1.5 },
+    normal: { goldMul:0.95, spawnDelay:1.8, upgradeChance:0.5, ageDelay:1.0 },
+    hard:   { goldMul:1.05, spawnDelay:1.2, upgradeChance:0.7, ageDelay:0.7 },
+    insane: { goldMul:1.10, spawnDelay:0.7, upgradeChance:0.9, ageDelay:0.4 }
 };
 
 // Campaign stage definitions
