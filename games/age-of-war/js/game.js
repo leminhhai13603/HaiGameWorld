@@ -273,11 +273,20 @@ class AgeOfWar {
             this._advanceAge(false);
         }
 
-        // AI turret auto-fire at nearest player unit
+        // AI turret auto-fire at nearest player unit (within range)
         this.eTurretCooldown -= dt;
-        if (this.eTurretCooldown <= 0 && this.pUnits.length > 0) {
-            const target = this.pUnits.reduce((a, b) => a.x > b.x ? a : b);
-            this._fireTurret(target.x, target.y, false);
+        if (this.eTurretCooldown <= 0) {
+            const turretRange = 350;
+            let bestTarget = null;
+            let bestDist = Infinity;
+            for (const u of this.pUnits) {
+                const d = Math.abs(u.x - BASE_X_ENEMY);
+                if (d < turretRange && d < bestDist) {
+                    bestDist = d;
+                    bestTarget = u;
+                }
+            }
+            if (bestTarget) this._fireTurret(bestTarget.x, bestTarget.y, false);
         }
     }
 
