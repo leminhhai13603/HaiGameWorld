@@ -152,6 +152,16 @@ const Hub = {
             thumbClass: 'cyber-thumb',
             path: 'games/cyber-survivor/',
             featured: false
+        },
+        {
+            id: 'super-hero-rampage',
+            name: 'Super Hero Rampage',
+            desc: 'Đánh bại robot xâm lược! Combo chiến đấu, siêu năng lượng, đánh boss, cứu Trái Đất!',
+            tag: 'Action',
+            thumb: '🦸',
+            thumbClass: 'hero-thumb',
+            path: 'games/super-hero-rampage/',
+            featured: false
         }
     ],
 
