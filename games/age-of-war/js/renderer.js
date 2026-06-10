@@ -97,7 +97,7 @@ const Renderer = {
     },
 
     // ─── Bases ───
-    drawBase(ctx, x, isPlayer, age, hp, maxHp, turretCooldown, turretMaxCd) {
+    drawBase(ctx, x, isPlayer, age, hp, maxHp, turretCooldown, turretTier, turretLevel) {
         const pal = AGE_PALETTES[age] || AGE_PALETTES[0];
         const dir = isPlayer ? 1 : -1;
         const bx = isPlayer ? x : x - BASE_W;
@@ -252,28 +252,36 @@ const Renderer = {
             ctx.globalAlpha = 1;
         }
 
-        // Turret
-        const turretX = bx + (isPlayer ? BASE_W : 0);
-        const turretY = 240;
-        const cd = Math.max(0, turretCooldown);
-        const cdRatio = cd / turretMaxCd;
+        // Turret (only if purchased)
+        if (turretLevel > 0 && turretTier) {
+            const turretX = bx + (isPlayer ? BASE_W : 0);
+            const turretY = 240;
+            const cd = Math.max(0, turretCooldown);
+            const cdRatio = cd / turretTier.cooldown;
 
-        ctx.fillStyle = '#555';
-        ctx.fillRect(turretX - 4, turretY - 4, 8, 8);
-        // Turret barrel
-        ctx.strokeStyle = '#777';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(turretX, turretY);
-        ctx.lineTo(turretX + dir * 20, turretY);
-        ctx.stroke();
-        // Cooldown indicator
-        if (cdRatio > 0) {
-            ctx.fillStyle = 'rgba(255,255,0,0.3)';
+            // Turret base block - color by tier
+            const tierColors = ['#8B7355', '#808080', '#5A5A5A', '#4A5568', '#1A0A2E'];
+            const tierBarrelColors = ['#A0855A', '#999', '#777', '#718096', '#00FFFF'];
+            const tc = tierColors[Math.min(turretLevel - 1, 4)];
+            const bc = tierBarrelColors[Math.min(turretLevel - 1, 4)];
+
+            ctx.fillStyle = tc;
+            ctx.fillRect(turretX - 5, turretY - 5, 10, 10);
+            // Turret barrel - thicker at higher tiers
+            ctx.strokeStyle = bc;
+            ctx.lineWidth = 2 + Math.min(turretLevel, 3);
             ctx.beginPath();
-            ctx.arc(turretX, turretY, 10, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * (1 - cdRatio));
-            ctx.lineTo(turretX, turretY);
-            ctx.fill();
+            ctx.moveTo(turretX, turretY);
+            ctx.lineTo(turretX + dir * (16 + turretLevel * 3), turretY);
+            ctx.stroke();
+            // Cooldown indicator
+            if (cdRatio > 0) {
+                ctx.fillStyle = 'rgba(255,255,0,0.3)';
+                ctx.beginPath();
+                ctx.arc(turretX, turretY, 10, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * (1 - cdRatio));
+                ctx.lineTo(turretX, turretY);
+                ctx.fill();
+            }
         }
 
         // HP bar

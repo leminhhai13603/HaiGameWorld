@@ -113,10 +113,6 @@ class AgeOfWar {
             return;
         }
 
-        // Turret fire (click on battlefield)
-        if (y > 30 && y < 420 && x > BATTLE_LEFT && x < BATTLE_RIGHT) {
-            this._fireTurret(x, y, true);
-        }
     }
 
     _menuClick(x, y) {
@@ -179,30 +175,42 @@ class AgeOfWar {
         AudioManager.play('spawn');
     }
 
-    _fireTurret(targetX, targetY, isPlayer) {
-        const age = isPlayer ? this.pAge : this.eAge;
-        const ageDef = AGE_DEFS[age];
+    _autoFireTurret(isPlayer) {
+        const upgrades = isPlayer ? this.pUpgrades : this.eUpgrades;
+        if (upgrades.turret <= 0) return; // No turret purchased
+
         const cooldown = isPlayer ? this.pTurretCooldown : this.eTurretCooldown;
         if (cooldown > 0) return;
 
-        const turretDmg = ageDef.turretDmg + (isPlayer ? this.pUpgrades.turret : this.eUpgrades.turret) * UPGRADE_DEFS.turret.effect;
+        const age = isPlayer ? this.pAge : this.eAge;
+        const tierIdx = Math.min(age, upgrades.turret - 1);
+        const tier = TURRET_TIERS[tierIdx];
+
         const baseX = isPlayer ? BASE_X_PLAYER + BASE_W : BASE_X_ENEMY;
-        const baseY = 280;
+        const enemies = isPlayer ? this.eUnits : this.pUnits;
 
+        // Find nearest enemy within range
+        let bestTarget = null, bestDist = Infinity;
+        for (const u of enemies) {
+            const d = Math.abs(u.x - baseX);
+            if (d <= TURRET_RANGE && d < bestDist) {
+                bestDist = d;
+                bestTarget = u;
+            }
+        }
+        if (!bestTarget) return;
+
+        // Fire projectile
         const projArr = isPlayer ? this.pProjectiles : this.eProjectiles;
-        projArr.push({
-            x: baseX, y: baseY, tx: targetX, ty: targetY,
-            speed: 400, dmg: Math.floor(turretDmg), splash: 0, isPlayer,
-            vx: 0, vy: 0, life: 2
-        });
-        // Calculate velocity
-        const dx = targetX - baseX, dy = targetY - baseY;
+        const dx = bestTarget.x - baseX, dy = bestTarget.y - 280;
         const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-        const proj = projArr[projArr.length - 1];
-        proj.vx = (dx/dist) * 400; proj.vy = (dy/dist) * 400;
+        projArr.push({
+            x: baseX, y: 280, speed: 400, dmg: tier.dmg, splash: 0,
+            isPlayer, vx: (dx/dist)*400, vy: (dy/dist)*400, life: 2
+        });
 
-        if (isPlayer) this.pTurretCooldown = ageDef.turretCooldown;
-        else this.eTurretCooldown = ageDef.turretCooldown;
+        if (isPlayer) this.pTurretCooldown = tier.cooldown;
+        else this.eTurretCooldown = tier.cooldown;
         AudioManager.play('shoot');
     }
 
@@ -210,6 +218,11 @@ class AgeOfWar {
         const def = UPGRADE_DEFS[key];
         const upgs = isPlayer ? this.pUpgrades : this.eUpgrades;
         if (upgs[key] >= def.maxLv) return;
+        // Turret: level capped by age (can't exceed age+1)
+        if (key === 'turret') {
+            const age = isPlayer ? this.pAge : this.eAge;
+            if (upgs.turret >= age + 1) return;
+        }
         const cost = def.costs[upgs[key]];
         const gold = isPlayer ? this.pGold : this.eGold;
         if (gold < cost) return;
@@ -273,20 +286,12 @@ class AgeOfWar {
             this._advanceAge(false);
         }
 
-        // AI turret auto-fire at nearest player unit (within range)
-        this.eTurretCooldown -= dt;
-        if (this.eTurretCooldown <= 0) {
-            const turretRange = 350;
-            let bestTarget = null;
-            let bestDist = Infinity;
-            for (const u of this.pUnits) {
-                const d = Math.abs(u.x - BASE_X_ENEMY);
-                if (d < turretRange && d < bestDist) {
-                    bestDist = d;
-                    bestTarget = u;
-                }
+        // AI auto-buy turret when affordable and age-appropriate
+        if (this.eUpgrades.turret < UPGRADE_DEFS.turret.maxLv && this.eUpgrades.turret < this.eAge + 1) {
+            const turretCost = UPGRADE_DEFS.turret.costs[this.eUpgrades.turret];
+            if (this.eGold >= turretCost) {
+                this._upgrade('turret', false);
             }
-            if (bestTarget) this._fireTurret(bestTarget.x, bestTarget.y, false);
         }
     }
 
@@ -515,9 +520,11 @@ class AgeOfWar {
         const pIncome = BASE_INCOME + this.pUpgrades.income * UPGRADE_DEFS.income.effect;
         this.pGold += pIncome * dt;
 
-        // Turret cooldowns
+        // Turret cooldowns & auto-fire
         this.pTurretCooldown -= dt;
         this.eTurretCooldown -= dt;
+        this._autoFireTurret(true);
+        this._autoFireTurret(false);
 
         this._updateAI(dt);
         this._updateUnits(dt);
@@ -538,8 +545,10 @@ class AgeOfWar {
         Renderer.drawBackground(ctx, this.pAge, this.gameTime);
 
         // Bases
-        Renderer.drawBase(ctx, BASE_X_PLAYER, true, this.pAge, this.pBaseHp, this.pBaseMaxHp, this.pTurretCooldown, AGE_DEFS[this.pAge].turretCooldown);
-        Renderer.drawBase(ctx, BASE_X_ENEMY, false, this.eAge, this.eBaseHp, this.eBaseMaxHp, this.eTurretCooldown, AGE_DEFS[this.eAge].turretCooldown);
+        const pTier = this.pUpgrades.turret > 0 ? TURRET_TIERS[Math.min(this.pAge, this.pUpgrades.turret-1)] : null;
+        const eTier = this.eUpgrades.turret > 0 ? TURRET_TIERS[Math.min(this.eAge, this.eUpgrades.turret-1)] : null;
+        Renderer.drawBase(ctx, BASE_X_PLAYER, true, this.pAge, this.pBaseHp, this.pBaseMaxHp, this.pTurretCooldown, pTier, this.pUpgrades.turret);
+        Renderer.drawBase(ctx, BASE_X_ENEMY, false, this.eAge, this.eBaseHp, this.eBaseMaxHp, this.eTurretCooldown, eTier, this.eUpgrades.turret);
 
         // Units
         const allUnits = [...this.pUnits, ...this.eUnits];
@@ -630,8 +639,15 @@ class AgeOfWar {
             const lv = this.pUpgrades[upgKeys[i]];
             const bx = 10 + i * (ubW + 4);
             const maxed = lv >= def.maxLv;
-            const cost = maxed ? 0 : def.costs[lv];
-            const canAfford = !maxed && this.pGold >= cost;
+
+            // Turret: also check age cap
+            let ageBlocked = false;
+            let cost = maxed ? 0 : def.costs[lv];
+            if (upgKeys[i] === 'turret' && !maxed && lv >= this.pAge + 1) {
+                ageBlocked = true;
+                cost = def.costs[lv];
+            }
+            const canAfford = !maxed && !ageBlocked && this.pGold >= cost;
 
             ctx.fillStyle = maxed ? 'rgba(68,204,68,0.2)' : canAfford ? 'rgba(255,204,0,0.2)' : 'rgba(100,100,100,0.15)';
             ctx.fillRect(bx, 472, ubW, 26);
@@ -639,14 +655,20 @@ class AgeOfWar {
             ctx.lineWidth = 1;
             ctx.strokeRect(bx, 472, ubW, 26);
 
-            ctx.fillStyle = maxed ? '#4c4' : '#ccc';
+            ctx.fillStyle = maxed ? '#4c4' : ageBlocked ? '#664' : '#ccc';
             ctx.font = '10px Rajdhani, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(def.icon + ' ' + def.name + ' ' + lv + '/' + def.maxLv, bx + ubW/2, 484);
+            // Turret: show tier name instead of generic name
+            let label = def.icon + ' ' + def.name + ' ' + lv + '/' + def.maxLv;
+            if (upgKeys[i] === 'turret') {
+                if (lv === 0) label = def.icon + ' Mua Pháo';
+                else label = def.icon + ' ' + TURRET_TIERS[Math.min(this.pAge, lv-1)].name + ' ' + lv + '/' + def.maxLv;
+            }
+            ctx.fillText(label, bx + ubW/2, 484);
             if (!maxed) {
-                ctx.fillStyle = canAfford ? '#ffcc00' : '#555';
+                ctx.fillStyle = canAfford ? '#ffcc00' : ageBlocked ? '#553' : '#555';
                 ctx.font = '9px Rajdhani, sans-serif';
-                ctx.fillText('💰' + cost, bx + ubW/2, 496);
+                ctx.fillText('💰' + cost + (ageBlocked ? ' (cần tuổi ' + AGE_DEFS[lv].name + ')' : ''), bx + ubW/2, 496);
             }
         }
 
@@ -670,12 +692,19 @@ class AgeOfWar {
         ctx.textAlign = 'right';
         ctx.fillText('Enemy: ' + AGE_DEFS[this.eAge].name + ' | 💰' + Math.floor(this.eGold), W-15, 46);
 
-        // Turret range indicator when hovering
-        ctx.strokeStyle = 'rgba(255,255,100,0.15)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(BASE_X_PLAYER + BASE_W, 280, TURRET_RANGE, -0.5, 0.5);
-        ctx.stroke();
+        // Turret range indicator (only when turret purchased)
+        if (this.pUpgrades.turret > 0) {
+            ctx.strokeStyle = 'rgba(255,255,100,0.2)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(BASE_X_PLAYER + BASE_W, 280, TURRET_RANGE, -0.5, 0.5);
+            ctx.stroke();
+            // Range label
+            ctx.fillStyle = 'rgba(255,255,100,0.3)';
+            ctx.font = '9px Rajdhani, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(TURRET_TIERS[Math.min(this.pAge, this.pUpgrades.turret-1)].name, BASE_X_PLAYER + BASE_W + TURRET_RANGE * 0.7, 240);
+        }
     }
 
     _renderMenu(ctx) {
