@@ -537,6 +537,7 @@ const Renderer = {
                 ctx.save();
                 ctx.translate(bx + btnW/2, by + 22);
                 ctx.scale(0.45, 0.45);
+                ctx.translate(-(GRID_X + CELL_W/2), -(GRID_Y + CELL_H/2 + 10));
                 this.drawPlant(ctx, { type: key, row: 0, col: 0, hp: 100 }, 0);
                 ctx.restore();
 
