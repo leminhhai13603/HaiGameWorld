@@ -10,7 +10,7 @@ const Hub = {
             tag: 'Shooter',
             thumb: '🚀',
             thumbClass: 'space-thumb',
-            path: 'games/space-avian-assault/index.html',
+            path: 'games/space-avian-assault/',
             featured: true
         },
         {
@@ -20,7 +20,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '⛏️',
             thumbClass: 'gold-thumb',
-            path: 'games/gold-miner/index.html',
+            path: 'games/gold-miner/',
             featured: false
         },
         {
@@ -30,7 +30,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🐶',
             thumbClass: 'pikachu-thumb',
-            path: 'games/pikachu-classic/index.html',
+            path: 'games/pikachu-classic/',
             featured: false
         },
         {
@@ -40,7 +40,7 @@ const Hub = {
             tag: 'Action',
             thumb: '🎯',
             thumbClass: 'battle-thumb',
-            path: 'games/battle-city/index.html',
+            path: 'games/battle-city/',
             featured: false
         },
         {
@@ -50,7 +50,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🐦',
             thumbClass: 'flappy-thumb',
-            path: 'games/flappy-bird/index.html',
+            path: 'games/flappy-bird/',
             featured: false
         },
         {
@@ -60,7 +60,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🔢',
             thumbClass: 'thumb-2048',
-            path: 'games/2048/index.html',
+            path: 'games/2048/',
             featured: false
         },
         {
@@ -70,7 +70,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🦖',
             thumbClass: 'dino-thumb',
-            path: 'games/dino-hunter/index.html',
+            path: 'games/dino-hunter/',
             featured: false
         },
         {
@@ -80,7 +80,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🧱',
             thumbClass: 'dxbal-thumb',
-            path: 'games/dx-ball-remastered/index.html',
+            path: 'games/dx-ball-remastered/',
             featured: false
         },
         {
@@ -90,7 +90,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🟦',
             thumbClass: 'tetris-thumb',
-            path: 'games/tetris-ultimate/index.html',
+            path: 'games/tetris-ultimate/',
             featured: false
         },
         {
@@ -100,7 +100,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🐸',
             thumbClass: 'zuma-thumb',
-            path: 'games/zuma-deluxe-remastered/index.html',
+            path: 'games/zuma-deluxe-remastered/',
             featured: false
         },
         {
@@ -110,7 +110,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🍉',
             thumbClass: 'fruit-thumb',
-            path: 'games/fruit-ninja-ultimate/index.html',
+            path: 'games/fruit-ninja-ultimate/',
             featured: false
         },
         {
@@ -120,7 +120,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🔢',
             thumbClass: 'sudoku-thumb',
-            path: 'games/sudoku-master/index.html',
+            path: 'games/sudoku-master/',
             featured: false
         },
         {
@@ -130,7 +130,7 @@ const Hub = {
             tag: 'Strategy',
             thumb: '⚔️',
             thumbClass: 'ageofwar-thumb',
-            path: 'games/age-of-war/index.html',
+            path: 'games/age-of-war/',
             featured: false
         },
         {
@@ -140,7 +140,7 @@ const Hub = {
             tag: 'Strategy',
             thumb: '🐻',
             thumbClass: 'pvz-thumb',
-            path: 'games/animal-kingdom-defense/index.html',
+            path: 'games/animal-kingdom-defense/',
             featured: false
         },
         {
@@ -150,7 +150,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🤖',
             thumbClass: 'cyber-thumb',
-            path: 'games/cyber-survivor/index.html',
+            path: 'games/cyber-survivor/',
             featured: false
         },
         {
@@ -160,13 +160,21 @@ const Hub = {
             tag: 'Action',
             thumb: '🦸',
             thumbClass: 'hero-thumb',
-            path: 'games/super-hero-rampage/index.html',
+            path: 'games/super-hero-rampage/',
             featured: false
         }
     ],
 
     _carouselIndex: 0,
     _carouselTimer: null,
+
+    // Auto-fix path for local file:// (needs index.html) vs server (clean URL)
+    _fixPath(path) {
+        if (location.protocol === 'file:') {
+            return path.endsWith('/') ? path + 'index.html' : path;
+        }
+        return path;
+    },
 
     init() {
         this.renderFeatured();
@@ -182,7 +190,7 @@ const Hub = {
             <div class="carousel">
                 <div class="carousel-track" id="carousel-track">
                     ${games.map((g, i) => `
-                        <a href="${g.path}" class="featured carousel-slide" style="text-decoration:none;color:inherit;" data-index="${i}">
+                        <a href="${this._fixPath(g.path)}" class="featured carousel-slide" style="text-decoration:none;color:inherit;" data-index="${i}">
                             <div class="featured-inner">
                                 <div class="featured-thumb ${g.thumbClass}">${g.thumb}</div>
                                 <div class="featured-info">
@@ -268,7 +276,7 @@ const Hub = {
     renderGrid() {
         const grid = document.getElementById('games-grid');
         grid.innerHTML = this.games.map(game => `
-            <a href="${game.path}" class="game-card animate-in delay-${this.games.indexOf(game) + 1}" style="text-decoration:none;color:inherit;" role="listitem" aria-label="Chơi ${game.name}">
+            <a href="${this._fixPath(game.path)}" class="game-card animate-in delay-${this.games.indexOf(game) + 1}" style="text-decoration:none;color:inherit;" role="listitem" aria-label="Chơi ${game.name}">
                 <div class="card-thumb ${game.thumbClass}" aria-hidden="true">${game.thumb}</div>
                 <div class="card-body">
                     <div class="card-name">${game.name}</div>
