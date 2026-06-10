@@ -249,50 +249,99 @@ class AgeOfWar {
     _updateAI(dt) {
         const diff = AI_DIFF[this.difficulty] || AI_DIFF.normal;
 
-        // AI gold generation
+        // AI gold generation (same formula as player, with difficulty multiplier)
         const aiIncome = (BASE_INCOME + this.eUpgrades.income * UPGRADE_DEFS.income.effect) * diff.goldMul;
         this.eGold += aiIncome * dt;
 
-        // AI spawn
-        this.aiSpawnTimer -= dt;
-        if (this.aiSpawnTimer <= 0) {
-            this.aiSpawnTimer = diff.spawnDelay + Math.random() * 0.5;
-            const units = AGE_UNITS[this.eAge];
-            if (units.length > 0) {
-                // Pick a unit the AI can afford
-                const affordable = units.filter(u => UNIT_DEFS[u].cost <= this.eGold);
-                if (affordable.length > 0) {
-                    const pick = affordable[Math.floor(Math.random() * affordable.length)];
-                    this._spawnUnit(pick, false);
-                }
-            }
-        }
+        // ── AI Age Advance (always try when ready) ──
+        this._advanceAge(false);
 
-        // AI upgrade
+        // ── AI Smart Upgrades (priority-based, not random) ──
         this.aiUpgradeTimer -= dt;
         if (this.aiUpgradeTimer <= 0) {
-            this.aiUpgradeTimer = 4 + Math.random() * 3;
-            if (Math.random() < diff.upgradeChance) {
-                const keys = Object.keys(UPGRADE_DEFS);
-                const key = keys[Math.floor(Math.random() * keys.length)];
-                this._upgrade(key, false);
-            }
+            this.aiUpgradeTimer = 3 + Math.random() * 2;
+            this._aiSmartUpgrade();
         }
 
-        // AI age advance
-        this.aiAgeTimer -= dt;
-        if (this.aiAgeTimer <= 0) {
-            this.aiAgeTimer = 8 * diff.ageDelay;
-            this._advanceAge(false);
+        // ── AI Smart Unit Spawning ──
+        this.aiSpawnTimer -= dt;
+        if (this.aiSpawnTimer <= 0) {
+            this.aiSpawnTimer = diff.spawnDelay + Math.random() * 0.3;
+            this._aiSmartSpawn();
         }
+    }
 
-        // AI auto-buy turret when affordable and age-appropriate
+    _aiSmartUpgrade() {
+        // Priority 1: Always buy turret when age-appropriate
         if (this.eUpgrades.turret < UPGRADE_DEFS.turret.maxLv && this.eUpgrades.turret < this.eAge + 1) {
-            const turretCost = UPGRADE_DEFS.turret.costs[this.eUpgrades.turret];
-            if (this.eGold >= turretCost) {
-                this._upgrade('turret', false);
+            const cost = UPGRADE_DEFS.turret.costs[this.eUpgrades.turret];
+            if (this.eGold >= cost) { this._upgrade('turret', false); return; }
+        }
+
+        // Priority 2: Income upgrade (invest early for long-term advantage)
+        if (this.eUpgrades.income < UPGRADE_DEFS.income.maxLv) {
+            const cost = UPGRADE_DEFS.income.costs[this.eUpgrades.income];
+            if (this.eGold >= cost) { this._upgrade('income', false); return; }
+        }
+
+        // Priority 3: Base HP when base is damaged
+        if (this.eBaseHp < this.eBaseMaxHp * 0.6 && this.eUpgrades.baseHp < UPGRADE_DEFS.baseHp.maxLv) {
+            const cost = UPGRADE_DEFS.baseHp.costs[this.eUpgrades.baseHp];
+            if (this.eGold >= cost) { this._upgrade('baseHp', false); return; }
+        }
+
+        // Priority 4: Damage upgrade (offensive advantage)
+        if (this.eUpgrades.dmg < UPGRADE_DEFS.dmg.maxLv) {
+            const cost = UPGRADE_DEFS.dmg.costs[this.eUpgrades.dmg];
+            if (this.eGold >= cost) { this._upgrade('dmg', false); return; }
+        }
+
+        // Priority 5: HP upgrade (unit survivability)
+        if (this.eUpgrades.hp < UPGRADE_DEFS.hp.maxLv) {
+            const cost = UPGRADE_DEFS.hp.costs[this.eUpgrades.hp];
+            if (this.eGold >= cost) { this._upgrade('hp', false); return; }
+        }
+
+        // Priority 6: Base HP as fallback
+        if (this.eUpgrades.baseHp < UPGRADE_DEFS.baseHp.maxLv) {
+            const cost = UPGRADE_DEFS.baseHp.costs[this.eUpgrades.baseHp];
+            if (this.eGold >= cost) { this._upgrade('baseHp', false); return; }
+        }
+    }
+
+    _aiSmartSpawn() {
+        const units = AGE_UNITS[this.eAge];
+        if (units.length === 0) return;
+
+        const affordable = units.filter(u => UNIT_DEFS[u].cost <= this.eGold);
+        if (affordable.length === 0) return;
+
+        // Check if player is pushing (many units near AI base) → spawn defenders
+        const playerUnitsNearBase = this.pUnits.filter(u => u.x > 600).length;
+        const underPressure = playerUnitsNearBase >= 3;
+
+        let pick;
+        if (underPressure) {
+            // Under pressure: prefer cheap units for rapid defense, or splash damage
+            const splashers = affordable.filter(u => UNIT_DEFS[u].splash > 0);
+            if (splashers.length > 0 && this.eGold >= UNIT_DEFS[splashers[0]].cost * 1.5) {
+                pick = splashers[0]; // Use splash to clear groups
+            } else {
+                pick = affordable[0]; // Cheapest = fastest to deploy
+            }
+        } else {
+            // Normal: prefer strongest unit affordable (sort by cost desc)
+            const sorted = [...affordable].sort((a, b) => UNIT_DEFS[b].cost - UNIT_DEFS[a].cost);
+            // Pick best unit if AI has enough gold for it, otherwise mid-range
+            if (this.eGold >= UNIT_DEFS[sorted[0]].cost * 1.5) {
+                pick = sorted[0]; // Can afford expensive unit comfortably
+            } else {
+                // Pick mid-range unit
+                pick = sorted[Math.min(1, sorted.length - 1)];
             }
         }
+
+        if (pick) this._spawnUnit(pick, false);
     }
 
     _updateUnits(dt) {

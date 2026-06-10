@@ -32,24 +32,24 @@ const AGE_DEFS = [
 // Unit definitions: { hp, dmg, atkSpeed, range, moveSpeed, cost, type, name, size }
 const UNIT_DEFS = {
     // Age 0 - Stone
-    clubman:   { age:0, name:'Gậy Đá',    hp:60,  dmg:12, atkSpeed:0.8, range:28,  moveSpeed:55, cost:20,  type:'melee',  size:10 },
-    spear:     { age:0, name:'Giáo Đá',   hp:35,  dmg:18, atkSpeed:0.55, range:130, moveSpeed:45, cost:35,  type:'ranged', size:9, projSpeed:200 },
+    clubman:   { age:0, name:'Gậy Đá',    hp:60,  dmg:12, atkSpeed:0.7, range:28,  moveSpeed:45, cost:20,  type:'melee',  size:10 },
+    spear:     { age:0, name:'Giáo Đá',   hp:35,  dmg:18, atkSpeed:0.5, range:130, moveSpeed:38, cost:35,  type:'ranged', size:9, projSpeed:200 },
     // Age 1 - Medieval
-    swordsman: { age:1, name:'Kiếm Sĩ',   hp:90,  dmg:22, atkSpeed:0.8, range:28,  moveSpeed:55, cost:45,  type:'melee',  size:11 },
-    archer:    { age:1, name:'Cung Thủ',  hp:50,  dmg:28, atkSpeed:0.55, range:160, moveSpeed:45, cost:60,  type:'ranged', size:9, projSpeed:250 },
-    knight:    { age:1, name:'Hiệp Sĩ',   hp:140, dmg:32, atkSpeed:0.9, range:30,  moveSpeed:70, cost:90,  type:'melee',  size:13 },
+    swordsman: { age:1, name:'Kiếm Sĩ',   hp:90,  dmg:22, atkSpeed:0.7, range:28,  moveSpeed:45, cost:45,  type:'melee',  size:11 },
+    archer:    { age:1, name:'Cung Thủ',  hp:50,  dmg:28, atkSpeed:0.5, range:160, moveSpeed:38, cost:60,  type:'ranged', size:9, projSpeed:250 },
+    knight:    { age:1, name:'Hiệp Sĩ',   hp:140, dmg:32, atkSpeed:0.8, range:30,  moveSpeed:58, cost:90,  type:'melee',  size:13 },
     // Age 2 - Industrial
-    rifleman:  { age:2, name:'Lính Súng', hp:75,  dmg:38, atkSpeed:0.65, range:190, moveSpeed:45, cost:75,  type:'ranged', size:10, projSpeed:350 },
-    grenadier: { age:2, name:'Lựu Đạn',   hp:65,  dmg:55, atkSpeed:0.4, range:140, moveSpeed:40, cost:100, type:'ranged', size:11, projSpeed:180, splash:30 },
-    heavy:     { age:2, name:'Bộ Binh',   hp:180, dmg:28, atkSpeed:0.7, range:30,  moveSpeed:35, cost:110, type:'melee',  size:14 },
+    rifleman:  { age:2, name:'Lính Súng', hp:75,  dmg:38, atkSpeed:0.55, range:190, moveSpeed:38, cost:75,  type:'ranged', size:10, projSpeed:350 },
+    grenadier: { age:2, name:'Lựu Đạn',   hp:65,  dmg:55, atkSpeed:0.35, range:140, moveSpeed:34, cost:100, type:'ranged', size:11, projSpeed:180, splash:30 },
+    heavy:     { age:2, name:'Bộ Binh',   hp:180, dmg:28, atkSpeed:0.6, range:30,  moveSpeed:30, cost:110, type:'melee',  size:14 },
     // Age 3 - Modern
-    marine:    { age:3, name:'Thuỷ Quân',  hp:110, dmg:45, atkSpeed:0.7, range:190, moveSpeed:50, cost:110, type:'ranged', size:10, projSpeed:400 },
-    rocket:    { age:3, name:'Tên Lửa',    hp:85,  dmg:75, atkSpeed:0.3, range:220, moveSpeed:38, cost:160, type:'ranged', size:11, projSpeed:250, splash:35 },
-    tank:      { age:3, name:'Xe Tăng',    hp:280, dmg:55, atkSpeed:0.55, range:160, moveSpeed:30, cost:220, type:'ranged', size:16, projSpeed:300 },
+    marine:    { age:3, name:'Thuỷ Quân',  hp:110, dmg:45, atkSpeed:0.6, range:190, moveSpeed:42, cost:110, type:'ranged', size:10, projSpeed:400 },
+    rocket:    { age:3, name:'Tên Lửa',    hp:85,  dmg:75, atkSpeed:0.25, range:220, moveSpeed:32, cost:160, type:'ranged', size:11, projSpeed:250, splash:35 },
+    tank:      { age:3, name:'Xe Tăng',    hp:280, dmg:55, atkSpeed:0.45, range:160, moveSpeed:25, cost:220, type:'ranged', size:16, projSpeed:300 },
     // Age 4 - Future
-    laser:     { age:4, name:'Laser',      hp:130, dmg:65, atkSpeed:0.8, range:210, moveSpeed:50, cost:170, type:'ranged', size:10, projSpeed:600 },
-    mech:      { age:4, name:'Cơ Giáp',   hp:350, dmg:90, atkSpeed:0.65, range:100, moveSpeed:35, cost:280, type:'melee',  size:16 },
-    plasma:    { age:4, name:'Plasma',     hp:450, dmg:110,atkSpeed:0.5, range:190, moveSpeed:25, cost:380, type:'ranged', size:18, projSpeed:350, splash:40 }
+    laser:     { age:4, name:'Laser',      hp:130, dmg:65, atkSpeed:0.7, range:210, moveSpeed:42, cost:170, type:'ranged', size:10, projSpeed:600 },
+    mech:      { age:4, name:'Cơ Giáp',   hp:350, dmg:90, atkSpeed:0.55, range:100, moveSpeed:30, cost:280, type:'melee',  size:16 },
+    plasma:    { age:4, name:'Plasma',     hp:450, dmg:110,atkSpeed:0.4, range:190, moveSpeed:22, cost:380, type:'ranged', size:18, projSpeed:350, splash:40 }
 };
 
 // Units per age for UI
@@ -72,10 +72,10 @@ const UPGRADE_DEFS = {
 
 // AI difficulty multipliers
 const AI_DIFF = {
-    easy:   { goldMul:0.90, spawnDelay:2.5, upgradeChance:0.3, ageDelay:1.5 },
-    normal: { goldMul:0.95, spawnDelay:1.8, upgradeChance:0.5, ageDelay:1.0 },
-    hard:   { goldMul:1.05, spawnDelay:1.2, upgradeChance:0.7, ageDelay:0.7 },
-    insane: { goldMul:1.10, spawnDelay:0.7, upgradeChance:0.9, ageDelay:0.4 }
+    easy:   { goldMul:1.0,  spawnDelay:2.5, upgradeChance:0.4, ageDelay:1.5 },
+    normal: { goldMul:1.0,  spawnDelay:1.8, upgradeChance:0.6, ageDelay:1.0 },
+    hard:   { goldMul:1.05, spawnDelay:1.2, upgradeChance:0.8, ageDelay:0.7 },
+    insane: { goldMul:1.10, spawnDelay:0.7, upgradeChance:0.95, ageDelay:0.4 }
 };
 
 // Campaign stage definitions
