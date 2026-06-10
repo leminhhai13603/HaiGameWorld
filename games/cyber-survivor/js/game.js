@@ -71,6 +71,7 @@ class CyberSurvivor {
         this.bossTimers = {};
         Object.keys(BOSS_TYPES).forEach(k => this.bossTimers[k] = false);
         this.upgradeChoices = [];
+        this.pendingLevelUps = 0;
         this.eventTimer = 60 + Math.random()*30;
         this.activeEvent = null; this.eventTimerLeft = 0;
         this.beamTargets = []; this.orbitAngle = 0; this.sawAngle = 0;
@@ -201,8 +202,8 @@ class CyberSurvivor {
         }
         if (this.state === GS.LEVELUP) {
             for (let i=0; i<this.upgradeChoices.length; i++) {
-                const bx = W/2-130, by = 170+i*80;
-                if (x>=bx && x<=bx+260 && y>=by && y<=by+65) { this._selectUpgrade(i); return; }
+                const bx = W/2-155, by = 150+i*125, bw = 310, bh = 115;
+                if (x>=bx && x<=bx+bw && y>=by && y<=by+bh) { this._selectUpgrade(i); return; }
             }
             return;
         }
@@ -226,8 +227,14 @@ class CyberSurvivor {
         }
         this._checkEvolutions();
         this._applyPassives();
-        this.state = GS.PLAYING;
         AudioManager.play('levelUp');
+        // Queue next level up if pending
+        if (this.pendingLevelUps > 0) {
+            this.pendingLevelUps--;
+            this._showLevelUp();
+        } else {
+            this.state = GS.PLAYING;
+        }
     }
 
     _checkEvolutions() {
@@ -375,7 +382,8 @@ class CyberSurvivor {
         }
         if (ult.effect === 'xpSurge') {
             p.xp += ult.xpAmount;
-            while (p.xp >= p.xpNext) { p.xp -= p.xpNext; p.level++; p.xpNext = xpForLevel(p.level); this._showLevelUp(); }
+            while (p.xp >= p.xpNext) { p.xp -= p.xpNext; p.level++; p.xpNext = xpForLevel(p.level); this.pendingLevelUps++; }
+            if (this.pendingLevelUps > 0 && this.state !== GS.LEVELUP) { this.pendingLevelUps--; this._showLevelUp(); }
         }
     }
 
@@ -637,7 +645,8 @@ class CyberSurvivor {
                 p.xp += Math.floor(o.value * p.xpMul * (this.activeEvent==='doubleXp'?2:1));
                 AudioManager.play('xpCollect');
                 this._releaseXp(o);
-                while (p.xp >= p.xpNext) { p.xp -= p.xpNext; p.level++; p.xpNext = xpForLevel(p.level); this._showLevelUp(); }
+                while (p.xp >= p.xpNext) { p.xp -= p.xpNext; p.level++; p.xpNext = xpForLevel(p.level); this.pendingLevelUps++; }
+            if (this.pendingLevelUps > 0 && this.state !== GS.LEVELUP) { this.pendingLevelUps--; this._showLevelUp(); }
             } else if (o.life <= 0) this._releaseXp(o);
         }
 
