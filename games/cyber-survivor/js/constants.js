@@ -20,23 +20,23 @@ const CHAR_ORDER = ['vanguard','assassin','engineer','heavy','monk','pilot','hac
 
 // ─── WEAPONS (Rebalanced) ───
 const WEAPONS = {
-    blaster:   { name:'Energy Blaster',   icon:'🔫', dmg:10,  cd:0.5, maxLv:8, type:'proj',   projSpd:350, evolve:'atkSpeed',  evoTo:'hyperBlaster',
+    blaster:   { name:'Energy Blaster',   icon:'🔫', dmg:10,  cd:0.5, maxLv:5, type:'proj',   projSpd:350, evolve:'atkSpeed',  evoTo:'hyperBlaster',
         tags:['Balanced','Reliable'], role:'Starter', strong:'Mọi tình huống', weak:'Không chuyên', bestVs:'Nhóm nhỏ', worstVs:'—' },
-    laser:     { name:'Laser Beam',       icon:'🔴', dmg:6,   cd:0.08,maxLv:8, type:'beam',   range:200,   evolve:'critChance',evoTo:'quantumBeam',
+    laser:     { name:'Laser Beam',       icon:'🔴', dmg:6,   cd:0.08,maxLv:5, type:'beam',   range:200,   evolve:'critChance',evoTo:'quantumBeam',
         tags:['Piercing','Crowd Control'], role:'CC', strong:'Địch xếp hàng', weak:'Sát thương đơn thấp', bestVs:'Nhóm lớn', worstVs:'Boss' },
-    rocket:    { name:'Rocket Launcher',  icon:'🚀', dmg:30,  cd:1.0, maxLv:8, type:'rocket', projSpd:220, explodeR:80, evolve:'damage', evoTo:'nuke',
+    rocket:    { name:'Rocket Launcher',  icon:'🚀', dmg:30,  cd:1.0, maxLv:5, type:'rocket', projSpd:220, explodeR:80, evolve:'damage', evoTo:'nuke',
         tags:['AOE','Explosion','Burst'], role:'AOE Burst', strong:'Diệt nhóm lớn', weak:'Chậm, có thể miss', bestVs:'Nhóm lớn', worstVs:'Địch nhanh' },
-    lightning: { name:'Lightning Strike',  icon:'⚡', dmg:18,  cd:0.7, maxLv:8, type:'chain',  chainCount:3, chainR:120, evolve:'cooldown', evoTo:'stormCall',
+    lightning: { name:'Lightning Strike',  icon:'⚡', dmg:18,  cd:0.7, maxLv:5, type:'chain',  chainCount:3, chainR:120, evolve:'cooldown', evoTo:'stormCall',
         tags:['Chain','Multi-Target'], role:'Chain DPS', strong:'Phủ diện rộng', weak:'Kém vs boss', bestVs:'Địch phân tán', worstVs:'Boss đơn' },
-    orbit:     { name:'Orbit Drones',     icon:'🛸', dmg:5,   cd:0.04,maxLv:8, type:'orbit',  orbitR:80,  orbitCount:2, evolve:'moveSpeed', evoTo:'vortex',
+    orbit:     { name:'Orbit Drones',     icon:'🛸', dmg:5,   cd:0.04,maxLv:5, type:'orbit',  orbitR:80,  orbitCount:2, evolve:'moveSpeed', evoTo:'vortex',
         tags:['Defensive','Zone','Passive'], role:'Phòng thủ', strong:'Bảo vệ liên tục', weak:'Tầm ngắn', bestVs:'Địch áp sát', worstVs:'Địch xa' },
-    saw:       { name:'Energy Saw',       icon:'⚙️', dmg:10,  cd:0.03,maxLv:8, type:'saw',    sawR:60, evolve:'projCount', evoTo:'sawStorm',
+    saw:       { name:'Energy Saw',       icon:'⚙️', dmg:10,  cd:0.03,maxLv:5, type:'saw',    sawR:60, evolve:'projCount', evoTo:'sawStorm',
         tags:['AOE','Zone','Melee'], role:'Vùng sát thương', strong:'Diệt địch áp sát', weak:'Phải đứng gần', bestVs:'Địch đông', worstVs:'Địch ranged' },
-    plasma:    { name:'Plasma Cannon',    icon:'💜', dmg:70,  cd:1.8, maxLv:8, type:'proj',   projSpd:200, evolve:'damage', evoTo:'megaPlasma',
+    plasma:    { name:'Plasma Cannon',    icon:'💜', dmg:70,  cd:1.8, maxLv:5, type:'proj',   projSpd:200, evolve:'damage', evoTo:'megaPlasma',
         tags:['Boss Killer','Single Target','Heavy'], role:'Diệt Boss', strong:'Sát thương cực mạnh', weak:'Rất chậm', bestVs:'Boss', worstVs:'Địch đông nhanh' },
-    ice:       { name:'Ice Launcher',     icon:'❄️', dmg:10,  cd:0.5, maxLv:8, type:'proj',   projSpd:300, slow:0.5, slowDur:2, evolve:'cooldown', evoTo:'absoluteZero',
+    ice:       { name:'Ice Launcher',     icon:'❄️', dmg:10,  cd:0.5, maxLv:5, type:'proj',   projSpd:300, slow:0.5, slowDur:2, evolve:'cooldown', evoTo:'absoluteZero',
         tags:['Crowd Control','Slow','Utility'], role:'CC', strong:'Làm chậm diện rộng', weak:'DPS thấp', bestVs:'Địch nhanh', worstVs:'Boss' },
-    missiles:  { name:'Nano Missiles',    icon:'🎯', dmg:12,  cd:0.6, maxLv:8, type:'homing', projSpd:250, evolve:'atkSpeed', evoTo:'swarm',
+    missiles:  { name:'Nano Missiles',    icon:'🎯', dmg:12,  cd:0.6, maxLv:5, type:'homing', projSpd:250, evolve:'atkSpeed', evoTo:'swarm',
         tags:['Auto-Track','Reliable','Easy'], role:'Tự dẫn', strong:'Dễ dùng, không miss', weak:'DPS trung bình', bestVs:'Địch di chuyển', worstVs:'—' }
 };
 const WEAPON_ORDER = ['blaster','laser','rocket','lightning','orbit','saw','plasma','ice','missiles'];

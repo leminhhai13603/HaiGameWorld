@@ -202,7 +202,7 @@ class CyberSurvivor {
         }
         if (this.state === GS.LEVELUP) {
             for (let i=0; i<this.upgradeChoices.length; i++) {
-                const bx = W/2-155, by = 150+i*125, bw = 310, bh = 115;
+                const bx = W/2-155, by = 140+i*155, bw = 310, bh = 145;
                 if (x>=bx && x<=bx+bw && y>=by && y<=by+bh) { this._selectUpgrade(i); return; }
             }
             return;
@@ -215,7 +215,7 @@ class CyberSurvivor {
         const c = this.upgradeChoices[i];
         const p = this.player;
         if (c.type === 'weapon') {
-            if (p.weapons[c.id]) p.weapons[c.id].lv = Math.min(p.weapons[c.id].lv + 1, WEAPONS[c.id]?.maxLv || 8);
+            if (p.weapons[c.id]) p.weapons[c.id].lv = Math.min(p.weapons[c.id].lv + 1, WEAPONS[c.id]?.maxLv || EVOLUTIONS[c.id]?.maxLv || 5);
             else if (Object.keys(p.weapons).length < MAX_WEAPONS) p.weapons[c.id] = { lv:1, cd:0 };
         } else if (c.type === 'passive') {
             if (p.passives[c.id]) p.passives[c.id] = Math.min(p.passives[c.id] + 1, PASSIVES[c.id].maxLv);
@@ -287,16 +287,31 @@ class CyberSurvivor {
         // Existing weapon upgrades
         for (const [wk, wv] of Object.entries(p.weapons)) {
             const def = WEAPONS[wk] || EVOLUTIONS[wk];
-            if (def && wv.lv < (def.maxLv||8)) {
+            if (def && wv.lv < (def.maxLv||5)) {
                 const rarity = getRarity();
                 const syn = SYNERGIES[wk] || [];
+                // Evolution info
+                let evoInfo = '';
+                if (def.evoTo && EVOLUTIONS[def.evoTo]) {
+                    const evoName = EVOLUTIONS[def.evoTo].name;
+                    const passName = PASSIVES[def.evolve]?.name || def.evolve;
+                    const passIcon = PASSIVES[def.evolve]?.icon || '';
+                    const passLv = p.passives[def.evolve] || 0;
+                    const passMax = PASSIVES[def.evolve]?.maxLv || 5;
+                    const wReady = wv.lv + 1 >= (def.maxLv||5);
+                    const pReady = passLv >= passMax;
+                    evoInfo = `🔄 Tiến hoá: ${evoName}`;
+                    evoInfo += `\n   Cần: ${def.name} lv${def.maxLv||5} + ${passIcon}${passName} lv${passMax}`;
+                    evoInfo += `\n   ${wReady ? '✅' : '⬜'} Vũ khí ${wv.lv+1}/${def.maxLv||5}  ${pReady ? '✅' : '⬜'} Passive ${passLv}/${passMax}`;
+                }
                 choices.push({
                     type:'weapon', id:wk, rarity,
                     name:def.name, curLv:wv.lv, nextLv:wv.lv+1,
                     icon:def.icon, role:def.role||'',
                     tags:def.tags||[], strong:def.strong||'', weak:def.weak||'',
                     synergies:syn.map(s => PASSIVES[s]?.icon||s).join(' '),
-                    desc:'+'+Math.floor((def.dmg||10)*0.15)+' DMG mỗi cấp'
+                    desc:'+'+Math.floor((def.dmg||10)*0.15)+' DMG mỗi cấp',
+                    evoInfo
                 });
             }
         }
@@ -307,13 +322,23 @@ class CyberSurvivor {
                 const def = WEAPONS[wk];
                 const rarity = getRarity();
                 const syn = SYNERGIES[wk] || [];
+                // Evolution info for new weapon
+                let evoInfo = '';
+                if (def.evoTo && EVOLUTIONS[def.evoTo]) {
+                    const evoName = EVOLUTIONS[def.evoTo].name;
+                    const passName = PASSIVES[def.evolve]?.name || def.evolve;
+                    const passIcon = PASSIVES[def.evolve]?.icon || '';
+                    evoInfo = `🔄 Tiến hoá: ${evoName}`;
+                    evoInfo += `\n   Cần: ${def.name} lv5 + ${passIcon}${passName} lv5`;
+                }
                 choices.push({
                     type:'weapon', id:wk, rarity,
                     name:def.name, curLv:0, nextLv:1,
                     icon:def.icon, role:def.role||'',
                     tags:def.tags||[], strong:def.strong||'', weak:def.weak||'',
                     synergies:syn.map(s => PASSIVES[s]?.icon||s).join(' '),
-                    desc:'Vũ khí mới'
+                    desc:'Vũ khí mới',
+                    evoInfo
                 });
             }
         }
@@ -1434,13 +1459,13 @@ class CyberSurvivor {
     _drawLevelUp(ctx) {
         ctx.fillStyle = 'rgba(0,0,0,0.88)'; ctx.fillRect(0, 0, W, H);
         ctx.textAlign = 'center'; ctx.fillStyle = '#FFD700'; ctx.font = 'bold 22px Orbitron,monospace';
-        ctx.fillText('LEVEL UP!', W/2, 110);
+        ctx.fillText('LEVEL UP!', W/2, 80);
         ctx.fillStyle = '#888'; ctx.font = '12px Rajdhani,sans-serif';
-        ctx.fillText('Chọn 1 nâng cấp (phím 1-3)', W/2, 132);
+        ctx.fillText('Chọn 1 nâng cấp (phím 1-3)', W/2, 100);
 
         for (let i = 0; i < this.upgradeChoices.length; i++) {
             const c = this.upgradeChoices[i];
-            const bx = W/2-155, by = 150+i*125, bw = 310, bh = 115;
+            const bx = W/2-155, by = 115+i*155, bw = 310, bh = 145;
             const rarityCol = RARITY[c.rarity]?.color || '#AAA';
 
             // Card bg
@@ -1488,9 +1513,28 @@ class CyberSurvivor {
                 ctx.fillText('Synergy: '+c.synergies, bx+bw-8, by+80);
             }
 
+            // Evolution info
+            if (c.evoInfo) {
+                const lines = c.evoInfo.split('\n');
+                ctx.textAlign = 'left';
+                for (let j = 0; j < lines.length; j++) {
+                    const line = lines[j];
+                    if (line.includes('🔄')) {
+                        ctx.fillStyle = '#FFD700'; ctx.font = 'bold 10px Rajdhani,sans-serif';
+                    } else if (line.includes('✅')) {
+                        ctx.fillStyle = '#4CAF50'; ctx.font = '9px Rajdhani,sans-serif';
+                    } else if (line.includes('⬜')) {
+                        ctx.fillStyle = '#888'; ctx.font = '9px Rajdhani,sans-serif';
+                    } else {
+                        ctx.fillStyle = '#AAA'; ctx.font = '9px Rajdhani,sans-serif';
+                    }
+                    ctx.fillText(line, bx+10, by+105+j*13);
+                }
+            }
+
             // Key hint
             ctx.fillStyle = '#555'; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'right';
-            ctx.fillText('['+(i+1)+']', bx+bw-8, by+105);
+            ctx.fillText('['+(i+1)+']', bx+bw-8, by+138);
         }
     }
 
