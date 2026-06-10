@@ -63,9 +63,18 @@ class SuperHeroRampage {
         // Shop
         this.shopItems = [];
 
+        // Throwable objects on map
+        this.throwables = [];
+        // Grabbed enemy
+        this.grabbedEnemy = null;
+        // Combo display
+        this.comboDisplay = { text:'', timer:0, color:'#FFF' };
+        // Unlock notifications
+        this.unlockNotifs = [];
+
         // Input
         this.keys = {};
-        this.touchControls = { left:false, right:false, up:false, down:false, jump:false, attack:false, special:false };
+        this.touchControls = { left:false, right:false, up:false, down:false, jump:false, attack:false, special:false, grab:false };
 
         // Achievements
         this.achievements = {};
@@ -133,6 +142,8 @@ class SuperHeroRampage {
         this.stageComplete = false;
         this.enemies = [];
         this.projectiles = [];
+        this.throwables = [];
+        this.grabbedEnemy = null;
         this.pickups = [];
         this.particles = [];
         this.floatTexts = [];
@@ -143,6 +154,21 @@ class SuperHeroRampage {
         this.player.hp = this.player.maxHp;
         this.player.energy = this.player.maxEnergy;
         this.state = GS.PLAYING;
+
+        // Spawn throwable objects
+        const objTypes = Object.keys(THROWABLE_OBJECTS);
+        for (let i = 0; i < 5 + stageIndex * 2; i++) {
+            const type = objTypes[Math.floor(Math.random() * objTypes.length)];
+            this.throwables.push({
+                type,
+                x: 100 + Math.random() * 700,
+                y: GROUND_Y,
+                vx: 0, vy: 0,
+                grounded: true,
+                thrown: false,
+                life: 999
+            });
+        }
     }
 
     // ─── Save/Load ───
@@ -195,6 +221,7 @@ class SuperHeroRampage {
             { id:'btn-down',  key:'down',  x:60,  y:H-60,  w:60, h:50 },
             { id:'btn-jump',  key:'jump',  x:W-180,y:H-120,w:70, h:70 },
             { id:'btn-attack',key:'attack',x:W-100,y:H-120,w:70, h:70 },
+            { id:'btn-grab',key:'grab',x:W-180,y:H-200,w:60, h:50 },
             { id:'btn-special',key:'special',x:W-100,y:H-200,w:70, h:50 },
         ];
         for (const tc of tcs) {
@@ -257,10 +284,17 @@ class SuperHeroRampage {
 
         // Player
         this._updatePlayer(dt);
+        // Update grabbed enemy position
+        if (this.grabbedEnemy) {
+            this.grabbedEnemy.x = this.player.x + this.player.facing * 30;
+            this.grabbedEnemy.y = this.player.y - 30;
+        }
         // Enemies
         this._updateEnemies(dt);
         // Projectiles
         this._updateProjectiles(dt);
+        // Throwable objects
+        this._updateThrowables(dt);
         // Pickups
         this._updatePickups(dt);
         // Particles
@@ -283,6 +317,11 @@ class SuperHeroRampage {
         if (this.inputBufferTimer > 0) {
             this.inputBufferTimer -= dt;
             if (this.inputBufferTimer <= 0) this.inputBuffer = [];
+        }
+        // Unlock notifications
+        for (let i = this.unlockNotifs.length - 1; i >= 0; i--) {
+            this.unlockNotifs[i].timer -= dt;
+            if (this.unlockNotifs[i].timer <= 0) this.unlockNotifs.splice(i, 1);
         }
     }
 
@@ -365,8 +404,34 @@ class SuperHeroRampage {
 
         // Attack
         if (this.keys['j'] || this.keys['z'] || this.touchControls.attack) {
-            this._playerAttack();
+            if (this.grabbedEnemy) {
+                this._throwEnemy();
+            } else {
+                this._playerAttack();
+            }
             this.keys['j'] = false; this.keys['z'] = false; this.touchControls.attack = false;
+        }
+
+        // Grab/Throw (G key or touch)
+        if (this.keys['g'] || this.touchControls.grab) {
+            if (this.grabbedEnemy) {
+                this._throwEnemy();
+            } else {
+                this._grabEnemy();
+            }
+            this.keys['g'] = false; this.touchControls.grab = false;
+        }
+
+        // Ground attack (down + attack while in air)
+        if (!p.grounded && (this.keys['s'] || this.touchControls.down) && (this.keys['j'] || this.touchControls.attack)) {
+            this._groundPound();
+            this.keys['j'] = false; this.touchControls.attack = false;
+        }
+
+        // Pick up throwable object
+        if (this.keys['l'] || this.touchControls.special) {
+            this._pickUpThrowable();
+            this.keys['l'] = false;
         }
 
         // Special power
@@ -422,6 +487,101 @@ class SuperHeroRampage {
                 this._shake(crit ? 8 : 3);
                 // Slow mo on crit
                 if (crit) { this.slowMo = 0.3; this.slowMoTimer = 0.15; }
+            }
+        }
+    }
+
+    _grabEnemy() {
+        const p = this.player;
+        const range = 50;
+        for (const e of this.enemies) {
+            if (e.state === 'dead' || e.isBoss) continue;
+            const dx = e.x - p.x;
+            const dist = Math.abs(dx);
+            if (dist < range && Math.sign(dx) === p.facing) {
+                this.grabbedEnemy = e;
+                e.state = 'grabbed';
+                e.hitTimer = 0;
+                this._floatText(e.x, e.y - 40, 'GRAB!', '#FFD700');
+                this._shake(3);
+                break;
+            }
+        }
+    }
+
+    _throwEnemy() {
+        const p = this.player;
+        const e = this.grabbedEnemy;
+        if (!e) return;
+
+        // Throw enemy forward
+        e.vx = p.facing * 500;
+        e.vy = -200;
+        e.state = 'idle';
+        e.hitTimer = 0.5;
+        this.grabbedEnemy = null;
+
+        // Damage thrown enemy
+        this._damageEnemy(e, 30, false);
+
+        // Damage enemies hit by thrown enemy
+        for (const other of this.enemies) {
+            if (other === e || other.state === 'dead') continue;
+            const dist = Math.abs(other.x - e.x);
+            if (dist < 60) {
+                this._damageEnemy(other, 40, false);
+                other.vx = e.vx * 0.5;
+                other.vy = -150;
+                other.hitTimer = 0.3;
+                this._spawnHitParticles(other.x, other.y - 20, false);
+            }
+        }
+
+        this._floatText(e.x, e.y - 40, 'THROW!', '#FF4444');
+        this._shake(10);
+        this.comboCount += 3;
+        this.comboTimer = 2;
+    }
+
+    _groundPound() {
+        const p = this.player;
+        p.vy = 800; // Slam down fast
+        p.state = 'attacking';
+        p.attackTimer = 0.3;
+
+        // Damage all enemies below
+        for (const e of this.enemies) {
+            if (e.state === 'dead') continue;
+            const dx = Math.abs(e.x - p.x);
+            const dy = e.y - p.y;
+            if (dx < 80 && dy > -20) {
+                this._damageEnemy(e, 60 + p.damage, false);
+                e.vy = -300;
+                e.hitTimer = 0.3;
+                this._spawnHitParticles(e.x, e.y - 10, false);
+            }
+        }
+        this._shake(15);
+        this.slowMo = 0.2;
+        this.slowMoTimer = 0.2;
+        this._floatText(p.x, p.y + 20, 'GROUND SLAM!', '#FF8800');
+        this.comboCount += 2;
+        this.comboTimer = 2;
+    }
+
+    _pickUpThrowable() {
+        const p = this.player;
+        for (let i = 0; i < this.throwables.length; i++) {
+            const t = this.throwables[i];
+            const dist = Math.abs(t.x - p.x);
+            if (dist < 40 && t.grounded) {
+                // Throw it
+                const def = THROWABLE_OBJECTS[t.type];
+                this._spawnProjectile(t.x, t.y - 15, p.facing * 400, -100, def.damage, def.color, def.size/2);
+                this.throwables.splice(i, 1);
+                this._floatText(t.x, t.y - 30, def.name + '!', '#FFD700');
+                this._shake(5);
+                break;
             }
         }
     }
@@ -552,13 +712,25 @@ class SuperHeroRampage {
             this.player.damage += 3;
             this.player.maxEnergy += 5;
             this.player.energy = this.player.maxEnergy;
-            this._floatText(this.player.x, this.player.y - 80, 'LEVEL UP!', '#FFD700');
-            this._shake(5);
+            this._floatText(this.player.x, this.player.y - 80, 'LEVEL UP! Lv.' + this.level, '#FFD700');
+            this._shake(8);
+            this.slowMo = 0.3;
+            this.slowMoTimer = 0.3;
+
+            // Check combo unlocks
+            for (const [key, combo] of Object.entries(COMBOS)) {
+                if (this.level === combo.unlock) {
+                    this.unlockNotifs.push({ text:'New Combo: ' + combo.name, timer:3, color:'#FF8800' });
+                    this._floatText(this.player.x, this.player.y - 100, 'Combo: ' + combo.name + '!', '#FF8800');
+                }
+            }
+
             // Check power unlocks
             for (const [key, power] of Object.entries(POWERS)) {
                 if (this.level >= power.unlock && !this.unlockedPowers.includes(key)) {
                     this.unlockedPowers.push(key);
-                    this._floatText(this.player.x, this.player.y - 100, 'Unlocked: ' + power.name, '#4FF');
+                    this.unlockNotifs.push({ text:'New Power: ' + power.name, timer:3, color:'#4FF' });
+                    this._floatText(this.player.x, this.player.y - 120, 'Power: ' + power.name + '!', '#4FF');
                 }
             }
         }
@@ -727,6 +899,40 @@ class SuperHeroRampage {
         }
     }
 
+    _updateThrowables(dt) {
+        for (let i = this.throwables.length - 1; i >= 0; i--) {
+            const t = this.throwables[i];
+            if (t.thrown) {
+                t.x += t.vx * dt;
+                t.y += t.vy * dt;
+                t.vy += GRAVITY * dt;
+                if (t.y >= GROUND_Y) {
+                    t.y = GROUND_Y;
+                    t.vy = 0;
+                    t.vx *= 0.5;
+                    if (Math.abs(t.vx) < 10) {
+                        t.thrown = false;
+                        t.grounded = true;
+                    }
+                }
+                // Hit enemies
+                for (const e of this.enemies) {
+                    if (e.state === 'dead') continue;
+                    const dist = Math.sqrt((e.x-t.x)**2 + (e.y-t.y)**2);
+                    if (dist < 30) {
+                        this._damageEnemy(e, THROWABLE_OBJECTS[t.type].damage, false);
+                        e.vx = t.vx * 0.5;
+                        e.vy = -150;
+                        this.throwables.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            t.life -= dt;
+            if (t.life <= 0) this.throwables.splice(i, 1);
+        }
+    }
+
     // ─── Stage Waves ───
     _updateStageWaves(dt) {
         const stage = STAGES[this.currentStage];
@@ -879,6 +1085,20 @@ class SuperHeroRampage {
             ctx.font = '10px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(pk.type === 'health' ? '❤️' : '⚔️', pk.x, pk.y + 4);
+        }
+
+        // Throwable objects
+        for (const t of this.throwables) {
+            const def = THROWABLE_OBJECTS[t.type];
+            ctx.fillStyle = def.color;
+            ctx.fillRect(t.x - def.size/2, t.y - def.size, def.size, def.size);
+            ctx.font = (def.size * 0.8) + 'px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(def.icon, t.x, t.y - def.size/3);
+            // Glow effect
+            ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(t.x - def.size/2 - 2, t.y - def.size - 2, def.size + 4, def.size + 4);
         }
 
         // Enemies
@@ -1160,13 +1380,53 @@ class SuperHeroRampage {
         ctx.font = 'bold 14px Rajdhani,sans-serif';
         ctx.fillText('💰 ' + this.money, 350, 20);
 
-        // Combo
+        // Combo display (Hobo style - big and flashy)
         if (this.comboCount > 1) {
-            ctx.fillStyle = '#FF4444';
-            ctx.font = 'bold 24px Orbitron,monospace';
+            const comboY = 90;
+            const pulse = 1 + Math.sin(Date.now() * 0.01) * 0.1;
+            ctx.save();
+            ctx.translate(W/2, comboY);
+            ctx.scale(pulse, pulse);
+            // Background glow
+            ctx.fillStyle = 'rgba(255,0,0,0.2)';
+            ctx.fillRect(-80, -20, 160, 40);
+            // Combo count
+            ctx.fillStyle = this.comboCount >= 10 ? '#FFD700' : this.comboCount >= 5 ? '#FF8800' : '#FF4444';
+            ctx.font = 'bold 32px Orbitron,monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(this.comboCount + ' COMBO!', W/2, 80);
+            ctx.fillText(this.comboCount + 'x', 0, 5);
+            // Combo text
+            ctx.fillStyle = '#FFF';
+            ctx.font = 'bold 14px Rajdhani,sans-serif';
+            const comboTexts = ['COMBO!','GREAT!','AWESOME!','AMAZING!','UNSTOPPABLE!','LEGENDARY!'];
+            ctx.fillText(comboTexts[Math.min(this.comboCount - 2, comboTexts.length - 1)], 0, 20);
+            ctx.restore();
         }
+
+        // Grabbed enemy indicator
+        if (this.grabbedEnemy) {
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 14px Rajdhani,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Press J/G to THROW!', W/2, H - 150);
+        }
+
+        // Controls hint
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.font = '10px Rajdhani,sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('J:Attack G:Grab K:Power L:Throw Object', 10, H - 5);
+
+        // Unlock notifications
+        for (let i = 0; i < this.unlockNotifs.length; i++) {
+            const notif = this.unlockNotifs[i];
+            ctx.fillStyle = notif.color;
+            ctx.globalAlpha = Math.min(1, notif.timer);
+            ctx.font = 'bold 18px Rajdhani,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔓 ' + notif.text, W/2, 140 + i * 30);
+        }
+        ctx.globalAlpha = 1;
 
         // Stage
         ctx.fillStyle = '#CCC';

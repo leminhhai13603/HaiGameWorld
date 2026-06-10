@@ -68,11 +68,20 @@ const BOSS_TYPES = {
 
 // Weapon pickups
 const WEAPONS = {
-    pipe:        { name:'Pipe',        damage:25, duration:15, color:'#888' },
-    bat:         { name:'Bat',         damage:30, duration:12, color:'#864' },
-    hammer:      { name:'Hammer',      damage:45, duration:8,  color:'#666' },
-    energyBlade: { name:'Energy Blade', damage:50, duration:10, color:'#4FF' },
-    laserRifle:  { name:'Laser Rifle', damage:35, duration:8,  color:'#F44', ranged:true },
+    pipe:        { name:'Pipe',        damage:25, duration:15, color:'#888', throwable:true },
+    bat:         { name:'Bat',         damage:30, duration:12, color:'#864', throwable:true },
+    hammer:      { name:'Hammer',      damage:45, duration:8,  color:'#666', throwable:true },
+    energyBlade: { name:'Energy Blade', damage:50, duration:10, color:'#4FF', throwable:false },
+    laserRifle:  { name:'Laser Rifle', damage:35, duration:8,  color:'#F44', ranged:true, throwable:false },
+};
+
+// Throwable objects (spawn on map)
+const THROWABLE_OBJECTS = {
+    trashCan:   { name:'Trash Can',   damage:40, color:'#555', size:20, icon:'🗑️' },
+    barrel:     { name:'Barrel',      damage:50, color:'#864', size:25, icon:'🛢️' },
+    crate:      { name:'Crate',       damage:35, color:'#A85', size:22, icon:'📦' },
+    bench:      { name:'Bench',       damage:45, color:'#654', size:28, icon:'🪑' },
+    sign:       { name:'Sign',        damage:30, color:'#AA0', size:18, icon:'🪧' },
 };
 
 // Stages
