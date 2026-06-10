@@ -10,7 +10,7 @@ const Hub = {
             tag: 'Shooter',
             thumb: '🚀',
             thumbClass: 'space-thumb',
-            path: 'games/space-avian-assault/',
+            path: 'games/space-avian-assault/index.html',
             featured: true
         },
         {
@@ -20,7 +20,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '⛏️',
             thumbClass: 'gold-thumb',
-            path: 'games/gold-miner/',
+            path: 'games/gold-miner/index.html',
             featured: false
         },
         {
@@ -30,7 +30,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🐶',
             thumbClass: 'pikachu-thumb',
-            path: 'games/pikachu-classic/',
+            path: 'games/pikachu-classic/index.html',
             featured: false
         },
         {
@@ -40,7 +40,7 @@ const Hub = {
             tag: 'Action',
             thumb: '🎯',
             thumbClass: 'battle-thumb',
-            path: 'games/battle-city/',
+            path: 'games/battle-city/index.html',
             featured: false
         },
         {
@@ -50,7 +50,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🐦',
             thumbClass: 'flappy-thumb',
-            path: 'games/flappy-bird/',
+            path: 'games/flappy-bird/index.html',
             featured: false
         },
         {
@@ -60,7 +60,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🔢',
             thumbClass: 'thumb-2048',
-            path: 'games/2048/',
+            path: 'games/2048/index.html',
             featured: false
         },
         {
@@ -70,7 +70,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🦖',
             thumbClass: 'dino-thumb',
-            path: 'games/dino-hunter/',
+            path: 'games/dino-hunter/index.html',
             featured: false
         },
         {
@@ -80,7 +80,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🧱',
             thumbClass: 'dxbal-thumb',
-            path: 'games/dx-ball-remastered/',
+            path: 'games/dx-ball-remastered/index.html',
             featured: false
         },
         {
@@ -90,7 +90,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🟦',
             thumbClass: 'tetris-thumb',
-            path: 'games/tetris-ultimate/',
+            path: 'games/tetris-ultimate/index.html',
             featured: false
         },
         {
@@ -100,7 +100,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🐸',
             thumbClass: 'zuma-thumb',
-            path: 'games/zuma-deluxe-remastered/',
+            path: 'games/zuma-deluxe-remastered/index.html',
             featured: false
         },
         {
@@ -110,7 +110,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🍉',
             thumbClass: 'fruit-thumb',
-            path: 'games/fruit-ninja-ultimate/',
+            path: 'games/fruit-ninja-ultimate/index.html',
             featured: false
         },
         {
@@ -120,7 +120,7 @@ const Hub = {
             tag: 'Puzzle',
             thumb: '🔢',
             thumbClass: 'sudoku-thumb',
-            path: 'games/sudoku-master/',
+            path: 'games/sudoku-master/index.html',
             featured: false
         },
         {
@@ -130,7 +130,7 @@ const Hub = {
             tag: 'Strategy',
             thumb: '⚔️',
             thumbClass: 'ageofwar-thumb',
-            path: 'games/age-of-war/',
+            path: 'games/age-of-war/index.html',
             featured: false
         },
         {
@@ -140,7 +140,7 @@ const Hub = {
             tag: 'Strategy',
             thumb: '🐻',
             thumbClass: 'pvz-thumb',
-            path: 'games/animal-kingdom-defense/',
+            path: 'games/animal-kingdom-defense/index.html',
             featured: false
         },
         {
@@ -150,7 +150,7 @@ const Hub = {
             tag: 'Arcade',
             thumb: '🤖',
             thumbClass: 'cyber-thumb',
-            path: 'games/cyber-survivor/',
+            path: 'games/cyber-survivor/index.html',
             featured: false
         },
         {
@@ -160,7 +160,7 @@ const Hub = {
             tag: 'Action',
             thumb: '🦸',
             thumbClass: 'hero-thumb',
-            path: 'games/super-hero-rampage/',
+            path: 'games/super-hero-rampage/index.html',
             featured: false
         }
     ],
