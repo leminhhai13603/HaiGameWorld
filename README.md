@@ -25,6 +25,7 @@
 | 13 | **Age of War** | Strategy | ⚔️ Evolution warfare — advance through ages, train units, destroy the enemy base |
 | 14 | **Animal Kingdom Defense** | Tower Defense | 🌱 Plants vs Robots — plant trees to defend against robot invasion |
 | 15 | **Cyber Survivor** | Roguelike | 🤖 Vampire Survivors-style — auto-attack, level up, survive the horde |
+| 16 | **Factory Empire** | Strategy | 🏭 Build production chains, automate resources, grow an industrial empire! |
 
 ---
 

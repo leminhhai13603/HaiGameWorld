@@ -152,6 +152,16 @@ const Hub = {
             thumbClass: 'cyber-thumb',
             path: 'games/cyber-survivor/',
             featured: false
+        },
+        {
+            id: 'factory-empire',
+            name: 'Factory Empire',
+            desc: 'Xây dựng chuỗi sản xuất, tự động hoá tài nguyên, tối ưu logistics, đế chế công nghiệp!',
+            tag: 'Strategy',
+            thumb: '🏭',
+            thumbClass: 'factory-thumb',
+            path: 'games/factory-empire/',
+            featured: false
         }
     ],
 
