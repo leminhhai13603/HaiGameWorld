@@ -308,9 +308,8 @@ class SudokuGame {
             this.notes[row][col].clear();
             AudioManager.play('place');
 
-            // Mistake check (relaxed mode)
-            const s = SaveManager.load().settings;
-            if (s.mistakeMode === 'relaxed' && this.solution[row][col] !== num) {
+            // Mistake check
+            if (this.solution[row][col] !== num) {
                 AudioManager.play('error');
             }
 
@@ -450,7 +449,8 @@ class SudokuGame {
         Renderer.drawTopBar(ctx, { difficulty: this.difficulty, timer: this.timer }, this.W);
         this.gridInfo = Renderer.drawGrid(ctx, {
             board: this.board, given: this.given, notes: this.notes,
-            selected: this.selected, notesMode: this.notesMode
+            selected: this.selected, notesMode: this.notesMode,
+            solution: this.solution
         }, this.W);
         this.padInfo = Renderer.drawNumpad(ctx, { board: this.board, numpadSelected: this.numpadSelected }, this.W, this.gridInfo);
         const ctrl = Renderer.drawControls(ctx, { notesMode: this.notesMode }, this.W, this.gridInfo, this.padInfo);

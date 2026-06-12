@@ -191,7 +191,7 @@ const PuzzleGenerator = (() => {
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 9; c++) {
                 if (board[r][c] === 0) return false;
-                if (!isValid(board, r, c, board[r][c])) return false;
+                if (findConflicts(board, r, c).length > 0) return false;
             }
         }
         return true;

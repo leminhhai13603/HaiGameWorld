@@ -97,10 +97,12 @@ const Renderer = (() => {
                     ctx.globalAlpha = 1;
                 }
 
-                // Conflict
+                // Conflict or Mistake
                 if (state.board[r][c] !== 0 && !state.given[r][c]) {
                     const conflicts = PuzzleGenerator.findConflicts(state.board, r, c);
-                    if (conflicts.length > 0) {
+                    const isWrong = state.solution && state.board[r][c] !== state.solution[r][c];
+                    
+                    if (conflicts.length > 0 || isWrong) {
                         ctx.fillStyle = t.conflict;
                         ctx.globalAlpha = 0.2;
                         ctx.fillRect(x, y, cellSize, cellSize);
@@ -122,11 +124,12 @@ const Renderer = (() => {
                     ctx.textBaseline = 'middle';
 
                     const conflicts = !state.given[r][c] ? PuzzleGenerator.findConflicts(state.board, r, c) : [];
+                    const isWrong = !state.given[r][c] && state.solution && state.board[r][c] !== state.solution[r][c];
 
                     if (state.given[r][c]) {
                         ctx.fillStyle = t.given;
                         ctx.font = `bold ${Math.floor(cellSize * 0.55)}px Orbitron, monospace`;
-                    } else if (conflicts.length > 0) {
+                    } else if (conflicts.length > 0 || isWrong) {
                         ctx.fillStyle = t.conflict;
                         ctx.font = `${Math.floor(cellSize * 0.5)}px Rajdhani, sans-serif`;
                     } else {
