@@ -165,7 +165,8 @@ class Game2048 {
             } else {
                 this._move(dy > 0 ? 'down' : 'up');
             }
-        }, { passive: false });
+        };
+        this.canvas.addEventListener('touchend', this._handlers.touchend, { passive: false });
 
         // Mouse drag (desktop fallback)
         let mouseDown = false;
