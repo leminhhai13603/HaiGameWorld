@@ -61,21 +61,27 @@ class Board {
                 this.grid[h.r][h.c] = 0;
             }
         }
-        // Ensure even number of remaining tiles (keep pairs balanced)
-        let remaining = 0;
+        // Count each tile type — any type with an odd count has a lone orphan
+        const counts = {};
         for (let r = 0; r < this.rows; r++)
             for (let c = 0; c < this.cols; c++)
-                if (this.grid[r][c] !== 0) remaining++;
-        if (remaining % 2 !== 0) {
-            // Remove one more tile to make count even
-            outer:
-            for (let r = 0; r < this.rows; r++)
-                for (let c = 0; c < this.cols; c++)
-                    if (this.grid[r][c] !== 0) {
-                        this.grid[r][c] = 0;
-                        break outer;
-                    }
-        }
+                if (this.grid[r][c] !== 0)
+                    counts[this.grid[r][c]] = (counts[this.grid[r][c]] || 0) + 1;
+
+        // Collect all types whose count is odd
+        const orphans = new Set(
+            Object.entries(counts)
+                .filter(([, cnt]) => cnt % 2 !== 0)
+                .map(([t]) => Number(t))
+        );
+
+        // Remove exactly one tile of each orphaned type so every type has an even count
+        for (let r = 0; r < this.rows && orphans.size > 0; r++)
+            for (let c = 0; c < this.cols && orphans.size > 0; c++)
+                if (orphans.has(this.grid[r][c])) {
+                    orphans.delete(this.grid[r][c]);
+                    this.grid[r][c] = 0;
+                }
     }
 
     /**
