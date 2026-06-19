@@ -44,7 +44,7 @@ class Game2048 {
         // Game state
         this.grid = [];
         this.score = 0;
-        this.bestScore = Storage.getBestScore();
+        this.bestScore = Game2048Storage.getBestScore();
         this.largestTile = 0;
         this.moves = 0;
         this.state = 'ready'; // ready, playing, gameover
@@ -73,15 +73,15 @@ class Game2048 {
         this._spawnTile();
         this._spawnTile();
         this.state = 'playing';
-        Storage.addGamePlayed();
+        Game2048Storage.addGamePlayed();
 
         window.addEventListener('beforeunload', () => { AudioManager.close(); });
         this._gameLoop(performance.now());
     }
 
     _resize() {
-        const maxW = Math.min(window.innerWidth - 32, 480);
-        const maxH = window.innerHeight - 200;
+        const maxW = Math.min(Math.max(window.innerWidth - 32, 280), 480);
+        const maxH = Math.max(window.innerHeight - 200, 280);
         this.CANVAS_SIZE = Math.min(maxW, maxH, 480);
         this.canvas.width = this.CANVAS_SIZE;
         this.canvas.height = this.CANVAS_SIZE;
@@ -271,21 +271,21 @@ class Game2048 {
         if (mergeScore > 0) {
             this.scorePopup = { value: mergeScore, timer: 30, y: 0 };
             AudioManager.play('merge');
-            Storage.setLargestTile(this.largestTile);
+            Game2048Storage.setLargestTile(this.largestTile);
         } else {
             AudioManager.play('move');
         }
 
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
-            Storage.setBestScore(this.score);
+            Game2048Storage.setBestScore(this.score);
         }
         this._updateDisplays();
 
         // Check achievements
         for (const ach of ACHIEVEMENTS) {
-            if (this.largestTile >= ach.value && !Storage.hasAchievement(ach.id)) {
-                Storage.unlockAchievement(ach.id);
+            if (this.largestTile >= ach.value && !Game2048Storage.hasAchievement(ach.id)) {
+                Game2048Storage.unlockAchievement(ach.id);
                 this.achievementQueue.push(ach);
             }
         }
@@ -299,7 +299,7 @@ class Game2048 {
             // Check game over
             if (!this._hasValidMoves()) {
                 this.state = 'gameover';
-                Storage.addMoves(this.moves);
+                Game2048Storage.addMoves(this.moves);
                 AudioManager.play('gameover');
             }
         }, 120);
@@ -371,7 +371,7 @@ class Game2048 {
         this._spawnTile();
         this._spawnTile();
         this.state = 'playing';
-        Storage.addGamePlayed();
+        Game2048Storage.addGamePlayed();
         this._updateDisplays();
     }
 

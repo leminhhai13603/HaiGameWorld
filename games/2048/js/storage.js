@@ -1,7 +1,7 @@
 /**
  * 2048 - Storage Manager (localStorage)
  */
-const Storage = (() => {
+const Game2048Storage = (() => {
     const KEY = 'game2048';
 
     function _defaults() {
